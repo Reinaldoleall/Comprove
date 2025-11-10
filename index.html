@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão - Coordenador & Consultores</title>
+    
+    <!-- Material Design 3 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Firebase SDK (Modular v11+) -->
+    <!-- Deixado como 'module' para usar import/export -->
+
+    <style>
+        :root {
+            --md-primary: #6750A4;
+            --md-on-primary: #FFFFFF;
+            --md-primary-container: #EADDFF;
+            --md-on-primary-container: #21005D;
+            --md-secondary: #625B71;
+            --md-on-secondary: #FFFFFF;
+            --md-secondary-container: #E8DEF8;
+            --md-on-secondary-container: #1D192B;
+            --md-tertiary: #7D5260;
+            --md-on-tertiary: #FFFFFF;
+            --md-tertiary-container: #FFD8E4;
+            --md-on-tertiary-container: #31111D;
+            --md-surface: #FEF7FF;
+            --md-on-surface: #1D1B20;
+            --md-surface-variant: #E7E0EC;
+            --md-on-surface-variant: #49454F;
+            --md-error: #BA1A1A;
+            --md-on-error: #FFFFFF;
+            --md-shadow: rgba(0, 0, 0, 0.1);
+            --md-shadow-hover: rgba(0, 0, 0, 0.2);
+            --md-success: #4CAF50;
+            --md-on-success: #FFFFFF;
+            --md-warning: #FFC107;
+            --md-on-warning: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--md-surface);
+            color: var(--md-on-surface);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- Componentes de UI --- */
+
+        /* Header */
+        header {
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px var(--md-shadow);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--md-secondary-container);
+            color: var(--md-on-secondary-container);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 1.25rem;
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: var(--md-surface);
+            border-bottom: 1px solid var(--md-surface-variant);
+            padding: 0 20px;
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+        }
+
+        .nav-item {
+            padding: 16px 4px;
+            cursor: pointer;
+            position: relative;
+            color: var(--md-on-surface-variant);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-item.active {
+            color: var(--md-primary);
+            border-bottom-color: var(--md-primary);
+        }
+
+        /* Cards */
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px var(--md-shadow);
+            border: 1px solid var(--md-surface-variant);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-primary);
+        }
+        
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--md-on-surface-variant);
+            margin-bottom: 16px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 24px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
+        }
+        
+        .btn-primary:hover {
+             box-shadow: 0 2px 4px var(--md-shadow-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--md-secondary-container);
+            color: var(--md-on-secondary-container);
+        }
+
+        .btn-outlined {
+            background-color: transparent;
+            border: 1px solid var(--md-primary);
+            color: var(--md-primary);
+        }
+        
+        .btn-icon {
+            padding: 8px;
+            border-radius: 50%;
+            background-color: transparent;
+        }
+        
+        .btn-icon:hover {
+            background-color: var(--md-surface-variant);
+        }
+
+        .btn-small {
+            padding: 6px 16px;
+            font-size: 0.875rem;
+        }
+        
+        .btn-success {
+            background-color: var(--md-success);
+            color: var(--md-on-success);
+        }
+        
+        .btn-danger {
+            background-color: var(--md-error);
+            color: var(--md-on-error);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--md-on-surface-variant);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="date"],
+        input[type="file"],
+        select, 
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--md-surface-variant);
+            background-color: var(--md-surface);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--md-primary);
+            box-shadow: 0 0 0 2px var(--md-primary-container);
+        }
+        
+        input[type="file"] {
+            border-style: dashed;
+        }
+
+        /* Status badges */
+        .status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-pending { background-color: var(--md-warning); color: var(--md-on-warning); }
+        .status-approved { background-color: var(--md-success); color: var(--md-on-success); }
+        .status-rejected { background-color: var(--md-error); color: var(--md-on-error); }
+        .status-accepted { background-color: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
+        .status-closed { background-color: var(--md-surface-variant); color: var(--md-on-surface-variant); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--md-surface-variant);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--md-on-surface-variant);
+        }
+
+        .tab.active {
+            color: var(--md-primary);
+            border-bottom: 2px solid var(--md-primary);
+        }
+
+        /* Hidden sections */
+        .section, .tab-content {
+            display: none;
+        }
+
+        .section.active, .tab-content.active {
+            display: block;
+        }
+
+        /* Login screen */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 12px var(--md-shadow);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .login-subtitle {
+            color: var(--md-on-surface-variant);
+            margin-bottom: 30px;
+        }
+
+        /* Dashboard grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: var(--md-primary);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .stat-saldo-negativo {
+            color: var(--md-error);
+        }
+
+        /* List items */
+        .list-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--md-surface-variant);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .list-item-content {
+            flex-grow: 1;
+        }
+        
+        .list-item-title {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        
+        .list-item-subtitle {
+            font-size: 0.9rem;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .list-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 90%;
+            width: 500px;
+            box-shadow: 0 4px 12px var(--md-shadow);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        
+        .modal-body {
+            margin-bottom: 24px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Invoice (Nota Fiscal) styles */
+        .invoice-item {
+            background-color: var(--md-surface);
+            border: 1px solid var(--md-surface-variant);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .invoice-details {
+            font-size: 0.9rem;
+        }
+        
+        .invoice-amount {
+            font-weight: 500;
+            color: var(--md-tertiary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .list-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .list-item-actions {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--md-on-surface-variant);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1 class="login-title">Sistema de Gestão</h1>
+            <p class="login-subtitle">Faça login com sua conta Google para continuar</p>
+            <button id="loginButton" class="btn btn-primary">
+                <span class="material-icons">login</span>
+                Entrar com Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App (hidden until login) -->
+    <div id="app" style="display: none;">
+        <header>
+            <div class="logo">Gestão</div>
+            <div class="user-info" id="userInfoButton">
+                <div id="userName">Usuário</div>
+                <div class="user-avatar" id="userAvatar">
+                    <span>U</span>
+                </div>
+            </div>
+        </header>
+
+        <nav id="mainNav">
+            <!-- Nav items serão injetados pelo JS com base na função -->
+        </nav>
+
+        <div class="container">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <h1>Dashboard</h1>
+                <div class="dashboard-grid" id="dashboardGrid">
+                    <!-- Dashboard cards serão injetados pelo JS -->
+                </div>
+            </div>
+
+            <!-- Consultants Section (Coordinator) -->
+            <div id="consultants" class="section">
+                <h1>Gerenciar Consultores</h1>
+                <div class="card">
+                    <h2 class="card-title">Meus Consultores</h2>
+                    <div id="consultantsList" class="loading">
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Section (Coordinator) -->
+            <div id="payments-coord" class="section">
+                <div class="tabs">
+                    <div class="tab active" data-tab="makePayment">Fazer Pagamento</div>
+                    <div class="tab" data-tab="paymentHistory">Histórico de Pagamentos</div>
+                </div>
+                
+                <div id="makePayment" class="tab-content active">
+                    <div class="card">
+                        <h2 class="card-title">Realizar Adiantamento</h2>
+                        <form id="paymentForm">
+                            <div class="form-group">
+                                <label for="consultantSelect">Consultor</label>
+                                <select id="consultantSelect" required>
+                                    <option value="">Selecione um consultor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="paymentAmount">Valor (R$)</label>
+                                <input type="number" id="paymentAmount" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="paymentDescription">Descrição (Ex: Adiantamento Outubro)</label>
+                                <textarea id="paymentDescription" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-icons">send</span>
+                                Enviar Pagamento
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div id="paymentHistory" class="tab-content">
+                    <div class="card">
+                        <h2 class="card-title">Histórico de Pagamentos</h2>
+                        <div id="paymentHistoryList" class="loading">
+                            <p>Carregando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payments Section (Consultant) -->
+            <div id="payments-consult" class="section">
+                <h1>Meus Pagamentos</h1>
+                <div class="card">
+                    <h2 class="card-title">Pagamentos Recebidos</h2>
+                    <div id="myPaymentsList" class="loading">
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Section (Coordinator & Consultant) -->
+            <div id="actions" class="section">
+                <!-- Varia com a role -->
+            </div>
+
+            <!-- Reports Section (Coordinator) -->
+            <div id="reports" class="section">
+                <h1>Relatórios</h1>
+                <div class="card">
+                    <h2 class="card-title">Gerar Relatórios</h2>
+                    <div class="form-group">
+                        <label for="reportType">Tipo de Relatório</label>
+                        <select id="reportType">
+                            <option value="financial">Financeiro</option>
+                            <option value="actions">Ações</option>
+                        </select>
+                    </div>
+                    <button id="generateReportPDF" class="btn btn-primary">
+                        <span class="material-icons">description</span>
+                        Baixar PDF
+                    </button>
+                    <button id="shareReport" class="btn btn-secondary" style="margin-left: 10px;">
+                        <span class="material-icons">share</span>
+                        Compartilhar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Primeiro Acesso (Escolher Função) -->
+    <div id="roleModal" class="modal-overlay">
+        <div class="modal">
+            <h2 class="modal-title">Primeiro Acesso</h2>
+            <div class="modal-body">
+                <p>Bem-vindo! Para configurar sua conta, por favor, selecione sua função:</p>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="roleSelect">Eu sou:</label>
+                    <select id="roleSelect">
+                        <option value="">Selecione...</option>
+                        <option value="coordinator">Coordenador</option>
+                        <option value="consultant">Consultor</option>
+                    </select>
+                </div>
+                <div class="form-group" id="coordinatorIdInput" style="display: none;">
+                    <label for="coordinatorId">ID do Coordenador</label>
+                    <input type="text" id="coordinatorId" placeholder="Peça este ID ao seu coordenador">
+                    <small>Seu coordenador encontra este ID no perfil dele.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveRoleButton" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Perfil do Usuário -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal">
+            <h2 class="modal-title">Meu Perfil</h2>
+            <div class="modal-body">
+                <p><strong>Nome:</strong> <span id="profileName"></span></p>
+                <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                <p><strong>Função:</strong> <span id="profileRole"></span></p>
+                <div id="profileCoordinatorId" style="display: none;">
+                    <p><strong>Meu ID de Coordenador (para compartilhar):</strong></p>
+                    <input type="text" id="myCoordinatorId" readonly style="background: #eee; cursor: copy;">
+                </div>
+                <div id="profileMyCoordinator" style="display: none;">
+                    <p><strong>Meu Coordenador:</strong> <span id="myCoordinatorName"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="logoutButton" class="btn btn-danger">
+                    <span class="material-icons">logout</span>
+                    Sair
+                </button>
+                <button id="closeProfileModal" class="btn btn-secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Adicionar Nota Fiscal (Comprovação) -->
+    <div id="invoiceModal" class="modal-overlay">
+        <div class="modal">
+            <form id="invoiceForm">
+                <h2 class="modal-title">Adicionar Comprovação</h2>
+                <div class="modal-body">
+                    <p>Adicionando comprovação para o pagamento: <strong id="invoicePaymentDescription"></strong></p>
+                    <input type="hidden" id="invoicePaymentId">
+                    <div class="form-group">
+                        <label for="invoiceAmount">Valor da Nota (R$)</label>
+                        <input type="number" id="invoiceAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceDescription">Descrição (Ex: Almoço Cliente X)</label>
+                        <input type="text" id="invoiceDescription" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceFile">Arquivo da Nota (PDF, JPG, PNG)</label>
+                        <input type="file" id="invoiceFile" accept=".pdf,.jpg,.jpeg,.png" required>
+                    </div>
+                     <div id="uploadProgress" style="display: none;">
+                        <progress id="uploadProgressBar" value="0" max="100"></progress>
+                        <span id="uploadProgressText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="closeInvoiceModal" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Comprovação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Alerta Customizado -->
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal">
+            <h2 class="modal-title" id="alertModalTitle">Aviso</h2>
+            <div classs="modal-body">
+                <p id="alertModalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="closeAlertModal" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // Importar Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            onAuthStateChanged, 
+            signOut
+            // Removido signInWithCustomToken e signInAnonymously pois não são mais necessários com config própria
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            setLogLevel, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            addDoc, 
+            collection, 
+            query, 
+            where, 
+            onSnapshot,
+            updateDoc,
+            Timestamp,
+            getDocs // Adicionado getDocs
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytesResumable, 
+            getDownloadURL 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // Configuração do Firebase (Fornecida pelo usuário)
+        const firebaseConfig = {
+          apiKey: "AIzaSyByyM8RvGNM5pyrQIQ7nCH6mmgYAIpq0bc",
+          authDomain: "rifas-c414b.firebaseapp.com",
+          databaseURL: "https://rifas-c414b-default-rtdb.firebaseio.com",
+          projectId: "rifas-c414b",
+          storageBucket: "rifas-c414b.firebasestorage.app",
+          messagingSenderId: "770195193538",
+          appId: "1:770195193538:web:48e585ac5661d27f3dc55b"
+        };
+        // O appID não é mais necessário para os paths, pois usaremos coleções raiz
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        setLogLevel('Debug'); // Para logs no console
+
+        // Variáveis globais de estado
+        let currentUser = null;
+        let currentUserData = null; // Dados do Firestore (role, etc.)
+        let unsubscribeListeners = []; // Array para guardar os listeners do onSnapshot
+
+        // --- Paths do Firestore (Coleções Raiz) ---
+        // Alterado para usar coleções raiz no projeto do usuário (ex: 'users', 'payments')
+        // Você DEVE configurar as Regras de Segurança (Security Rules) no seu console do Firebase
+        // para permitir 'read' e 'write' nestas coleções.
+        const USERS_COL = `users`;
+        const PAYMENTS_COL = `payments`;
+        const INVOICES_COL = `invoices`;
+        const ACTIONS_COL = `actionRequests`;
+
+        // --- Elementos DOM ---
+        const loginScreen = document.getElementById('loginScreen');
+        const appScreen = document.getElementById('app');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const mainNav = document.getElementById('mainNav');
+        
+        // Modais
+        const roleModal = document.getElementById('roleModal');
+        const profileModal = document.getElementById('profileModal');
+        const invoiceModal = document.getElementById('invoiceModal');
+        const alertModal = document.getElementById('alertModal');
+        const closeAlertModal = document.getElementById('closeAlertModal');
+        
+        // Elementos de Navegação
+        // Note: querySelectorAll será chamado *depois* que o nav for preenchido
+        
+        // --- Funções de Alerta Customizado ---
+        function showAlert(title, message) {
+            document.getElementById('alertModalTitle').textContent = title;
+            document.getElementById('alertModalMessage').textContent = message;
+            alertModal.classList.add('active');
+        }
+        closeAlertModal.addEventListener('click', () => alertModal.classList.remove('active'));
+
+        // --- Lógica de Autenticação ---
+
+        // Listener principal do estado de autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário está logado
+                currentUser = user;
+                checkUserRole(user);
+            } else {
+                // Usuário está deslogado
+                currentUser = null;
+                currentUserData = null;
+                loginScreen.style.display = 'flex';
+                appScreen.style.display = 'none';
+                // Limpar listeners antigos
+                clearFirestoreListeners();
+            }
+        });
+
+        // Login com Google
+        loginButton.addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider)
+                .catch((error) => {
+                    console.error('Erro no login com Google:', error);
+                    showAlert('Erro de Login', error.message);
+                });
+        });
+
+        // Logout
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).catch((error) => {
+                console.error('Erro no logout:', error);
+            });
+            profileModal.classList.remove('active');
+        });
+
+        // --- Lógica de Funções (Roles) ---
+
+        async function checkUserRole(user) {
+            const userRef = doc(db, USERS_COL, user.uid);
+            const userDoc = await getDoc(userRef);
+
+            if (userDoc.exists()) {
+                // Usuário já tem função definida
+                currentUserData = userDoc.data();
+                showApp();
+            } else {
+                // Primeiro acesso, mostrar modal de escolha de função
+                roleModal.classList.add('active');
+            }
+        }
+
+        // Mostrar/esconder campo de ID do Coordenador no modal
+        document.getElementById('roleSelect').addEventListener('change', (e) => {
+            const role = e.target.value;
+            const coordIdInput = document.getElementById('coordinatorIdInput');
+            if (role === 'consultant') {
+                coordIdInput.style.display = 'block';
+            } else {
+                coordIdInput.style.display = 'none';
+            }
+        });
+
+        // Salvar função (primeiro acesso)
+        document.getElementById('saveRoleButton').addEventListener('click', async () => {
+            const role = document.getElementById('roleSelect').value;
+            const coordinatorId = document.getElementById('coordinatorId').value.trim();
+            
+            if (!role) {
+                showAlert('Aviso', 'Por favor, selecione uma função.');
+                return;
+            }
+            
+            if (role === 'consultant' && !coordinatorId) {
+                showAlert('Aviso', 'Consultores precisam inserir o ID do Coordenador.');
+                return;
+            }
+
+            let userData = {
+                name: currentUser.displayName,
+                email: currentUser.email,
+                role: role,
+                createdAt: Timestamp.now()
+            };
+
+            if (role === 'consultant') {
+                // Verificar se o Coordenador existe
+                const coordRef = doc(db, USERS_COL, coordinatorId);
+                const coordDoc = await getDoc(coordRef);
+                
+                if (!coordDoc.exists() || coordDoc.data().role !== 'coordinator') {
+                    showAlert('Erro', 'O ID do Coordenador informado não é válido ou não existe.');
+                    return;
+                }
+                userData.coordinatorId = coordinatorId;
+                userData.coordinatorName = coordDoc.data().name;
+            }
+
+            // Salvar dados do usuário no Firestore
+            const userRef = doc(db, USERS_COL, currentUser.uid);
+            try {
+                await setDoc(userRef, userData);
+                currentUserData = userData;
+                roleModal.classList.remove('active');
+                showApp();
+            } catch (error) {
+                console.error("Erro ao salvar função:", error);
+                showAlert('Erro', 'Não foi possível salvar sua função: ' + error.message);
+            }
+        });
+
+        // --- Lógica de UI Principal ---
+
+        function showApp() {
+            loginScreen.style.display = 'none';
+            appScreen.style.display = 'block';
+
+            // Configurar Perfil
+            document.getElementById('userName').textContent = currentUser.displayName;
+            const avatar = document.getElementById('userAvatar');
+            if (currentUser.photoURL) {
+                avatar.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar">`;
+            } else {
+                avatar.innerHTML = `<span>${currentUser.displayName.charAt(0).toUpperCase()}</span>`;
+            }
+
+            // Configurar Modal de Perfil
+            document.getElementById('profileName').textContent = currentUserData.name;
+            document.getElementById('profileEmail').textContent = currentUserData.email;
+            document.getElementById('profileRole').textContent = currentUserData.role === 'coordinator' ? 'Coordenador' : 'Consultor';
+
+            if (currentUserData.role === 'coordinator') {
+                document.getElementById('profileCoordinatorId').style.display = 'block';
+                document.getElementById('myCoordinatorId').value = currentUser.uid;
+            } else {
+                 document.getElementById('profileCoordinatorId').style.display = 'none';
+            }
+            
+            if (currentUserData.role === 'consultant') {
+                document.getElementById('profileMyCoordinator').style.display = 'block';
+                document.getElementById('myCoordinatorName').textContent = currentUserData.coordinatorName || 'Não vinculado';
+            } else {
+                document.getElementById('profileMyCoordinator').style.display = 'none';
+            }
+
+            // Configurar Navegação e Seções
+            setupNavigation(currentUserData.role);
+            setupTabs(); // Configura listeners para as abas (ex: Pagamentos)
+            
+            // Carregar dados iniciais (Dashboard)
+            loadDataForSection('dashboard');
+        }
+        
+        // Copiar ID do Coordenador
+        document.getElementById('myCoordinatorId').addEventListener('click', (e) => {
+            e.target.select();
+            try {
+                // Tenta o método moderno (se falhar, o 'catch' usa o 'execCommand')
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(e.target.value).then(() => {
+                        showAlert('Copiado!', 'Seu ID de Coordenador foi copiado.');
+                    });
+                } else {
+                    // Fallback para document.execCommand
+                    document.execCommand('copy');
+                    showAlert('Copiado!', 'Seu ID de Coordenador foi copiado.');
+                }
+            } catch (err) {
+                console.error("Erro ao copiar:", err);
+                showAlert('Erro', 'Não foi possível copiar o ID.');
+            }
+        });
+
+        // Abrir/Fechar Modal de Perfil
+        document.getElementById('userInfoButton').addEventListener('click', () => profileModal.classList.add('active'));
+        document.getElementById('closeProfileModal').addEventListener('click', () => profileModal.classList.remove('active'));
+
+
+        function setupNavigation(role) {
+            let navHTML = '';
+            
+            // Abas comuns
+            navHTML += `<div class="nav-item active" data-section="dashboard">Dashboard</div>`;
+            
+            if (role === 'coordinator') {
+                navHTML += `<div class="nav-item" data-section="consultants">Consultores</div>`;
+                navHTML += `<div class="nav-item" data-section="payments-coord">Pagamentos</div>`;
+                navHTML += `<div class="nav-item" data-section="actions">Ações</div>`;
+                navHTML += `<div class="nav-item" data-section="reports">Relatórios</div>`;
+            } else {
+                // Consultor
+                navHTML += `<div class="nav-item" data-section="payments-consult">Meus Pagamentos</div>`;
+                navHTML += `<div class="nav-item" data-section="actions">Solicitar Ação</div>`;
+            }
+            
+            mainNav.innerHTML = navHTML;
+            
+            // Adicionar listeners aos novos nav-items
+            mainNav.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const sectionId = item.getAttribute('data-section');
+                    
+                    mainNav.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+                    document.getElementById(sectionId).classList.add('active');
+                    
+                    // Carregar dados da seção clicada
+                    loadDataForSection(sectionId);
+                });
+            });
+
+            // Configurar a seção "Ações" com base na função
+            setupActionsSection(role);
+        }
+        
+        function setupTabs() {
+             document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    const parentSection = tab.closest('.section');
+                    
+                    if (!parentSection) return; // Segurança
+                    
+                    parentSection.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    parentSection.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    const activeTabContent = parentSection.querySelector(`#${tabId}`);
+                    if (activeTabContent) {
+                        activeTabContent.classList.add('active');
+                    }
+                });
+            });
+        }
+        
+        // Limpar listeners do Firestore para evitar duplicatas
+        function clearFirestoreListeners() {
+            unsubscribeListeners.forEach(unsub => unsub());
+            unsubscribeListeners = [];
+        }
+        
+        // --- Carregamento de Dados ---
+        
+        function loadDataForSection(sectionId) {
+            clearFirestoreListeners(); // Limpa listeners antigos
+            
+            switch(sectionId) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'consultants':
+                    loadConsultants();
+                    break;
+                case 'payments-coord':
+                    loadConsultantsForPayment(); // Preenche o select
+                    loadPaymentHistory();
+                    break;
+                case 'payments-consult':
+                    loadMyPayments();
+                    break;
+                case 'actions':
+                    loadActionRequests();
+                    break;
+            }
+        }
+        
+        // --- NOVA FUNÇÃO ---
+        /**
+         * Processa um arquivo antes do upload.
+         * Se for imagem, redimensiona e comprime.
+         * Se for PDF ou outro, retorna o arquivo original.
+         */
+        async function processFileForUpload(file) {
+            // 1. Define constraints
+            const MAX_WIDTH = 1280;
+            const MAX_HEIGHT = 1280;
+            const JPEG_QUALITY = 0.8; // 80% quality
+            const fileType = file.type;
+
+            // 2. Check if it's an image
+            if (!fileType.startsWith('image/')) {
+                // Not an image (e.g., PDF), return it as-is
+                console.log('Arquivo não é imagem, enviando como está:', fileType);
+                return file;
+            }
+
+            // 3. It's an image, so we process it
+            console.log('Arquivo é imagem, processando...');
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    // 4. Calculate new dimensions
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = height * (MAX_WIDTH / width);
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = width * (MAX_HEIGHT / height);
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    // 5. Create canvas and draw
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    URL.revokeObjectURL(img.src); // Liberar memória
+
+                    // 6. Convert canvas to blob (JPEG com compressão)
+                    canvas.toBlob(
+                        (blob) => {
+                            if (!blob) {
+                                reject(new Error('Falha ao converter canvas para Blob'));
+                                return;
+                            }
+                            // Criar um novo "File" do blob
+                            const resizedFile = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now(),
+                            });
+                            console.log('Imagem processada:', resizedFile);
+                            resolve(resizedFile);
+                        },
+                        'image/jpeg', // Força o formato JPEG para compressão
+                        JPEG_QUALITY
+                    );
+                };
+
+                img.onerror = (error) => {
+                    console.error("Erro ao carregar imagem:", error);
+                    reject(new Error('Falha ao carregar imagem para processamento'));
+                };
+            });
+        }
+        // --- FIM DA NOVA FUNÇÃO ---
+
+        
+        // 1. Dashboard
+        async function loadDashboardData() {
+            const grid = document.getElementById('dashboardGrid');
+            grid.innerHTML = ''; // Limpa
+            
+            if (currentUserData.role === 'coordinator') {
+                // Dashboard Coordenador
+                
+                // Queries
+                const paymentsQuery = query(collection(db, PAYMENTS_COL), where('coordinatorId', '==', currentUser.uid));
+                const invoicesQuery = query(collection(db, INVOICES_COL), where('coordinatorId', '==', currentUser.uid));
+                const actionsQuery = query(collection(db, ACTIONS_COL), where('coordinatorId', '==', currentUser.uid), where('status', '==', 'pending'));
+
+                let totalEnviado = 0;
+                let totalComprovado = 0;
+                let acoesPendentes = 0;
+
+                try {
+                    const paymentsSnap = await getDocs(paymentsQuery);
+                    paymentsSnap.forEach(doc => {
+                        totalEnviado += doc.data().amount;
+                    });
+                    
+                    const invoicesSnap = await getDocs(invoicesQuery);
+                     invoicesSnap.forEach(doc => {
+                        totalComprovado += doc.data().amount;
+                    });
+                    
+                    const actionsSnap = await getDocs(actionsQuery);
+                    acoesPendentes = actionsSnap.size;
+                    
+                    const saldo = totalEnviado - totalComprovado;
+                    
+                    grid.innerHTML = `
+                        <div class="card stat-card">
+                            <div class="stat-value">R$ ${totalEnviado.toFixed(2)}</div>
+                            <div class="stat-label">Total Enviado</div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-value">R$ ${totalComprovado.toFixed(2)}</div>
+                            <div class="stat-label">Total Comprovado</div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-value ${saldo < 0 ? 'stat-saldo-negativo' : ''}">R$ ${saldo.toFixed(2)}</div>
+                            <div class="stat-label">Saldo Pendente</div>
+                        </div>
+                         <div class="card stat-card">
+                            <div class="stat-value">${acoesPendentes}</div>
+                            <div class="stat-label">Ações Pendentes</div>
+                        </div>
+                    `;
+
+                } catch (e) {
+                    console.error("Erro ao calcular dashboard do coordenador:", e);
+                    grid.innerHTML = '<p>Erro ao carregar resumo.</p>';
+                }
+                
+            } else {
+                // Dashboard Consultor
+                const paymentsQuery = query(collection(db, PAYMENTS_COL), where('consultantId', '==', currentUser.uid), where('status', '==', 'accepted'));
+                const invoicesQuery = query(collection(db, INVOICES_COL), where('consultantId', '==', currentUser.uid));
+
+                let totalRecebido = 0;
+                let totalComprovado = 0;
+
+                try {
+                    const paymentsSnap = await getDocs(paymentsQuery);
+                    paymentsSnap.forEach(doc => {
+                        totalRecebido += doc.data().amount;
+                    });
+                    
+                    const invoicesSnap = await getDocs(invoicesQuery);
+                     invoicesSnap.forEach(doc => {
+                        totalComprovado += doc.data().amount;
+                    });
+                    
+                    const saldo = totalRecebido - totalComprovado;
+                    
+                    grid.innerHTML = `
+                        <div class="card stat-card">
+                            <div class="stat-value">R$ ${totalRecebido.toFixed(2)}</div>
+                            <div class="stat-label">Total Recebido (Aceito)</div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-value">R$ ${totalComprovado.toFixed(2)}</div>
+                            <div class="stat-label">Total Comprovado</div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-value ${saldo < 0 ? 'stat-saldo-negativo' : ''}">R$ ${saldo.toFixed(2)}</div>
+                            <div class="stat-label">Saldo Atual</div>
+                        </div>
+                    `;
+
+                } catch (e) {
+                    console.error("Erro ao calcular dashboard do consultor:", e);
+                    grid.innerHTML = '<p>Erro ao carregar resumo.</p>';
+                }
+            }
+        }
+        
+        // 2. Coordenador: Carregar Consultores
+        function loadConsultants() {
+            const list = document.getElementById('consultantsList');
+            list.innerHTML = '<p class="loading">Carregando consultores...</p>';
+            
+            const q = query(collection(db, USERS_COL), where('coordinatorId', '==', currentUser.uid));
+            
+            const unsub = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    list.innerHTML = '<p>Você ainda não tem consultores vinculados.</p>';
+                    return;
+                }
+                
+                list.innerHTML = ''; // Limpa
+                snapshot.forEach(doc => {
+                    const consultant = doc.data();
+                    const consultantEl = document.createElement('div');
+                    consultantEl.className = 'list-item';
+                    consultantEl.innerHTML = `
+                        <div class="list-item-content">
+                            <div class="list-item-title">${consultant.name}</div>
+                            <div class="list-item-subtitle">${consultant.email}</div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-secondary btn-small" disabled>Ver Detalhes</button>
+                        </div>
+                    `;
+                    list.appendChild(consultantEl);
+                });
+            }, (error) => {
+                console.error("Erro ao carregar consultores:", error);
+                list.innerHTML = '<p>Erro ao carregar consultores.</p>';
+            });
+            
+            unsubscribeListeners.push(unsub);
+        }
+
+        // 3. Coordenador: Carregar Consultores (para select de pagamento)
+        async function loadConsultantsForPayment() {
+            const select = document.getElementById('consultantSelect');
+            select.innerHTML = '<option value="">Carregando...</option>';
+            
+            const q = query(collection(db, USERS_COL), where('coordinatorId', '==', currentUser.uid));
+            
+            try {
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    select.innerHTML = '<option value="">Nenhum consultor encontrado</option>';
+                    return;
+                }
+                
+                select.innerHTML = '<option value="">Selecione um consultor</option>';
+                snapshot.forEach(doc => {
+                    const consultant = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id; // Salva o UID
+                    option.textContent = consultant.name;
+                    option.dataset.name = consultant.name; // Salva o nome
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Erro ao carregar consultores para pagamento:", error);
+                select.innerHTML = '<option value="">Erro ao carregar</option>';
+            }
+        }
+        
+        // 4. Coordenador: Histórico de Pagamentos
+        function loadPaymentHistory() {
+            const list = document.getElementById('paymentHistoryList');
+            list.innerHTML = '<p class="loading">Carregando histórico...</p>';
+            
+            const q = query(collection(db, PAYMENTS_COL), where('coordinatorId', '==', currentUser.uid));
+            
+            const unsub = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    list.innerHTML = '<p>Nenhum pagamento realizado.</p>';
+                    return;
+                }
+                
+                list.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const payment = doc.data();
+                    const paymentEl = document.createElement('div');
+                    paymentEl.className = 'card';
+                    paymentEl.style.marginBottom = '10px';
+                    
+                    const statusClass = `status-${payment.status}`;
+                    const statusText = payment.status.charAt(0).toUpperCase() + payment.status.slice(1);
+                    
+                    paymentEl.innerHTML = `
+                        <div class="list-item">
+                            <div class="list-item-content">
+                                <div class="list-item-title">${payment.consultantName} - R$ ${payment.amount.toFixed(2)}</div>
+                                <div class="list-item-subtitle">${payment.description}</div>
+                            </div>
+                            <div class="list-item-actions">
+                                <span class="status ${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="invoice-list-container" id="invoices-for-${doc.id}">
+                            <small>Comprovações:</small>
+                            <p class="loading">Carregando...</p>
+                        </div>
+                    `;
+                    list.appendChild(paymentEl);
+                    // Carregar notas fiscais para este pagamento
+                    loadInvoicesForPayment(doc.id);
+                });
+            }, (error) => {
+                console.error("Erro ao carregar pagamentos:", error);
+                list.innerHTML = '<p>Erro ao carregar pagamentos.</p>';
+            });
+            
+            unsubscribeListeners.push(unsub);
+        }
+        
+        // 4a. Coordenador: Carregar Notas de um Pagamento
+        function loadInvoicesForPayment(paymentId) {
+            const container = document.getElementById(`invoices-for-${paymentId}`);
+            if (!container) return; // Segurança
+            
+            const q = query(collection(db, INVOICES_COL), where('paymentId', '==', paymentId));
+            
+            const unsub = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    container.innerHTML = '<small>Nenhuma comprovação enviada.</small>';
+                    return;
+                }
+                
+                container.innerHTML = '<small>Comprovações:</small>';
+                snapshot.forEach(doc => {
+                    const invoice = doc.data();
+                    const invoiceEl = document.createElement('div');
+                    invoiceEl.className = 'invoice-item';
+                    invoiceEl.innerHTML = `
+                        <div class="invoice-details">
+                            ${invoice.description}
+                            <span class="invoice-amount">- R$ ${invoice.amount.toFixed(2)}</span>
+                        </div>
+                        <a href="${invoice.fileUrl}" target="_blank" class="btn btn-outlined btn-small">
+                            <span class="material-icons">download</span>
+                            Baixar
+                        </a>
+                    `;
+                    container.appendChild(invoiceEl);
+                });
+            }, (error) => {
+                console.error("Erro ao carregar notas:", error);
+                container.innerHTML = '<small>Erro ao carregar notas.</small>';
+            });
+            
+            unsubscribeListeners.push(unsub);
+        }
+
+        // 5. Consultor: Carregar Meus Pagamentos
+        function loadMyPayments() {
+            const list = document.getElementById('myPaymentsList');
+            list.innerHTML = '<p class="loading">Carregando pagamentos...</p>';
+            
+            const q = query(collection(db, PAYMENTS_COL), where('consultantId', '==', currentUser.uid));
+            
+            const unsub = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    list.innerHTML = '<p>Nenhum pagamento recebido.</p>';
+                    return;
+                }
+                
+                list.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const payment = doc.data();
+                    const paymentId = doc.id;
+                    const paymentEl = document.createElement('div');
+                    paymentEl.className = 'list-item';
+                    
+                    const statusClass = `status-${payment.status}`;
+                    const statusText = payment.status.charAt(0).toUpperCase() + payment.status.slice(1);
+                    
+                    let actionsHTML = `<span class="status ${statusClass}">${statusText}</span>`;
+                    
+                    if (payment.status === 'pending') {
+                        actionsHTML = `<button class="btn btn-success btn-small" data-payment-id="${paymentId}">
+                                         <span class="material-icons">check</span> Aceitar
+                                       </button>`;
+                    } else if (payment.status === 'accepted') {
+                         actionsHTML = `<button class="btn btn-primary btn-small" data-payment-id="${paymentId}" data-payment-desc="${payment.description}">
+                                         <span class="material-icons">add_circle</span> Adicionar Comprovação
+                                       </button>`;
+                    }
+                    
+                    paymentEl.innerHTML = `
+                        <div class="list-item-content">
+                            <div class="list-item-title">${payment.description} - R$ ${payment.amount.toFixed(2)}</div>
+                            <div class="list-item-subtitle">De: ${payment.coordinatorName}</div>
+                        </div>
+                        <div class="list-item-actions" id="actions-for-${paymentId}">
+                            ${actionsHTML}
+                        </div>
+                    `;
+                    list.appendChild(paymentEl);
+                });
+                
+                // Adicionar listeners aos botões
+                list.querySelectorAll('[data-payment-id]').forEach(button => {
+                    if (button.textContent.includes('Aceitar')) {
+                        button.addEventListener('click', () => acceptPayment(button.dataset.paymentId));
+                    } else if (button.textContent.includes('Adicionar')) {
+                        button.addEventListener('click', () => openInvoiceModal(button.dataset.paymentId, button.dataset.paymentDesc));
+                    }
+                });
+                
+            }, (error) => {
+                console.error("Erro ao carregar pagamentos:", error);
+                list.innerHTML = '<p>Erro ao carregar pagamentos.</p>';
+            });
+            
+            unsubscribeListeners.push(unsub);
+        }
+        
+        // 6. Consultor: Aceitar Pagamento
+        async function acceptPayment(paymentId) {
+            const paymentRef = doc(db, PAYMENTS_COL, paymentId);
+            try {
+                await updateDoc(paymentRef, {
+                    status: 'accepted'
+                });
+                showAlert('Sucesso', 'Pagamento aceito! Agora você pode adicionar comprovações.');
+            } catch (e) {
+                console.error("Erro ao aceitar pagamento:", e);
+                showAlert('Erro', 'Não foi possível aceitar o pagamento.');
+            }
+        }
+        
+        // 7. Consultor: Abrir Modal de Nota Fiscal
+        function openInvoiceModal(paymentId, paymentDescription) {
+            document.getElementById('invoicePaymentId').value = paymentId;
+            document.getElementById('invoicePaymentDescription').textContent = paymentDescription;
+            invoiceModal.classList.add('active');
+        }
+        
+        document.getElementById('closeInvoiceModal').addEventListener('click', () => {
+            invoiceModal.classList.remove('active');
+            document.getElementById('invoiceForm').reset();
+        });
+        
+        // --- Lógica de Ações ---
+        
+        function setupActionsSection(role) {
+            const section = document.getElementById('actions');
+            if (role === 'coordinator') {
+                section.innerHTML = `
+                    <h1>Ações Solicitadas</h1>
+                    <div class="card">
+                        <h2 class="card-title">Solicitações Pendentes dos Consultores</h2>
+                        <div id="actionRequestsList" class="loading"><p>Carregando...</p></div>
+                    </div>
+                `;
+            } else {
+                // Consultor
+                section.innerHTML = `
+                    <h1>Solicitar Ação</h1>
+                    <div class="card">
+                        <h2 class="card-title">Solicitar Nova Ação</h2>
+                        <form id="actionRequestForm">
+                            <div class="form-group">
+                                <label for="actionType">Tipo de Ação</label>
+                                <select id="actionType" required>
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="degustacao">Degustação</option>
+                                    <option value="promocao">Promoção</option>
+                                    <option value="evento">Evento</option>
+                                    <option value="outro">Outro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="storeName">Nome da Loja</label>
+                                <input type="text" id="storeName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="plannedDate">Data Planejada</label>
+                                <input type="date" id="plannedDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="actionDescription">Descrição da Ação</label>
+                                <textarea id="actionDescription" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-icons">send</span>
+                                Enviar Solicitação
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card" style="margin-top: 20px;">
+                        <h2 class="card-title">Minhas Solicitações</h2>
+                        <div id="myActionRequestsList" class="loading"><p>Carregando...</p></div>
+                    </div>
+                `;
+                // Adicionar listener ao novo formulário
+                const form = document.getElementById('actionRequestForm');
+                if (form) {
+                    form.addEventListener('submit', handleActionRequestSubmit);
+                }
+            }
+        }
+        
+        async function handleActionRequestSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const actionData = {
+                consultantId: currentUser.uid,
+                consultantName: currentUserData.name,
+                coordinatorId: currentUserData.coordinatorId, // Vincular ao coordenador
+                actionType: form.actionType.value,
+                storeName: form.storeName.value,
+                plannedDate: form.plannedDate.value,
+                description: form.actionDescription.value,
+                status: 'pending',
+                createdAt: Timestamp.now()
+            };
+            
+            try {
+                await addDoc(collection(db, ACTIONS_COL), actionData);
+                showAlert('Sucesso', 'Solicitação de ação enviada!');
+                form.reset();
+                // loadActionRequests() será chamado pelo listener onSnapshot
+            } catch (error) {
+                console.error("Erro ao enviar solicitação:", error);
+                showAlert('Erro', 'Não foi possível enviar a solicitação.');
+            }
+        }
+        
+        function loadActionRequests() {
+            if (currentUserData.role === 'coordinator') {
+                // Coordenador: vê ações dos seus consultores
+                const list = document.getElementById('actionRequestsList');
+                if (!list) return; // Seção não ativa
+                list.innerHTML = '<p class="loading">Carregando solicitações...</p>';
+                
+                const q = query(collection(db, ACTIONS_COL), where('coordinatorId', '==', currentUser.uid));
+                
+                const unsub = onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        list.innerHTML = '<p>Nenhuma solicitação de ação encontrada.</p>';
+                        return;
+                    }
+                    list.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const action = doc.data();
+                        const actionId = doc.id;
+                        const actionEl = document.createElement('div');
+                        actionEl.className = 'list-item';
+                        
+                        const statusClass = `status-${action.status}`;
+                        const statusText = action.status.charAt(0).toUpperCase() + action.status.slice(1);
+                        
+                        let actionsHTML = `<span class="status ${statusClass}">${statusText}</span>`;
+                        if(action.status === 'pending') {
+                            actionsHTML = `
+                                <button class="btn btn-success btn-small" data-action-id="${actionId}" data-status="approved">
+                                    <span class="material-icons">check</span> Aprovar
+                                </button>
+                                <button class="btn btn-danger btn-small" data-action-id="${actionId}" data-status="rejected">
+                                    <span class="material-icons">close</span> Rejeitar
+                                </button>
+                            `;
+                        }
+                        
+                        actionEl.innerHTML = `
+                            <div class="list-item-content">
+                                <div class="list-item-title">${action.actionType} - ${action.storeName}</div>
+                                <div class="list-item-subtitle">Por: ${action.consultantName} | Data: ${action.plannedDate}</div>
+                            </div>
+                            <div class="list-item-actions">
+                                ${actionsHTML}
+                            </div>
+                        `;
+                        list.appendChild(actionEl);
+                    });
+                    
+                    // Listeners dos botões de aprovar/rejeitar
+                    list.querySelectorAll('[data-action-id]').forEach(button => {
+                        button.addEventListener('click', () => updateActionStatus(button.dataset.actionId, button.dataset.status));
+                    });
+                    
+                }, (error) => {
+                    console.error("Erro ao carregar ações:", error);
+                    list.innerHTML = '<p>Erro ao carregar ações.</p>';
+                });
+                unsubscribeListeners.push(unsub);
+                
+            } else {
+                // Consultor: vê suas próprias ações
+                const list = document.getElementById('myActionRequestsList');
+                if (!list) return; // Seção não ativa
+                list.innerHTML = '<p class="loading">Carregando minhas solicitações...</p>';
+                
+                const q = query(collection(db, ACTIONS_COL), where('consultantId', '==', currentUser.uid));
+                
+                 const unsub = onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        list.innerHTML = '<p>Nenhuma solicitação enviada.</p>';
+                        return;
+                    }
+                    list.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const action = doc.data();
+                        const actionEl = document.createElement('div');
+                        actionEl.className = 'list-item';
+                        
+                        const statusClass = `status-${action.status}`;
+                        const statusText = action.status.charAt(0).toUpperCase() + action.status.slice(1);
+
+                        actionEl.innerHTML = `
+                            <div class="list-item-content">
+                                <div class="list-item-title">${action.actionType} - ${action.storeName}</div>
+                                <div class="list-item-subtitle">Data: ${action.plannedDate}</div>
+                            </div>
+                            <div class="list-item-actions">
+                                <span class="status ${statusClass}">${statusText}</span>
+                            </div>
+                        `;
+                        list.appendChild(actionEl);
+                    });
+                 }, (error) => {
+                    console.error("Erro ao carregar minhas ações:", error);
+                    list.innerHTML = '<p>Erro ao carregar ações.</p>';
+                });
+                unsubscribeListeners.push(unsub);
+            }
+        }
+        
+        async function updateActionStatus(actionId, newStatus) {
+            const actionRef = doc(db, ACTIONS_COL, actionId);
+            try {
+                await updateDoc(actionRef, { status: newStatus });
+                showAlert('Sucesso', `Ação ${newStatus === 'approved' ? 'aprovada' : 'rejeitada'}.`);
+            } catch (e) {
+                console.error("Erro ao atualizar ação:", e);
+                showAlert('Erro', 'Não foi possível atualizar o status da ação.');
+            }
+        }
+
+        // --- Formulários ---
+        
+        // Coordenador: Enviar Pagamento
+        const paymentForm = document.getElementById('paymentForm');
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const selectedOption = form.consultantSelect.options[form.consultantSelect.selectedIndex];
+                
+                const paymentData = {
+                    coordinatorId: currentUser.uid,
+                    coordinatorName: currentUserData.name,
+                    consultantId: selectedOption.value,
+                    consultantName: selectedOption.dataset.name,
+                    amount: parseFloat(form.paymentAmount.value),
+                    description: form.paymentDescription.value,
+                    status: 'pending',
+                    createdAt: Timestamp.now()
+                };
+                
+                if (!paymentData.consultantId) {
+                    showAlert('Aviso', 'Por favor, selecione um consultor.');
+                    return;
+                }
+                
+                try {
+                    await addDoc(collection(db, PAYMENTS_COL), paymentData);
+                    showAlert('Sucesso', 'Pagamento enviado para aceite do consultor.');
+                    form.reset();
+                    // Mudar para a aba de histórico
+                    document.querySelector('[data-tab="paymentHistory"]').click();
+                } catch (error) {
+                    console.error("Erro ao enviar pagamento:", error);
+                    showAlert('Erro', 'Não foi possível enviar o pagamento.');
+                }
+            });
+        }
+        
+        // Consultor: Enviar Nota Fiscal (Comprovação)
+        const invoiceForm = document.getElementById('invoiceForm');
+        if (invoiceForm) {
+            invoiceForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const paymentId = form.invoicePaymentId.value;
+                const amount = parseFloat(form.invoiceAmount.value);
+                const description = form.invoiceDescription.value;
+                const file = form.invoiceFile.files[0];
+                
+                if (!file || !amount || !description) {
+                    showAlert('Aviso', 'Preencha todos os campos.');
+                    return;
+                }
+                
+                // UI de Upload
+                const progressContainer = document.getElementById('uploadProgress');
+                const progressBar = document.getElementById('uploadProgressBar');
+                const progressText = document.getElementById('uploadProgressText');
+                progressContainer.style.display = 'block';
+                progressBar.value = 0;
+                progressText.textContent = '0%';
+
+                try {
+                    // --- ALTERAÇÃO AQUI ---
+                    // "Tratar" o arquivo (imagem ou PDF) antes de fazer upload
+                    showAlert('Processando...', 'Estamos otimizando o arquivo, aguarde.');
+                    const fileToUpload = await processFileForUpload(file);
+                    alertModal.classList.remove('active'); // Fecha o modal "Processando"
+                    // --- FIM DA ALTERAÇÃO ---
+
+                    // 1. Criar referência no Storage
+                    const filePath = `invoices/${currentUser.uid}/${paymentId}_${Date.now()}_${fileToUpload.name}`;
+                    const storageRef = ref(storage, filePath);
+                    
+                    // 2. Iniciar Upload
+                    const uploadTask = uploadBytesResumable(storageRef, fileToUpload); // <-- Usa fileToUpload
+                    
+                    // 3. Monitorar Upload
+                    uploadTask.on('state_changed', 
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            progressBar.value = progress;
+                            progressText.textContent = `${Math.round(progress)}%`;
+                        }, 
+                        (error) => {
+                            console.error("Erro no upload:", error);
+                            showAlert('Erro de Upload', error.message);
+                            progressContainer.style.display = 'none';
+                        }, 
+                        async () => {
+                            // 4. Upload completo, pegar URL
+                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                            
+                            // 5. Salvar dados no Firestore
+                            const invoiceData = {
+                                consultantId: currentUser.uid,
+                                coordinatorId: currentUserData.coordinatorId,
+                                paymentId: paymentId,
+                                amount: amount,
+                                description: description,
+                                fileUrl: downloadURL,
+                                fileName: fileToUpload.name, // <-- Usa fileToUpload.name
+                                filePath: filePath,
+                                createdAt: Timestamp.now()
+                            };
+                            
+                            await addDoc(collection(db, INVOICES_COL), invoiceData);
+                            
+                            showAlert('Sucesso', 'Comprovação enviada!');
+                            invoiceModal.classList.remove('active');
+                            form.reset();
+                            progressContainer.style.display = 'none';
+                            loadDashboardData(); // Recalcular saldo
+                        }
+                    );
+                    
+                } catch (error) {
+                     console.error("Erro ao salvar comprovação:", error);
+                     showAlert('Erro', `Não foi possível salvar a comprovação: ${error.message}`);
+                     progressContainer.style.display = 'none';
+                }
+            });
+        }
+        
+        // --- Relatórios (Demo) ---
+        document.getElementById('generateReportPDF').addEventListener('click', () => {
+            showAlert('Não implementado', 'A geração de PDF é um recurso avançado não incluído nesta demonstração.');
+        });
+        document.getElementById('shareReport').addEventListener('click', () => {
+            showAlert('Não implementado', 'O compartilhamento direto com WhatsApp é um recurso avançado não incluído nesta demonstração.');
+        });
+
+    </script>
+</body>
+</html>
+
+
+
