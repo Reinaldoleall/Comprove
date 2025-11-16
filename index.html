@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-S">
+    <meta charset="UTF-8"> <!-- Corrigido de UTF-S para UTF-8 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dominó Multiplayer</title>
     <!-- Material Icons -->
@@ -52,6 +52,8 @@
             min-height: 100vh;
             padding: 1rem;
             color: var(--md-sys-color-on-surface);
+            /* Evita rolagem do corpo principal em telas pequenas */
+            overflow: hidden; 
         }
 
         /* --- 2. Classes de Peças de Dominó --- */
@@ -240,6 +242,13 @@
             justify-content: center;
             z-index: 50;
             padding: 1rem;
+            transition: opacity 0.2s ease-in-out;
+        }
+        
+        #modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: flex; /* Mantém no layout para animação de saída */
         }
 
         #modal-content {
@@ -308,12 +317,23 @@
         .toast.warning { border-left: 4px solid #F59E0B; }
 
         /* --- 6. Layout Principal (Lobby e Jogo) --- */
+        
+        /* Contêiner para centralizar as telas */
+        .screen-container {
+            width: 100%;
+            max-width: 56rem; /* max-w-7xl é muito grande, ajustei */
+            height: 100vh;
+            display: flex; /* Usado para trocar de tela */
+            flex-direction: column;
+            padding: 1rem;
+        }
 
         /* Tela de Autenticação */
         #auth-screen {
             max-width: 28rem;
             width: 100%;
             text-align: center;
+            margin: auto; /* Centraliza a tela de lobby */
         }
         
         #auth-screen .icon-container {
@@ -343,6 +363,7 @@
         #user-id-display {
             font-size: 0.875rem;
             font-weight: 500;
+            word-break: break-all;
         }
         
         #firebase-auth-warning {
@@ -418,11 +439,10 @@
         /* Tela do Jogo */
         #game-screen {
             width: 100%;
-            max-width: 56rem; /* max-w-7xl é muito grande, ajustei */
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 1rem;
+            overflow: hidden; /* Evita rolagem da tela inteira */
         }
         
         .game-header {
@@ -432,15 +452,18 @@
             align-items: flex-start;
             margin-bottom: 1rem;
             gap: 1rem;
+            flex-shrink: 0;
         }
         
         #game-info {
             flex: 1;
             max-width: 28rem;
+            width: 100%;
         }
         #game-info h2 {
             font-size: 1.25rem;
             font-weight: bold;
+            word-break: break-all;
         }
         #game-info .turn-status {
             font-size: 1.125rem;
@@ -481,7 +504,7 @@
         }
         
         #board-area {
-            flex-grow: 1;
+            flex-grow: 1; /* Ocupa o espaço disponível */
             background: linear-gradient(135deg, #388E3C, #1B5E20);
             border: 4px solid #1B5E20;
             border-radius: 1rem;
@@ -492,7 +515,7 @@
             align-items: center;
             overflow-x: auto;
             box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.1);
-            min-height: 200px;
+            min-height: 200px; /* Garante altura mínima */
         }
         .board-empty-message {
             display: flex;
@@ -515,6 +538,7 @@
             align-items: stretch;
             margin: 1rem 0;
             gap: 1rem;
+            flex-shrink: 0;
         }
         
         #game-controls {
@@ -527,6 +551,9 @@
             flex: 1;
             max-width: 28rem;
             margin-left: auto;
+            /* Garante que o log não cresça indefinidamente */
+            display: flex;
+            flex-direction: column;
         }
         #game-log-container h3 {
             font-weight: bold;
@@ -535,6 +562,7 @@
         #game-log {
             height: 8rem;
             overflow-y: auto;
+            flex-grow: 1;
         }
         #game-log p {
             font-size: 0.875rem;
@@ -548,8 +576,8 @@
         
         #player-hand-container {
             border-radius: 1rem 1rem 0 0;
-            margin-top: auto;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0; /* Não encolhe */
         }
         #player-hand-container h3 {
             font-weight: bold;
@@ -571,6 +599,22 @@
         
         /* --- 7. Media Queries (Responsivo) --- */
         @media (max-width: 768px) {
+            body {
+                padding: 0; /* Remove padding do body em telas pequenas */
+                height: 100vh;
+                width: 100vw;
+            }
+            
+            .screen-container {
+                padding: 0.5rem;
+                height: 100%;
+                width: 100%;
+            }
+            
+            #auth-screen {
+                padding: 1rem; /* Adiciona padding interno ao card */
+            }
+
             .domino {
                 width: 3rem;
                 height: 6rem;
@@ -580,6 +624,11 @@
                 width: 6rem;
                 height: 3rem;
             }
+            .domino-board.double {
+                width: 3rem;
+                height: 6rem;
+            }
+            
             .domino-back {
                 width: 2rem;
                 height: 4rem;
@@ -603,6 +652,14 @@
             #player-hand-container {
                 /* Garante que não ocupe a tela toda */
                 flex-shrink: 0;
+            }
+            
+            #board-area {
+                min-height: 150px; /* Reduz altura minima no mobile */
+            }
+            
+            #player-hand {
+                min-height: 110px; /* Reduz altura minima no mobile */
             }
         }
         
@@ -684,6 +741,7 @@
 
         function showSpinner(message = "Carregando...") {
             modalOverlay.classList.remove('hidden');
+            modalOverlay.style.opacity = '1';
             modalContent.innerHTML = `
                 <div class="loading-spinner-container">
                     <div class="loading-spinner"></div>
@@ -694,12 +752,16 @@
 
         function showModal(htmlContent) {
             modalOverlay.classList.remove('hidden');
+            modalOverlay.style.opacity = '1';
             modalContent.innerHTML = htmlContent;
         }
         
         function hideModal() {
-            modalOverlay.classList.add('hidden');
-            modalContent.innerHTML = ''; // Limpa o conteúdo
+            modalOverlay.style.opacity = '0';
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+                modalContent.innerHTML = ''; // Limpa o conteúdo
+            }, 200); // Espera a animação de opacidade
         }
         
         // Função para mostrar notificações toast
@@ -795,7 +857,7 @@
                     // Caso 1: Usuário está logado (ou acabou de logar)
                     currentUserId = user.uid;
                     console.log("Autenticado com UID:", currentUserId);
-                    userIdDisplay.textContent = `Seu ID de Jogador: ${currentUserId.substring(0, 8)}`;
+                    userIdDisplay.textContent = `Seu ID: ${currentUserId}`; // Mostra ID completo
                     
                     hideModal(); // Esconde o spinner
                     authScreen.classList.remove('hidden');
@@ -925,9 +987,12 @@
                 if (gameState.gameStatus !== 'waiting' && gameState.gameStatus !== 'ended') {
                     // Permite re-entrar se o jogo acabou para ver o placar
                     if(gameState.gameStatus === 'playing') {
-                        showToast("Jogo já começou", "error");
-                        hideModal();
-                        return;
+                        // Se o jogador já está no jogo, permite re-entrar
+                        if (!gameState.playerIds.includes(currentUserId)) {
+                            showToast("Jogo já começou", "error");
+                            hideModal();
+                            return;
+                        }
                     }
                 }
 
@@ -1014,8 +1079,17 @@
         function renderGame(state) {
             if (!state) return;
             
-            // Não renderiza se um modal estiver ativo (exceto tela de vitória)
+            // ** CORREÇÃO DE ROBUSTEZ **
+            // Se um modal de "loading" estiver aberto e o jogo avançar
+            // para 'playing' ou 'ended', devemos fechar o modal.
+            const isLoadingModal = !!modalContent.querySelector('.loading-spinner-container');
+            if (isLoadingModal && (state.gameStatus === 'playing' || state.gameStatus === 'ended')) {
+                hideModal();
+            }
+            
+            // Não renderiza se um modal (que não é de loading) estiver ativo
             if (!modalOverlay.classList.contains('hidden') && state.gameStatus !== 'ended') {
+                // Isso protege o modal 'askMoveChoice' de ser fechado
                 return;
             }
 
@@ -1079,6 +1153,14 @@
             // Se o jogo não começou, não renderiza o resto
             if (state.gameStatus !== 'playing' && state.gameStatus !== 'ended') {
                 gameControls.classList.add('hidden');
+                // Limpa áreas de jogo para não mostrar lixo
+                opponentHands.innerHTML = '';
+                boardArea.innerHTML = `
+                    <div class="board-empty-message">
+                        <span class="material-icons">groups</span>
+                        <p>Aguardando o host iniciar o jogo...</p>
+                    </div>`;
+                playerHand.innerHTML = '';
                 return;
             }
             
@@ -1207,7 +1289,7 @@
                 scoreText += `Vencedor: <strong style="font-size: 1.25rem;">${winnerId.substring(0, 8)}</strong><br><br>`;
             }
             
-            scoreText += `Pontuação final:`;
+            scoreText += `Pontuação final (menos é melhor):`;
             
             let scores = [];
             for (const pid in players) {
@@ -1279,7 +1361,9 @@
                 
                 for (let i = 0; i < piecesPerPlayer; i++) {
                     for (const pid of playerIds) {
-                        hands[pid].hand.push(shuffledDeck.pop());
+                        if (shuffledDeck.length > 0) { // Garante que não tente tirar de um deck vazio
+                            hands[pid].hand.push(shuffledDeck.pop());
+                        }
                     }
                 }
                 
@@ -1317,12 +1401,14 @@
                     log: newLog
                 });
                 
-                // hideModal() será chamado pelo onSnapshot que recebe o novo estado
+                // ***** AQUI ESTÁ A CORREÇÃO *****
+                // Esconde o spinner DEPOIS que a atualização for enviada
+                hideModal();
 
             } catch (e) {
                 console.error("Erro ao iniciar jogo:", e);
                 showToast("Erro ao iniciar jogo", "error");
-                hideModal();
+                hideModal(); // Esconde o spinner em caso de erro
             }
         }
 
@@ -1432,7 +1518,9 @@
 
             let move;
             try {
-                if (validMoves.length > 1) {
+                // Se a peça for uma bucha, e puder ser jogada em ambos os lados, pergunte.
+                // Se não for bucha, só há uma forma de encaixar, não precisa perguntar.
+                if (validMoves.length > 1 && piece.top !== piece.bottom) {
                     move = await askMoveChoice(piece, validMoves);
                 } else {
                     move = validMoves[0];
@@ -1589,11 +1677,13 @@
                         minScore = score;
                         winnerId = pid;
                     } else if (score === minScore) {
+                        // Em caso de empate, as regras variam.
+                        // Aqui, vamos manter o primeiro que encontramos com o score mínimo.
                         if (winnerId === null) winnerId = pid;
                     }
                 });
                 
-                if (winnerId === null) winnerId = state.hostId; 
+                if (winnerId === null) winnerId = state.hostId; // Fallback
                 
                 updatePayload.winner = winnerId;
                 updatePayload.log.push(`Jogo bloqueado! Vencedor: ${winnerId.substring(0, 5)}... com ${minScore} pontos.`);
@@ -1619,7 +1709,7 @@
 <body>
 
     <!-- Tela de Modal (Loading, Vitória, Escolha) -->
-    <div id="modal-overlay" class="hidden">
+    <div id="modal-overlay" class="hidden" style="opacity: 0;">
         <div id="modal-content">
             <!-- Conteúdo do modal será injetado aqui -->
             <div class="loading-spinner-container">
@@ -1635,7 +1725,7 @@
     </div>
 
     <!-- Tela de Autenticação / Lobby -->
-    <div id="auth-screen" class="card hidden">
+    <div id="auth-screen" class="card screen-container">
         <div class="icon-container">
             <span class="material-icons">dashboard_customize</span>
         </div>
@@ -1689,7 +1779,7 @@
     </div>
 
     <!-- Tela Principal do Jogo -->
-    <div id="game-screen" class="hidden">
+    <div id="game-screen" class="screen-container hidden">
         
         <div class="game-header">
             <div id="game-info">
