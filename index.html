@@ -1,13 +1,635 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-S">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dominó Multiplayer</title>
-    <!-- Carrega o Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- 
+      CSS COMPLETO - SEM TAILWIND
+      Todo o estilo do aplicativo está aqui.
+    -->
+    <style>
+        /* --- 1. Reset e Variáveis Globais --- */
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #410E0B;
+            --md-sys-color-success: #0D652D;
+            --md-sys-color-on-success: #FFFFFF;
+            --md-sys-color-success-container: #A5F3C1;
+            --md-sys-color-on-success-container: #00210B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #F3E5F5, #E3F2FD);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* --- 2. Classes de Peças de Dominó --- */
+        .domino {
+            width: 4rem;
+            height: 8rem;
+            border: 2px solid var(--md-sys-color-on-surface);
+            background-color: var(--md-sys-color-surface);
+            border-radius: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: var(--md-sys-color-on-surface);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .domino:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .domino-half {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            z-index: 1;
+            position: relative;
+        }
+
+        .domino-divider {
+            height: 2px;
+            width: 90%;
+            background-color: var(--md-sys-color-outline);
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        .domino-board {
+            width: 8rem;
+            height: 4rem;
+            flex-direction: row;
+            margin: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .domino-board .domino-half { height: 100%; }
+        .domino-board .domino-divider { width: 2px; height: 90%; }
+        
+        .domino-board.double {
+            width: 4rem;
+            height: 8rem;
+            flex-direction: column;
+        }
+
+        .domino-board.double .domino-divider { width: 90%; height: 2px; }
+
+        .domino-back {
+            width: 2.5rem;
+            height: 5rem;
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
+            border: 2px solid var(--md-sys-color-primary);
+            border-radius: 0.5rem;
+            margin: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .domino-back::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+            animation: shine 3s infinite linear;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* --- 3. Componentes de UI (Botões, Cards, etc) --- */
+        .card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 1.25rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            letter-spacing: 0.025rem;
+            text-transform: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .button-filled:hover {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+        
+        .button-outlined:hover {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .button-text {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+        }
+        
+        .button-text:hover {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* --- 4. Classes de Utilitários (Hidden, etc) --- */
+        .hidden {
+            display: none !important;
+        }
+        
+        .opacity-50 {
+            opacity: 0.5;
+        }
+        
+        .cursor-not-allowed {
+            cursor: not-allowed;
+        }
+        
+        .ring-active {
+            box-shadow: 0 0 0 3px var(--md-sys-color-success);
+        }
+
+        /* --- 5. Modal e Toast --- */
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+        }
+
+        #modal-content {
+            color: var(--md-sys-color-on-surface);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        /* Estilo específico para o modal de carregamento */
+        .loading-spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+            border: 4px solid var(--md-sys-color-primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        .loading-spinner-container p {
+            color: white;
+            font-size: 1.125rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.success { border-left: 4px solid var(--md-sys-color-success); }
+        .toast.error { border-left: 4px solid var(--md-sys-color-error); }
+        .toast.warning { border-left: 4px solid #F59E0B; }
+
+        /* --- 6. Layout Principal (Lobby e Jogo) --- */
+
+        /* Tela de Autenticação */
+        #auth-screen {
+            max-width: 28rem;
+            width: 100%;
+            text-align: center;
+        }
+        
+        #auth-screen .icon-container {
+            margin-bottom: 1.5rem;
+        }
+        #auth-screen .icon-container .material-icons {
+            font-size: 3rem;
+            color: var(--md-sys-color-primary);
+        }
+        #auth-screen h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 0.5rem;
+        }
+        #auth-screen .subtitle {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        #user-id-container {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-radius: 0.5rem;
+        }
+        #user-id-display {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        #firebase-auth-warning {
+            display: none; /* Oculto por padrão */
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--md-sys-color-error);
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        #firebase-auth-warning h3 {
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        #firebase-auth-warning p {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 0.5rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+        }
+        .form-group .form-hint {
+            font-size: 0.75rem;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 0.5rem;
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .button-container .button {
+            width: 100%;
+        }
+        
+        .footer-note {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--md-sys-color-surface-variant);
+            font-size: 0.75rem;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        /* Tela do Jogo */
+        #game-screen {
+            width: 100%;
+            max-width: 56rem; /* max-w-7xl é muito grande, ajustei */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+        
+        .game-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        
+        #game-info {
+            flex: 1;
+            max-width: 28rem;
+        }
+        #game-info h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        #game-info .turn-status {
+            font-size: 1.125rem;
+            margin-top: 0.5rem;
+        }
+        #game-info .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        #opponent-hands {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            flex: 1;
+        }
+        .opponent-hand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .opponent-hand .opponent-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .opponent-hand .opponent-info span {
+            font-weight: 500;
+        }
+        .opponent-hand .domino-back-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        #board-area {
+            flex-grow: 1;
+            background: linear-gradient(135deg, #388E3C, #1B5E20);
+            border: 4px solid #1B5E20;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.1);
+            min-height: 200px;
+        }
+        .board-empty-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+        .board-empty-message .material-icons {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-footer {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            margin: 1rem 0;
+            gap: 1rem;
+        }
+        
+        #game-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        #game-log-container {
+            flex: 1;
+            max-width: 28rem;
+            margin-left: auto;
+        }
+        #game-log-container h3 {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        #game-log {
+            height: 8rem;
+            overflow-y: auto;
+        }
+        #game-log p {
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 0.25rem 0;
+            border-bottom: 1px solid var(--md-sys-color-surface-variant);
+        }
+        #game-log p:last-child {
+            border-bottom: none;
+        }
+        
+        #player-hand-container {
+            border-radius: 1rem 1rem 0 0;
+            margin-top: auto;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        }
+        #player-hand-container h3 {
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+        #player-hand {
+            min-height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding: 1rem;
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        /* --- 7. Media Queries (Responsivo) --- */
+        @media (max-width: 768px) {
+            .domino {
+                width: 3rem;
+                height: 6rem;
+                font-size: 1.5rem;
+            }
+            .domino-board {
+                width: 6rem;
+                height: 3rem;
+            }
+            .domino-back {
+                width: 2rem;
+                height: 4rem;
+            }
+            
+            .game-header, .game-footer {
+                flex-direction: column;
+            }
+            
+            #game-log-container {
+                margin-left: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            #game-controls {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            #player-hand-container {
+                /* Garante que não ocupe a tela toda */
+                flex-shrink: 0;
+            }
+        }
+        
+        /* --- 8. Scrollbars Customizados --- */
+        #board-area::-webkit-scrollbar, 
+        #player-hand::-webkit-scrollbar, 
+        #game-log::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        
+        #board-area::-webkit-scrollbar-thumb, 
+        #player-hand::-webkit-scrollbar-thumb, 
+        #game-log::-webkit-scrollbar-thumb {
+            background-color: var(--md-sys-color-primary);
+            border-radius: 4px;
+        }
+        
+        #board-area::-webkit-scrollbar-track, 
+        #player-hand::-webkit-scrollbar-track, 
+        #game-log::-webkit-scrollbar-track {
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: 4px;
+        }
+        
+    </style>
+
     <!-- Carrega os SDKs do Firebase -->
     <script type="module">
         // Importações do Firebase
@@ -56,304 +678,16 @@
         let gameInfo, opponentHands, boardArea, playerHand, gameControls, boneyard, passTurnBtn, gameLog;
         let userIdDisplay;
         let toastContainer;
-
-        // Estilos customizados para as peças com Material Design 3
-        const style = document.createElement('style');
-        style.textContent = `
-            :root {
-                --md-sys-color-primary: #6750A4;
-                --md-sys-color-on-primary: #FFFFFF;
-                --md-sys-color-primary-container: #EADDFF;
-                --md-sys-color-on-primary-container: #21005D;
-                --md-sys-color-secondary: #625B71;
-                --md-sys-color-on-secondary: #FFFFFF;
-                --md-sys-color-secondary-container: #E8DEF8;
-                --md-sys-color-on-secondary-container: #1D192B;
-                --md-sys-color-surface: #FFFBFE;
-                --md-sys-color-on-surface: #1C1B1F;
-                --md-sys-color-surface-variant: #E7E0EC;
-                --md-sys-color-on-surface-variant: #49454F;
-                --md-sys-color-outline: #79747E;
-                --md-sys-color-error: #B3261E;
-                --md-sys-color-on-error: #FFFFFF;
-                --md-sys-color-error-container: #F9DEDC;
-                --md-sys-color-on-error-container: #410E0B;
-                --md-sys-color-success: #0D652D;
-                --md-sys-color-on-success: #FFFFFF;
-                --md-sys-color-success-container: #A5F3C1;
-                --md-sys-color-on-success-container: #00210B;
-            }
-            
-            .domino {
-                width: 4rem;
-                height: 8rem;
-                border: 2px solid var(--md-sys-color-on-surface);
-                background-color: var(--md-sys-color-surface);
-                border-radius: 0.75rem;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-around;
-                align-items: center;
-                font-size: 1.875rem;
-                font-weight: bold;
-                color: var(--md-sys-color-on-surface);
-                cursor: pointer;
-                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                position: relative;
-                overflow: hidden;
-                flex-shrink: 0; /* Impede que as peças encolham no flex */
-            }
-            
-            .domino::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(103, 80, 164, 0.05) 0%, rgba(103, 80, 164, 0.1) 100%);
-                z-index: 0;
-            }
-            
-            .domino:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            }
-            
-            .domino-half {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                z-index: 1;
-                position: relative;
-            }
-            
-            .domino-divider {
-                height: 2px;
-                width: 90%;
-                background-color: var(--md-sys-color-outline);
-                opacity: 0.5;
-                z-index: 1;
-            }
-            
-            /* Peça deitada (para o tabuleiro) */
-            .domino-board {
-                width: 8rem;
-                height: 4rem;
-                flex-direction: row;
-                margin: 0.5rem;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            }
-            
-            .domino-board .domino-half {
-                height: 100%;
-            }
-            
-            .domino-board .domino-divider {
-                width: 2px;
-                height: 90%;
-            }
-            
-            /* Peça "girada" (bucha/double) */
-            .domino-board.double {
-                width: 4rem;
-                height: 8rem;
-                flex-direction: column;
-            }
-            
-            .domino-board.double .domino-divider {
-                width: 90%;
-                height: 2px;
-            }
-            
-            /* Mão do oponente */
-            .domino-back {
-                width: 2.5rem;
-                height: 5rem;
-                background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
-                border: 2px solid var(--md-sys-color-primary);
-                border-radius: 0.5rem;
-                margin: 0.25rem;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                position: relative;
-                overflow: hidden;
-            }
-            
-            .domino-back::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
-                animation: shine 3s infinite linear;
-            }
-            
-            @keyframes shine {
-                0% { transform: translateX(-100%); }
-                100% { transform: translateX(100%); }
-            }
-            
-            /* Material Design 3 Buttons */
-            .m3-button {
-                padding: 0.75rem 1.5rem;
-                border-radius: 1.25rem;
-                font-weight: 500;
-                font-size: 0.875rem;
-                letter-spacing: 0.025rem;
-                text-transform: none;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                border: none;
-                cursor: pointer;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-            }
-            
-            .m3-button-filled {
-                background-color: var(--md-sys-color-primary);
-                color: var(--md-sys-color-on-primary);
-                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-            }
-            
-            .m3-button-filled:hover {
-                background-color: var(--md-sys-color-primary);
-                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
-                transform: translateY(-2px);
-            }
-            
-            .m3-button-outlined {
-                background-color: transparent;
-                color: var(--md-sys-color-primary);
-                border: 1px solid var(--md-sys-color-outline);
-            }
-            
-            .m3-button-outlined:hover {
-                background-color: var(--md-sys-color-primary-container);
-            }
-            
-            .m3-button-text {
-                background-color: transparent;
-                color: var(--md-sys-color-primary);
-            }
-            
-            .m3-button-text:hover {
-                background-color: var(--md-sys-color-primary-container);
-            }
-            
-            /* Cards */
-            .m3-card {
-                background-color: var(--md-sys-color-surface);
-                border-radius: 0.75rem;
-                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-                padding: 1.5rem;
-                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            
-            .m3-card:hover {
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            }
-            
-            /* Chips */
-            .m3-chip {
-                display: inline-flex;
-                align-items: center;
-                padding: 0.25rem 0.75rem;
-                border-radius: 0.5rem;
-                background-color: var(--md-sys-color-surface-variant);
-                color: var(--md-sys-color-on-surface-variant);
-                font-size: 0.75rem;
-                font-weight: 500;
-            }
-            
-            /* Toast notifications */
-            .toast {
-                padding: 1rem 1.5rem;
-                border-radius: 0.75rem;
-                background-color: var(--md-sys-color-surface);
-                color: var(--md-sys-color-on-surface);
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                opacity: 0;
-                transform: translateX(100%);
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            
-            .toast.show {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            
-            .toast.success {
-                border-left: 4px solid var(--md-sys-color-success);
-            }
-            
-            .toast.error {
-                border-left: 4px solid var(--md-sys-color-error);
-            }
-            
-            .toast.warning {
-                border-left: 4px solid #F59E0B;
-            }
-            
-            /* Scrollbars Customizados (CSS POLISH) */
-            #board-area::-webkit-scrollbar, 
-            #player-hand::-webkit-scrollbar, 
-            #game-log::-webkit-scrollbar {
-                height: 8px;
-                width: 8px;
-            }
-            
-            #board-area::-webkit-scrollbar-thumb, 
-            #player-hand::-webkit-scrollbar-thumb, 
-            #game-log::-webkit-scrollbar-thumb {
-                background-color: var(--md-sys-color-primary);
-                border-radius: 4px;
-            }
-            
-            #board-area::-webkit-scrollbar-track, 
-            #player-hand::-webkit-scrollbar-track, 
-            #game-log::-webkit-scrollbar-track {
-                background-color: var(--md-sys-color-surface-variant);
-                border-radius: 4px;
-            }
-
-            /* Responsive adjustments */
-            @media (max-width: 768px) {
-                .domino {
-                    width: 3rem;
-                    height: 6rem;
-                    font-size: 1.5rem;
-                }
-                
-                .domino-board {
-                    width: 6rem;
-                    height: 3rem;
-                }
-                
-                .domino-back {
-                    width: 2rem;
-                    height: 4rem;
-                }
-            }
-        `;
-        document.head.appendChild(style);
+        let authWarningBox;
 
         // --- Funções de UI (Modal, Toast) ---------------------------------------
 
         function showSpinner(message = "Carregando...") {
             modalOverlay.classList.remove('hidden');
             modalContent.innerHTML = `
-                <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p class="text-white text-lg">${message}</p>
+                <div class="loading-spinner-container">
+                    <div class="loading-spinner"></div>
+                    <p>${message}</p>
                 </div>
             `;
         }
@@ -368,19 +702,10 @@
             modalContent.innerHTML = ''; // Limpa o conteúdo
         }
         
-        function getSpinnerHtml(message = "Carregando...") {
-            return `
-                <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p class="text-white text-lg">${message}</p>
-                </div>
-            `;
-        }
-
         // Função para mostrar notificações toast
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+            toast.className = `toast ${type}`; // Adiciona classe base e de tipo
             
             let icon = 'info';
             if (type === 'success') icon = 'check_circle';
@@ -388,7 +713,7 @@
             if (type === 'warning') icon = 'warning';
             
             toast.innerHTML = `
-                <span class="material-icons" style="font-size: 1.25rem;">${icon}</span>
+                <span class="material-icons">${icon}</span>
                 <span>${message}</span>
             `;
             
@@ -396,7 +721,7 @@
             
             setTimeout(() => {
                 toast.classList.add('show');
-            }, 10);
+            }, 10); // Pequeno delay para a animação de entrada funcionar
             
             setTimeout(() => {
                 toast.classList.remove('show');
@@ -404,7 +729,7 @@
                     if (toastContainer.contains(toast)) {
                         toastContainer.removeChild(toast);
                     }
-                }, 300);
+                }, 300); // Espera a animação de saída terminar
             }, duration);
         }
 
@@ -436,12 +761,13 @@
                 gameLog = document.getElementById('game-log');
                 userIdDisplay = document.getElementById('user-id-display');
                 toastContainer = document.getElementById('toast-container');
+                authWarningBox = document.getElementById('firebase-auth-warning');
 
                 // Mostrar spinner de conexão inicial
                 showSpinner('Conectando...');
 
                 // Iniciar autenticação
-                handleAuth(); // **NOVA LÓGICA ROBUSTA**
+                handleAuth(); // **LÓGICA ROBUSTA DE AUTENTICAÇÃO**
 
                 // Listeners de botões
                 createGameBtn.onclick = createGame;
@@ -452,26 +778,24 @@
             } catch (e) {
                 console.error("Erro ao inicializar:", e);
                 showModal(`
-                    <div class="m3-card text-center p-6">
-                        <span class="material-icons text-5xl text-red-500 mb-4">error</span>
-                        <h2 class="text-2xl font-bold mb-2">Erro na Inicialização</h2>
-                        <p class="text-gray-700">Não foi possível carregar o jogo. Verifique o console.</p>
-                        <p class="text-xs text-gray-500">${e.message}</p>
+                    <div class="card" style="text-align: center; padding: 1.5rem;">
+                        <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
+                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro na Inicialização</h2>
+                        <p style="color: var(--md-sys-color-on-surface-variant);">Não foi possível carregar o jogo. Verifique o console.</p>
+                        <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">${e.message}</p>
                     </div>
                 `);
             }
         };
 
-        // *** MELHORIA CRÍTICA DE AUTENTICAÇÃO ***
-        // Este é o novo fluxo robusto. Ele usa onAuthStateChanged como a
-        // única fonte da verdade e reage a mudanças de estado.
+        // *** FLUXO DE AUTENTICAÇÃO ROBUSTO ***
         async function handleAuth() {
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     // Caso 1: Usuário está logado (ou acabou de logar)
                     currentUserId = user.uid;
                     console.log("Autenticado com UID:", currentUserId);
-                    userIdDisplay.innerText = `Seu ID de Jogador: ${currentUserId.substring(0, 8)}`;
+                    userIdDisplay.textContent = `Seu ID de Jogador: ${currentUserId.substring(0, 8)}`;
                     
                     hideModal(); // Esconde o spinner
                     authScreen.classList.remove('hidden');
@@ -493,14 +817,24 @@
                     } catch (e) {
                         // Caso 3: A tentativa de login FALHOU
                         console.error("Erro na autenticação:", e);
+                        
+                        // Mostra o aviso fixo na tela de lobby
+                        if (authWarningBox) authWarningBox.style.display = 'block';
+
+                        // Mostra o modal de erro fatal
                         showModal(`
-                            <div class="m3-card text-center p-6">
-                                <span class="material-icons text-5xl text-red-500 mb-4">error</span>
-                                <h2 class="text-2xl font-bold mb-2">Erro de Autenticação</h2>
-                                <p class="text-gray-700 mb-4">Não foi possível conectar. Verifique se o login anônimo (ou o provedor de token) está ativado no seu projeto Firebase.</p>
-                                <p class="text-xs text-gray-500">${e.message}</p>
+                            <div class="card" style="text-align: center; padding: 1.5rem;">
+                                <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
+                                <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro de Autenticação</h2>
+                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 1rem;">
+                                    Não foi possível conectar. Verifique se o login <strong>"Anônimo"</strong>
+                                    está ativado no seu projeto Firebase.
+                                </p>
+                                <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">Firebase: ${e.message}</p>
+                                <button id="reload-btn" class="button button-filled" style="margin-top: 1.5rem;">Tentar Novamente</button>
                             </div>
                         `);
+                        document.getElementById('reload-btn').onclick = () => window.location.reload();
                     }
                 }
             });
@@ -693,48 +1027,52 @@
 
             // 1. Informações do Jogo
             let turnText = "Carregando...";
-            let statusColor = "text-gray-600";
+            let statusColor = "var(--md-sys-color-on-surface-variant)";
             
             if (state.gameStatus === 'waiting') {
                 turnText = `Aguardando jogadores... (${state.playerIds.length}/4)`;
-                statusColor = "text-blue-600";
+                statusColor = "var(--md-sys-color-primary)";
             } else if (state.gameStatus === 'playing') {
                 if (state.currentPlayerId === currentUserId) {
                     turnText = "É a sua vez!";
-                    statusColor = "text-green-600 font-semibold";
+                    statusColor = "var(--md-sys-color-success)";
                 } else {
                     turnText = `Vez de: ${state.currentPlayerId.substring(0, 5)}...`;
-                    statusColor = "text-amber-600";
+                    statusColor = "#E65100"; // Laranja
                 }
             } else if (state.gameStatus === 'ended') {
                 turnText = `Fim de Jogo! Vencedor: ${state.winner.substring(0, 5)}...`;
-                statusColor = "text-purple-600 font-semibold";
+                statusColor = "var(--md-sys-color-primary)";
             }
             
             gameInfo.innerHTML = `
-                <div class="m3-card">
-                    <h2 class="text-xl font-bold text-gray-800">Jogo: ${state.gameId}</h2>
-                    <p class="text-lg ${statusColor} mt-2">${turnText}</p>
-                    <div class="flex flex-wrap gap-2 mt-3">
-                        <span class="m3-chip">Jogadores: ${state.playerIds.length}/4</span>
-                        ${state.gameStatus === 'playing' ? `<span class="m3-chip">Peças no monte: ${state.boneyard.length}</span>` : ''}
+                <div class="card">
+                    <h2>Jogo: ${state.gameId}</h2>
+                    <p class="turn-status" style="color: ${statusColor}; font-weight: 500;">${turnText}</p>
+                    <div class="chips-container">
+                        <span class="chip">Jogadores: ${state.playerIds.length}/4</span>
+                        ${state.gameStatus === 'playing' ? `<span class="chip">Peças no monte: ${state.boneyard.length}</span>` : ''}
                     </div>
                 </div>
             `;
 
             // 2. Botão de Iniciar (apenas para o Host)
             if (state.gameStatus === 'waiting' && state.hostId === currentUserId) {
+                const gameInfoCard = gameInfo.querySelector('.card');
                 if (state.playerIds.length >= 2) {
                     const startGameBtn = document.createElement('button');
-                    startGameBtn.innerHTML = `<span class="material-icons" style="font-size: 1.125rem;">play_arrow</span> Iniciar Jogo (${state.playerIds.length} jogadores)`;
-                    startGameBtn.className = "m3-button m3-button-filled mt-4";
+                    startGameBtn.innerHTML = `<span class="material-icons">play_arrow</span> Iniciar Jogo (${state.playerIds.length} jogadores)`;
+                    startGameBtn.className = "button button-filled";
+                    startGameBtn.style.marginTop = "1rem";
                     startGameBtn.onclick = () => startGame(state);
-                    gameInfo.querySelector('.m3-card').appendChild(startGameBtn);
+                    gameInfoCard.appendChild(startGameBtn);
                 } else {
                     const waitingText = document.createElement('p');
-                    waitingText.className = "text-sm text-gray-500 mt-3";
+                    waitingText.style.fontSize = "0.875rem";
+                    waitingText.style.color = "var(--md-sys-color-on-surface-variant)";
+                    waitingText.style.marginTop = "1rem";
                     waitingText.innerText = "Aguardando pelo menos 2 jogadores...";
-                    gameInfo.querySelector('.m3-card').appendChild(waitingText);
+                    gameInfoCard.appendChild(waitingText);
                 }
             }
 
@@ -754,32 +1092,27 @@
                 const hand = state.players[pid] ? state.players[pid].hand : [];
                 
                 const opponentDiv = document.createElement('div');
-                opponentDiv.className = 'flex flex-col items-center mx-4';
+                opponentDiv.className = 'opponent-hand';
                 opponentDiv.innerHTML = `
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="font-medium text-gray-700">${pid.substring(0, 5)}...</span>
-                        <span class="m3-chip">${hand.length} peças</span>
+                    <div class="opponent-info">
+                        <span>${pid.substring(0, 5)}...</span>
+                        <span class="chip">${hand.length} peças</span>
+                    </div>
+                    <div class="domino-back-container">
+                        ${[...Array(hand.length)].map(() => `<div class="domino-back"></div>`).join('')}
                     </div>
                 `;
-                
-                const cardsDiv = document.createElement('div');
-                cardsDiv.className = 'flex flex-wrap justify-center';
-                for (let i = 0; i < hand.length; i++) {
-                    cardsDiv.innerHTML += `<div class="domino-back"></div>`;
-                }
-                opponentDiv.appendChild(cardsDiv);
                 opponentHands.appendChild(opponentDiv);
             });
 
             // 4. Tabuleiro (Board)
             if (state.board.length === 0) {
-                const emptyBoardMsg = document.createElement('div');
-                emptyBoardMsg.className = 'flex flex-col items-center justify-center h-full text-gray-500';
-                emptyBoardMsg.innerHTML = `
-                    <span class="material-icons mb-2" style="font-size: 3rem;">dashboard_customize</span>
-                    <p class="text-lg">O jogo começará aqui</p>
+                boardArea.innerHTML = `
+                    <div class="board-empty-message">
+                        <span class="material-icons">dashboard_customize</span>
+                        <p>O jogo começará aqui</p>
+                    </div>
                 `;
-                boardArea.appendChild(emptyBoardMsg);
             } else {
                 state.board.forEach(piece => {
                     boardArea.appendChild(createDominoElement(piece, true));
@@ -789,29 +1122,27 @@
             // 5. Mão do Jogador
             const myHand = state.players[currentUserId] ? state.players[currentUserId].hand : [];
             
-            if (myHand.length === 0) {
-                const emptyHandMsg = document.createElement('div');
-                emptyHandMsg.className = 'text-center text-gray-500 py-4';
-                emptyHandMsg.innerHTML = `
-                    <span class="material-icons mb-2" style="font-size: 2rem;">inventory_2</span>
-                    <p>Você não tem peças</p>
+            if (myHand.length === 0 && state.gameStatus === 'playing') {
+                playerHand.innerHTML = `
+                    <div style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem;">
+                        <span class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">inventory_2</span>
+                        <p>Você não tem peças</p>
+                    </div>
                 `;
-                playerHand.appendChild(emptyHandMsg);
             } else {
                 myHand.forEach((piece, index) => {
                     const pieceEl = createDominoElement(piece, false);
                     if (isMyTurn) {
                         pieceEl.onclick = () => onPieceClick(piece, index);
-                        pieceEl.classList.add('cursor-pointer');
                     } else {
-                        pieceEl.classList.add('opacity-70', 'cursor-not-allowed');
+                        pieceEl.classList.add('opacity-50', 'cursor-not-allowed');
                     }
                     playerHand.appendChild(pieceEl);
                 });
             }
 
             // 6. Controles (Monte, Passar)
-            boneyard.innerHTML = `<span class="material-icons" style="font-size: 1.25rem;">style</span> Monte (${state.boneyard.length})`;
+            boneyard.innerHTML = `<span class="material-icons">style</span> Monte (${state.boneyard.length})`;
             
             if (isMyTurn) {
                 boneyard.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -819,27 +1150,24 @@
                 boneyard.disabled = state.boneyard.length === 0;
                 passTurnBtn.disabled = false;
                 
-                // Adiciona efeito visual para indicar que é a vez do jogador
-                playerHand.classList.add('ring-2', 'ring-green-500', 'ring-opacity-50', 'rounded-lg');
+                playerHand.classList.add('ring-active');
             } else {
                 boneyard.classList.add('opacity-50', 'cursor-not-allowed');
                 passTurnBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 boneyard.disabled = true;
                 passTurnBtn.disabled = true;
-                playerHand.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50', 'rounded-lg');
+                playerHand.classList.remove('ring-active');
             }
+            
+            if(boneyard.disabled) boneyard.classList.add('opacity-50');
 
             // 7. Log
             if (state.log.length === 0) {
-                const emptyLogMsg = document.createElement('p');
-                emptyLogMsg.className = 'text-sm text-gray-500 italic';
-                emptyLogMsg.innerText = "Nenhuma ação registrada ainda...";
-                gameLog.appendChild(emptyLogMsg);
+                gameLog.innerHTML = `<p style="font-style: italic;">Nenhuma ação registrada ainda...</p>`;
             } else {
                 state.log.slice(-8).reverse().forEach(msg => { // Mostra últimas 8 msgs
                     const logEntry = document.createElement('p');
-                    logEntry.className = 'text-sm text-gray-700 py-1 border-b border-gray-100 last:border-b-0';
-                    logEntry.innerText = msg;
+                    logEntry.textContent = msg;
                     gameLog.appendChild(logEntry);
                 });
             }
@@ -852,7 +1180,7 @@
         
         function createDominoElement(piece, isBoardPiece) {
             const el = document.createElement('div');
-            el.className = isBoardPiece ? 'domino-board' : 'domino';
+            el.className = isBoardPiece ? 'domino domino-board' : 'domino';
             
             // Adiciona classe 'double' se for bucha E estiver no tabuleiro
             if (isBoardPiece && piece.top === piece.bottom) {
@@ -868,22 +1196,26 @@
         }
 
         function showWinScreen(winnerId, players) {
-            let scoreText = "Fim de Jogo!<br>";
+            let scoreText = "Fim de Jogo!<br><br>";
             const isWinner = winnerId === currentUserId;
             
+            const winnerColor = isWinner ? "var(--md-sys-color-success)" : "var(--md-sys-color-primary)";
+            
             if (isWinner) {
-                scoreText += `<strong class="text-2xl text-green-600">🎉 Parabéns, você venceu! 🎉</strong><br><br>`;
+                scoreText += `<strong style="font-size: 1.5rem; color: ${winnerColor};">🎉 Parabéns, você venceu! 🎉</strong><br><br>`;
             } else {
-                scoreText += `Vencedor: <strong class="text-xl">${winnerId.substring(0, 8)}</strong><br><br>`;
+                scoreText += `Vencedor: <strong style="font-size: 1.25rem;">${winnerId.substring(0, 8)}</strong><br><br>`;
             }
             
             scoreText += `Pontuação final:`;
             
             let scores = [];
             for (const pid in players) {
-                const hand = players[pid].hand;
-                const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
-                scores.push({ pid, score, isCurrentUser: pid === currentUserId });
+                if (players[pid] && players[pid].hand) {
+                    const hand = players[pid].hand;
+                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
+                    scores.push({ pid, score, isCurrentUser: pid === currentUserId });
+                }
             }
             
             scores.sort((a, b) => a.score - b.score);
@@ -893,19 +1225,19 @@
             });
             
             const modalHtml = `
-                <div class="m3-card max-w-md w-full mx-4 text-center">
-                    <div class="mb-4">
-                        <span class="material-icons text-6xl ${isWinner ? 'text-green-500' : 'text-purple-500'}">emoji_events</span>
+                <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
+                    <div style="margin-bottom: 1rem;">
+                        <span class="material-icons" style="font-size: 4rem; color: ${winnerColor};">emoji_events</span>
                     </div>
-                    <h2 class="text-3xl font-bold mb-4 ${isWinner ? 'text-green-600' : 'text-purple-600'}">${isWinner ? 'Vitória!' : 'Fim de Jogo'}</h2>
-                    <div class="text-lg mb-6">${scoreText}</div>
-                    <div class="flex gap-3 justify-center">
-                        <button id="new-game-btn" class="m3-button m3-button-filled">
-                            <span class="material-icons" style="font-size: 1.125rem;">add</span>
+                    <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: ${winnerColor};">${isWinner ? 'Vitória!' : 'Fim de Jogo'}</h2>
+                    <div style="font-size: 1.125rem; margin-bottom: 1.5rem; line-height: 1.6;">${scoreText}</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; justify-content: center;">
+                        <button id="new-game-btn" class="button button-filled" style="width: 100%;">
+                            <span class="material-icons">add</span>
                             Novo Jogo
                         </button>
-                        <button id="leave-game-btn" class="m3-button m3-button-outlined">
-                            <span class="material-icons" style="font-size: 1.125rem;">logout</span>
+                        <button id="leave-game-btn" class="button button-outlined" style="width: 100%;">
+                            <span class="material-icons">logout</span>
                             Voltar ao Lobby
                         </button>
                     </div>
@@ -944,7 +1276,6 @@
                 playerIds.forEach(pid => { hands[pid] = { hand: [] }; });
                 
                 let piecesPerPlayer = 7;
-                // Regra de dominó: 2-4 jogadores, 7 peças.
                 
                 for (let i = 0; i < piecesPerPlayer; i++) {
                     for (const pid of playerIds) {
@@ -1017,33 +1348,32 @@
 
         // --- Lógica de Turno ----------------------------------------------------
 
-        // **NOVO** Modal para escolha de jogada
+        // Modal para escolha de jogada
         function askMoveChoice(piece, validMoves) {
             return new Promise((resolve, reject) => {
                 const modalHtml = `
-                    <div class="m3-card max-w-md w-full mx-4 text-center">
-                        <h2 class="text-2xl font-bold mb-4">Escolha sua Jogada</h2>
-                        <p class="text-lg mb-6">Onde você quer jogar a peça [${piece.top}|${piece.bottom}]?</p>
+                    <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
+                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Escolha sua Jogada</h2>
+                        <p style="font-size: 1.125rem; margin-bottom: 1.5rem;">Onde você quer jogar a peça?</p>
                         
-                        <!-- Peça de exemplo -->
-                        <div class="flex justify-center mb-6">
+                        <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
                             ${createDominoElement(piece, false).outerHTML}
                         </div>
                         
-                        <div class="flex flex-col gap-3">
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                             ${validMoves.includes('left') ? `
-                            <button id="modal-btn-left" class="m3-button m3-button-filled w-full">
-                                <span class="material-icons" style="font-size: 1.125rem;">arrow_back</span>
+                            <button id="modal-btn-left" class="button button-filled" style="width: 100%;">
+                                <span class="material-icons">arrow_back</span>
                                 Na Ponta Esquerda
                             </button>` : ''}
                             
                             ${validMoves.includes('right') ? `
-                            <button id="modal-btn-right" class="m3-button m3-button-filled w-full">
-                                <span class="material-icons" style="font-size: 1.125rem;">arrow_forward</span>
+                            <button id="modal-btn-right" class="button button-filled" style="width: 100%;">
+                                <span class="material-icons">arrow_forward</span>
                                 Na Ponta Direita
                             </button>` : ''}
                             
-                            <button id="modal-btn-cancel" class="m3-button m3-button-text w-full">
+                            <button id="modal-btn-cancel" class="button button-text" style="width: 100%;">
                                 Cancelar
                             </button>
                         </div>
@@ -1081,9 +1411,8 @@
             const { board, openEnds } = state;
             const [leftEnd, rightEnd] = openEnds;
             
-            let playedPiece = { ...piece }; // Peça como será jogada (pode ser invertida)
+            let playedPiece = { ...piece };
 
-            // **LÓGICA DE MOVIMENTO MELHORADA**
             const validMoves = [];
             if (board.length === 0) {
                 validMoves.push('first');
@@ -1103,7 +1432,6 @@
 
             let move;
             try {
-                // Se pode jogar em > 1 lugar (ex: 'left' e 'right'), pergunta ao usuário
                 if (validMoves.length > 1) {
                     move = await askMoveChoice(piece, validMoves);
                 } else {
@@ -1113,10 +1441,7 @@
                 console.log("Jogada cancelada pelo usuário.");
                 return; // Usuário apertou 'cancelar'
             }
-
-            // Se chegou aqui, o movimento é válido e foi escolhido.
             
-            // 1. Atualiza o tabuleiro
             let newBoard = [...board];
             let newOpenEnds = [...openEnds];
             
@@ -1137,23 +1462,17 @@
                 newOpenEnds[1] = playedPiece.bottom; // Nova ponta direita
             }
 
-            // 2. Atualiza a mão do jogador
             const myHand = state.players[currentUserId].hand;
             const newHand = myHand.filter((_, i) => i !== pieceIndex);
             
-            // 3. Atualiza o objeto 'players'
             const newPlayers = {
                 ...state.players,
                 [currentUserId]: { hand: newHand }
             };
 
-            // 4. Próximo jogador
             const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
-
-            // 5. Log
             const newLog = [...state.log, `${currentUserId.substring(0, 5)}... jogou [${playedPiece.top}|${playedPiece.bottom}].`];
 
-            // 6. Prepara o payload
             const updatePayload = {
                 board: newBoard,
                 openEnds: newOpenEnds,
@@ -1165,7 +1484,6 @@
                 winner: state.winner
             };
 
-            // 7. Verifica condição de vitória
             if (newHand.length === 0) {
                 console.log("JOGADOR VENCEU!");
                 updatePayload.gameStatus = 'ended';
@@ -1173,7 +1491,6 @@
                 showToast("🎉 Parabéns! Você venceu o jogo! 🎉", "success", 5000);
             }
             
-            // 8. Envia a atualização
             try {
                 await updateDoc(getGameRef(currentGameId), updatePayload);
             } catch (e) {
@@ -1191,15 +1508,12 @@
                 return;
             }
 
-            // Pega a peça
             const newBoneyard = [...state.boneyard];
-            const drawnPiece = newBoneyard.pop(); // Pega a última peça
+            const drawnPiece = newBoneyard.pop();
 
-            // Adiciona na mão
             const myHand = state.players[currentUserId].hand;
             const newHand = [...myHand, drawnPiece];
             
-            // Atualiza players
             const newPlayers = {
                 ...state.players,
                 [currentUserId]: { hand: newHand }
@@ -1207,7 +1521,6 @@
 
             const newLog = [...state.log, `${currentUserId.substring(0, 5)}... comprou do monte.`];
 
-            // Atualiza Firebase. O turno NÃO PASSA. O jogador pode jogar ou passar.
             try {
                 await updateDoc(getGameRef(currentGameId), {
                     boneyard: newBoneyard,
@@ -1225,13 +1538,12 @@
             const state = localGameState;
             if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
             
-            // Verifica se o jogador pode mesmo passar
             const myHand = state.players[currentUserId].hand;
             const [leftEnd, rightEnd] = state.openEnds;
 
             let canPlay = false;
             if (state.board.length === 0) {
-                canPlay = myHand.length > 0; // Se for o primeiro, pode jogar qualquer coisa
+                canPlay = myHand.length > 0;
             } else {
                 for (const piece of myHand) {
                     if (piece.top === leftEnd || piece.bottom === leftEnd || piece.top === rightEnd || piece.bottom === rightEnd) {
@@ -1251,9 +1563,6 @@
                 return;
             }
 
-            // Se chegou aqui, o jogador não pode jogar E o monte está vazio.
-            // O passe é válido.
-
             const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
             const newPassCount = (state.passCount || 0) + 1;
             const newLog = [...state.log, `${currentUserId.substring(0, 5)}... passou o turno.`];
@@ -1266,11 +1575,10 @@
                 winner: state.winner
             };
 
-            // Verifica se o jogo está bloqueado
             if (newPassCount >= state.playerIds.length) {
                 console.log("JOGO BLOQUEADO!");
                 updatePayload.gameStatus = 'ended';
-                // Encontra o vencedor pela menor soma de pontos
+                
                 let minScore = Infinity;
                 let winnerId = null;
                 
@@ -1281,15 +1589,10 @@
                         minScore = score;
                         winnerId = pid;
                     } else if (score === minScore) {
-                        // Lógica de desempate (ex: quem jogou por último, ou o abridor)
-                        // Por simplicidade, o primeiro a atingir o minScore vence
-                        if (winnerId === null) {
-                            winnerId = pid;
-                        }
+                        if (winnerId === null) winnerId = pid;
                     }
                 });
                 
-                // Se ninguém tiver peças (empate 0-0, raro), o 'winnerId' pode ser o primeiro jogador
                 if (winnerId === null) winnerId = state.hostId; 
                 
                 updatePayload.winner = winnerId;
@@ -1313,104 +1616,116 @@
 
     </script>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-blue-100 font-sans flex items-center justify-center min-h-screen p-4">
+<body>
 
     <!-- Tela de Modal (Loading, Vitória, Escolha) -->
-    <div id="modal-overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div id="modal-overlay" class="hidden">
         <div id="modal-content">
             <!-- Conteúdo do modal será injetado aqui -->
-            <div class="flex flex-col items-center">
-                <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-white text-lg">Carregando...</p>
+            <div class="loading-spinner-container">
+                <div class="loading-spinner"></div>
+                <p>Carregando...</p>
             </div>
         </div>
     </div>
 
     <!-- Container de Toasts -->
-    <div id="toast-container" class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+    <div id="toast-container">
         <!-- Notificações Toast serão injetadas aqui -->
     </div>
 
     <!-- Tela de Autenticação / Lobby -->
-    <div id="auth-screen" class="hidden max-w-md w-full">
-        <div class="m3-card text-center">
-            <div class="mb-6">
-                <span class="material-icons text-5xl text-purple-500 mb-4">dashboard_customize</span>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Dominó Multiplayer</h1>
-                <p class="text-gray-600">Jogue dominó online com amigos em tempo real</p>
-            </div>
-            
-            <div class="mb-6 p-4 bg-purple-50 rounded-lg">
-                <p id="user-id-display" class="text-sm text-gray-700 font-medium">Carregando ID...</p>
-            </div>
-            
-            <div class="mb-6">
-                <label for="game-id-input" class="block text-sm font-medium text-gray-700 mb-2 text-left">ID do Jogo</label>
-                <input type="text" id="game-id-input" placeholder="Ex: SALA123" 
-                       class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase font-medium"
-                       oninput="this.value = this.value.toUpperCase()" autocomplete="off">
-                <p class="text-xs text-gray-500 mt-2 text-left">Use um ID único para criar ou entrar em um jogo</p>
-            </div>
-            
-            <div class="flex flex-col gap-3">
-                <button id="create-game-btn" class="m3-button m3-button-filled w-full">
-                    <span class="material-icons" style="font-size: 1.125rem;">add</span>
-                    Criar Novo Jogo
-                </button>
-                <button id="join-game-btn" class="m3-button m3-button-outlined w-full">
-                    <span class="material-icons" style="font-size: 1.125rem;">login</span>
-                    Entrar em Jogo Existente
-                </button>
-            </div>
-            
-            <div class="mt-6 pt-4 border-t border-gray-200">
-                <p class="text-xs text-gray-500">Jogue com 2 a 4 jogadores. Cada jogador recebe 7 peças.</p>
-            </div>
+    <div id="auth-screen" class="card hidden">
+        <div class="icon-container">
+            <span class="material-icons">dashboard_customize</span>
+        </div>
+        <h1>Dominó Multiplayer</h1>
+        <p class="subtitle">Jogue dominó online com amigos em tempo real</p>
+        
+        <div id="user-id-container">
+            <p id="user-id-display">Carregando ID...</p>
+        </div>
+
+        <!-- 
+          AVISO DE ERRO DE AUTENTICAÇÃO
+          Este é o aviso que explica o erro da sua imagem.
+        -->
+        <div id="firebase-auth-warning">
+            <h3>
+                <span class="material-icons">warning</span>
+                Ação Necessária (Firebase)
+            </h3>
+            <p>
+                Se a autenticação falhar com o erro <strong>(auth/admin-restricted-operation)</strong>,
+                você precisa <strong>ATIVAR</strong> o provedor "Anônimo" nas configurações
+                do seu projeto Firebase.
+            </p>
+            <p>
+                Firebase Console -> Authentication -> Sign-in method -> Ativar "Anônimo".
+            </p>
+        </div>
+        
+        <div class="form-group">
+            <label for="game-id-input">ID do Jogo</label>
+            <input type="text" id="game-id-input" placeholder="Ex: SALA123" 
+                   oninput="this.value = this.value.toUpperCase()" autocomplete="off">
+            <p class="form-hint">Use um ID único para criar ou entrar em um jogo</p>
+        </div>
+        
+        <div class="button-container">
+            <button id="create-game-btn" class="button button-filled">
+                <span class="material-icons">add</span>
+                Criar Novo Jogo
+            </button>
+            <button id="join-game-btn" class="button button-outlined">
+                <span class="material-icons">login</span>
+                Entrar em Jogo Existente
+            </button>
+        </div>
+        
+        <div class="footer-note">
+            <p>Jogue com 2 a 4 jogadores. Cada jogador recebe 7 peças.</p>
         </div>
     </div>
 
     <!-- Tela Principal do Jogo -->
-    <div id="game-screen" class="hidden w-full max-w-7xl h-screen flex flex-col p-4">
+    <div id="game-screen" class="hidden">
         
-        <!-- Header com Info e Mãos dos Oponentes -->
-        <div class="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
-            <div id="game-info" class="flex-1 max-w-md">
+        <div class="game-header">
+            <div id="game-info">
                 <!-- Info do jogo será injetada aqui -->
             </div>
             
-            <div id="opponent-hands" class="flex flex-wrap justify-center gap-4 flex-1">
+            <div id="opponent-hands">
                 <!-- Mãos dos oponentes aqui -->
             </div>
         </div>
 
-        <!-- Tabuleiro (Centro) -->
-        <div id="board-area" class="flex-grow bg-gradient-to-br from-green-600 to-green-800 border-4 border-green-900 rounded-2xl p-6 flex flex-nowrap justify-start items-center overflow-x-auto shadow-inner min-h-[200px]">
+        <div id="board-area">
             <!-- Peças do tabuleiro aqui -->
         </div>
 
-        <!-- Controles e Log (Meio/Baixo) -->
-        <div class="flex flex-col md:flex-row justify-between items-stretch my-4 gap-4">
-            <div id="game-controls" class="hidden flex flex-col md:flex-row gap-3">
-                <button id="boneyard" class="m3-button m3-button-filled">
+        <div class="game-footer">
+            <div id="game-controls" class="hidden">
+                <button id="boneyard" class="button button-filled">
                     <!-- Ícone e texto serão injetados -->
                 </button>
-                <button id="pass-turn-btn" class="m3-button m3-button-outlined">
-                    <span class="material-icons" style="font-size: 1.125rem;">skip_next</span>
+                <button id="pass-turn-btn" class="button button-outlined">
+                    <span class="material-icons">skip_next</span>
                     Passar Vez
                 </button>
             </div>
-            <div class="m3-card flex-1 max-w-md ml-auto">
-                <h3 class="font-bold text-gray-800 mb-2">Histórico do Jogo</h3>
-                <div id="game-log" class="h-32 overflow-y-auto">
+            <div id="game-log-container" class="card">
+                <h3>Histórico do Jogo</h3>
+                <div id="game-log">
                     <!-- Log do Jogo -->
                 </div>
             </div>
         </div>
 
-        <!-- Mão do Jogador (Baixo) -->
-        <div class="m3-card rounded-t-2xl rounded-b-none shadow-lg mt-auto">
-            <h3 class="font-bold text-gray-800 mb-3 text-center">Sua Mão</h3>
-            <div id="player-hand" class="min-h-[140px] flex justify-center items-center flex-wrap gap-3 p-4 bg-gray-50 rounded-lg overflow-x-auto">
+        <div id="player-hand-container" class="card">
+            <h3>Sua Mão</h3>
+            <div id="player-hand">
                 <!-- Peças do jogador aqui -->
             </div>
         </div>
