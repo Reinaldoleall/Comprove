@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8"> <!-- Corrigido de UTF-S para UTF-8 -->
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dominó Multiplayer</title>
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
-    <!-- 
-      CSS COMPLETO - SEM TAILWIND
-      Todo o estilo do aplicativo está aqui.
-    -->
     <style>
         /* --- 1. Reset e Variáveis Globais --- */
         :root {
@@ -52,7 +48,6 @@
             min-height: 100vh;
             padding: 1rem;
             color: var(--md-sys-color-on-surface);
-            /* Evita rolagem do corpo principal em telas pequenas */
             overflow: hidden; 
         }
 
@@ -248,7 +243,7 @@
         #modal-overlay.hidden {
             opacity: 0;
             pointer-events: none;
-            display: flex; /* Mantém no layout para animação de saída */
+            display: flex;
         }
 
         #modal-content {
@@ -321,9 +316,9 @@
         /* Contêiner para centralizar as telas */
         .screen-container {
             width: 100%;
-            max-width: 56rem; /* max-w-7xl é muito grande, ajustei */
+            max-width: 56rem;
             height: 100vh;
-            display: flex; /* Usado para trocar de tela */
+            display: flex;
             flex-direction: column;
             padding: 1rem;
         }
@@ -333,7 +328,7 @@
             max-width: 28rem;
             width: 100%;
             text-align: center;
-            margin: auto; /* Centraliza a tela de lobby */
+            margin: auto;
         }
         
         #auth-screen .icon-container {
@@ -367,7 +362,7 @@
         }
         
         #firebase-auth-warning {
-            display: none; /* Oculto por padrão */
+            display: none;
             background-color: var(--md-sys-color-error-container);
             color: var(--md-sys-color-on-error-container);
             padding: 1rem;
@@ -442,7 +437,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Evita rolagem da tela inteira */
+            overflow: hidden;
         }
         
         .game-header {
@@ -504,7 +499,7 @@
         }
         
         #board-area {
-            flex-grow: 1; /* Ocupa o espaço disponível */
+            flex-grow: 1;
             background: linear-gradient(135deg, #388E3C, #1B5E20);
             border: 4px solid #1B5E20;
             border-radius: 1rem;
@@ -515,7 +510,7 @@
             align-items: center;
             overflow-x: auto;
             box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.1);
-            min-height: 200px; /* Garante altura mínima */
+            min-height: 200px;
         }
         .board-empty-message {
             display: flex;
@@ -551,7 +546,6 @@
             flex: 1;
             max-width: 28rem;
             margin-left: auto;
-            /* Garante que o log não cresça indefinidamente */
             display: flex;
             flex-direction: column;
         }
@@ -577,7 +571,7 @@
         #player-hand-container {
             border-radius: 1rem 1rem 0 0;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-            flex-shrink: 0; /* Não encolhe */
+            flex-shrink: 0;
         }
         #player-hand-container h3 {
             font-weight: bold;
@@ -600,7 +594,7 @@
         /* --- 7. Media Queries (Responsivo) --- */
         @media (max-width: 768px) {
             body {
-                padding: 0; /* Remove padding do body em telas pequenas */
+                padding: 0;
                 height: 100vh;
                 width: 100vw;
             }
@@ -612,7 +606,7 @@
             }
             
             #auth-screen {
-                padding: 1rem; /* Adiciona padding interno ao card */
+                padding: 1rem;
             }
 
             .domino {
@@ -650,16 +644,15 @@
             }
             
             #player-hand-container {
-                /* Garante que não ocupe a tela toda */
                 flex-shrink: 0;
             }
             
             #board-area {
-                min-height: 150px; /* Reduz altura minima no mobile */
+                min-height: 150px;
             }
             
             #player-hand {
-                min-height: 110px; /* Reduz altura minima no mobile */
+                min-height: 110px;
             }
         }
         
@@ -686,1025 +679,6 @@
         }
         
     </style>
-
-    <!-- Carrega os SDKs do Firebase -->
-    <script type="module">
-        // Importações do Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            signInAnonymously, 
-            onAuthStateChanged,
-            signInWithCustomToken
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc, 
-            getDoc, 
-            updateDoc, 
-            onSnapshot,
-            setLogLevel
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Configuração do Firebase ---------------------------------------------
-        
-        // Configuração do Firebase (hardcoded, conforme solicitado pelo usuário)
-        const firebaseConfig = {
-          apiKey: "AIzaSyByyM8RvGNM5pyrQIQ7nCH6mmgYAIpq0bc",
-          authDomain: "rifas-c414b.firebaseapp.com",
-          databaseURL: "https://rifas-c414b-default-rtdb.firebaseio.com",
-          projectId: "rifas-c414b",
-          storageBucket: "rifas-c414b.firebasestorage.app",
-          messagingSenderId: "770195193538",
-          appId: "1:770195193538:web:48e585ac5661d27f3dc55b"
-        };
-        
-        // Variáveis do ambiente do Canvas (necessárias para o caminho do DB e auth)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'domino-default';
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let app, auth, db;
-        let currentUserId = null;
-        let currentGameId = null;
-        let localGameState = null;
-        let gameUnsubscribe = null;
-
-        // Elementos da UI
-        let authScreen, gameScreen, modalOverlay, modalContent, gameIdInput, createGameBtn, joinGameBtn;
-        let gameInfo, opponentHands, boardArea, playerHand, gameControls, boneyard, passTurnBtn, gameLog;
-        let userIdDisplay;
-        let toastContainer;
-        let authWarningBox;
-
-        // --- Funções de UI (Modal, Toast) ---------------------------------------
-
-        function showSpinner(message = "Carregando...") {
-            modalOverlay.classList.remove('hidden');
-            modalOverlay.style.opacity = '1';
-            modalContent.innerHTML = `
-                <div class="loading-spinner-container">
-                    <div class="loading-spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
-        }
-
-        function showModal(htmlContent) {
-            modalOverlay.classList.remove('hidden');
-            modalOverlay.style.opacity = '1';
-            modalContent.innerHTML = htmlContent;
-        }
-        
-        function hideModal() {
-            modalOverlay.style.opacity = '0';
-            setTimeout(() => {
-                modalOverlay.classList.add('hidden');
-                modalContent.innerHTML = ''; // Limpa o conteúdo
-            }, 200); // Espera a animação de opacidade
-        }
-        
-        // Função para mostrar notificações toast
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`; // Adiciona classe base e de tipo
-            
-            let icon = 'info';
-            if (type === 'success') icon = 'check_circle';
-            if (type === 'error') icon = 'error';
-            if (type === 'warning') icon = 'warning';
-            
-            toast.innerHTML = `
-                <span class="material-icons">${icon}</span>
-                <span>${message}</span>
-            `;
-            
-            toastContainer.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10); // Pequeno delay para a animação de entrada funcionar
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    if (toastContainer.contains(toast)) {
-                        toastContainer.removeChild(toast);
-                    }
-                }, 300); // Espera a animação de saída terminar
-            }, duration);
-        }
-
-        // --- Funções Principais --------------------------------------------------
-
-        window.onload = () => {
-            // Inicializar Firebase
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug'); // Para logs de debug do Firestore
-                
-                // Obter referências da UI
-                authScreen = document.getElementById('auth-screen');
-                gameScreen = document.getElementById('game-screen');
-                modalOverlay = document.getElementById('modal-overlay');
-                modalContent = document.getElementById('modal-content');
-                gameIdInput = document.getElementById('game-id-input');
-                createGameBtn = document.getElementById('create-game-btn');
-                joinGameBtn = document.getElementById('join-game-btn');
-                gameInfo = document.getElementById('game-info');
-                opponentHands = document.getElementById('opponent-hands');
-                boardArea = document.getElementById('board-area');
-                playerHand = document.getElementById('player-hand');
-                gameControls = document.getElementById('game-controls');
-                boneyard = document.getElementById('boneyard');
-                passTurnBtn = document.getElementById('pass-turn-btn');
-                gameLog = document.getElementById('game-log');
-                userIdDisplay = document.getElementById('user-id-display');
-                toastContainer = document.getElementById('toast-container');
-                authWarningBox = document.getElementById('firebase-auth-warning');
-
-                // Mostrar spinner de conexão inicial
-                showSpinner('Conectando...');
-
-                // Iniciar autenticação
-                handleAuth(); // **LÓGICA ROBUSTA DE AUTENTICAÇÃO**
-
-                // Listeners de botões
-                createGameBtn.onclick = createGame;
-                joinGameBtn.onclick = joinGame;
-                boneyard.onclick = drawFromBoneyard;
-                passTurnBtn.onclick = passTurn;
-
-            } catch (e) {
-                console.error("Erro ao inicializar:", e);
-                showModal(`
-                    <div class="card" style="text-align: center; padding: 1.5rem;">
-                        <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
-                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro na Inicialização</h2>
-                        <p style="color: var(--md-sys-color-on-surface-variant);">Não foi possível carregar o jogo. Verifique o console.</p>
-                        <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">${e.message}</p>
-                    </div>
-                `);
-            }
-        };
-
-        // *** FLUXO DE AUTENTICAÇÃO ROBUSTO ***
-        async function handleAuth() {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    // Caso 1: Usuário está logado (ou acabou de logar)
-                    currentUserId = user.uid;
-                    console.log("Autenticado com UID:", currentUserId);
-                    userIdDisplay.textContent = `Seu ID: ${currentUserId}`; // Mostra ID completo
-                    
-                    hideModal(); // Esconde o spinner
-                    authScreen.classList.remove('hidden');
-                    gameScreen.classList.add('hidden');
-                } else {
-                    // Caso 2: Usuário NÃO está logado (user === null)
-                    console.log("Nenhum usuário logado. Tentando login...");
-                    // Mantém o spinner "Conectando..." visível
-                    try {
-                        if (authToken) {
-                            console.log("Tentando login com Custom Token...");
-                            await signInWithCustomToken(auth, authToken);
-                            // Se sucesso, onAuthStateChanged vai rodar de novo, caindo no "if (user)"
-                        } else {
-                            console.log("Tentando login anônimo...");
-                            await signInAnonymously(auth);
-                            // Se sucesso, onAuthStateChanged vai rodar de novo, caindo no "if (user)"
-                        }
-                    } catch (e) {
-                        // Caso 3: A tentativa de login FALHOU
-                        console.error("Erro na autenticação:", e);
-                        
-                        // Mostra o aviso fixo na tela de lobby
-                        if (authWarningBox) authWarningBox.style.display = 'block';
-
-                        // Mostra o modal de erro fatal
-                        showModal(`
-                            <div class="card" style="text-align: center; padding: 1.5rem;">
-                                <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
-                                <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro de Autenticação</h2>
-                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 1rem;">
-                                    Não foi possível conectar. Verifique se o login <strong>"Anônimo"</strong>
-                                    está ativado no seu projeto Firebase.
-                                </p>
-                                <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">Firebase: ${e.message}</p>
-                                <button id="reload-btn" class="button button-filled" style="margin-top: 1.5rem;">Tentar Novamente</button>
-                            </div>
-                        `);
-                        document.getElementById('reload-btn').onclick = () => window.location.reload();
-                    }
-                }
-            });
-        }
-
-
-        function getGameRef(gameId) {
-            // Todos os jogos são públicos para que outros possam encontrá-los
-            return doc(db, 'artifacts', appId, 'public', 'data', 'domino_games', gameId);
-        }
-
-        // --- Lógica de Lobby (Criar/Entrar) -------------------------------------
-
-        async function createGame() {
-            const gameId = gameIdInput.value.trim().toUpperCase();
-            if (!gameId) {
-                showToast("Digite um ID para o jogo", "warning");
-                gameIdInput.focus();
-                return;
-            }
-
-            if (gameId.length < 3) {
-                showToast("ID deve ter pelo menos 3 caracteres", "warning");
-                gameIdInput.focus();
-                return;
-            }
-
-            showSpinner('Criando jogo...');
-            const gameRef = getGameRef(gameId);
-
-            try {
-                const gameDoc = await getDoc(gameRef);
-                if (gameDoc.exists()) {
-                    showToast("Jogo já existe. Tente outro ID.", "error");
-                    hideModal();
-                    return;
-                }
-
-                const newGameState = {
-                    gameId: gameId,
-                    hostId: currentUserId,
-                    playerIds: [currentUserId], // Começa com o host
-                    players: {}, // Mãos e scores
-                    gameStatus: 'waiting', // waiting, playing, ended
-                    board: [], // Peças no tabuleiro
-                    boneyard: [], // Peças no monte
-                    openEnds: [null, null], // [esquerda, direita]
-                    currentPlayerId: null,
-                    passCount: 0,
-                    log: [`Jogo "${gameId}" criado por ${currentUserId.substring(0, 5)}...`],
-                    winner: null,
-                    createdAt: new Date().toISOString()
-                };
-
-                await setDoc(gameRef, newGameState);
-                console.log("Jogo criado:", gameId);
-                showToast(`Jogo "${gameId}" criado com sucesso!`, "success");
-                listenToGame(gameId);
-
-            } catch (e) {
-                console.error("Erro ao criar jogo:", e);
-                showToast("Erro ao criar jogo. Tente novamente.", "error");
-                hideModal();
-            }
-        }
-
-        async function joinGame() {
-            const gameId = gameIdInput.value.trim().toUpperCase();
-            if (!gameId) {
-                showToast("Digite um ID de jogo", "warning");
-                gameIdInput.focus();
-                return;
-            }
-
-            showSpinner('Entrando no jogo...');
-            const gameRef = getGameRef(gameId);
-
-            try {
-                const gameDoc = await getDoc(gameRef);
-                if (!gameDoc.exists()) {
-                    showToast("Jogo não encontrado", "error");
-                    hideModal();
-                    return;
-                }
-
-                const gameState = gameDoc.data();
-
-                if (gameState.gameStatus !== 'waiting' && gameState.gameStatus !== 'ended') {
-                    // Permite re-entrar se o jogo acabou para ver o placar
-                    if(gameState.gameStatus === 'playing') {
-                        // Se o jogador já está no jogo, permite re-entrar
-                        if (!gameState.playerIds.includes(currentUserId)) {
-                            showToast("Jogo já começou", "error");
-                            hideModal();
-                            return;
-                        }
-                    }
-                }
-
-                if (gameState.playerIds.includes(currentUserId)) {
-                    // Já está no jogo, apenas começa a escutar
-                    console.log("Reentrando no jogo...");
-                    showToast("Reentrando no jogo...", "info");
-                    listenToGame(gameId);
-                    return;
-                }
-
-                if (gameState.playerIds.length >= 4 && gameState.gameStatus === 'waiting') {
-                    showToast("Jogo cheio (máximo 4 jogadores)", "error");
-                    hideModal();
-                    return;
-                }
-
-                // Adiciona novo jogador (apenas se 'waiting')
-                if (gameState.gameStatus === 'waiting') {
-                    const newPlayerIds = [...gameState.playerIds, currentUserId];
-                    const newLog = [...gameState.log, `${currentUserId.substring(0, 5)}... entrou no jogo.`];
-                    
-                    await updateDoc(gameRef, {
-                        playerIds: newPlayerIds,
-                        log: newLog
-                    });
-                }
-
-                console.log("Entrou no jogo:", gameId);
-                showToast(`Entrou no jogo "${gameId}"!`, "success");
-                listenToGame(gameId);
-
-            } catch (e) {
-                console.error("Erro ao entrar no jogo:", e);
-                showToast("Erro ao entrar no jogo. Tente novamente.", "error");
-                hideModal();
-            }
-        }
-
-        function listenToGame(gameId) {
-            currentGameId = gameId;
-            hideModal(); // Esconde o spinner de "entrando..."
-            authScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-
-            const gameRef = getGameRef(gameId);
-
-            if (gameUnsubscribe) {
-                gameUnsubscribe(); // Para de escutar jogos antigos
-            }
-
-            gameUnsubscribe = onSnapshot(gameRef, (doc) => {
-                if (doc.exists()) {
-                    console.log("Dados do jogo recebidos:", doc.data());
-                    localGameState = doc.data();
-                    renderGame(localGameState);
-                } else {
-                    console.warn("O jogo foi deletado ou não existe.");
-                    showToast("O jogo foi encerrado", "error");
-                    leaveGame();
-                }
-            }, (error) => {
-                console.error("Erro no listener do jogo:", error);
-                showToast("Erro de conexão com o jogo", "error");
-                leaveGame();
-            });
-        }
-
-        function leaveGame() {
-            if (gameUnsubscribe) {
-                gameUnsubscribe();
-            }
-            gameUnsubscribe = null;
-            localGameState = null;
-            currentGameId = null;
-
-            gameScreen.classList.add('hidden');
-            authScreen.classList.remove('hidden');
-            hideModal(); // Garante que qualquer modal (ex: vitória) seja fechado
-        }
-
-        // --- Renderização do Jogo -----------------------------------------------
-
-        function renderGame(state) {
-            if (!state) return;
-            
-            // ** CORREÇÃO DE ROBUSTEZ **
-            // Se um modal de "loading" estiver aberto e o jogo avançar
-            // para 'playing' ou 'ended', devemos fechar o modal.
-            const isLoadingModal = !!modalContent.querySelector('.loading-spinner-container');
-            if (isLoadingModal && (state.gameStatus === 'playing' || state.gameStatus === 'ended')) {
-                hideModal();
-            }
-            
-            // Não renderiza se um modal (que não é de loading) estiver ativo
-            if (!modalOverlay.classList.contains('hidden') && state.gameStatus !== 'ended') {
-                // Isso protege o modal 'askMoveChoice' de ser fechado
-                return;
-            }
-
-            // Limpa áreas
-            opponentHands.innerHTML = '';
-            playerHand.innerHTML = '';
-            boardArea.innerHTML = '';
-            gameLog.innerHTML = '';
-
-            // 1. Informações do Jogo
-            let turnText = "Carregando...";
-            let statusColor = "var(--md-sys-color-on-surface-variant)";
-            
-            if (state.gameStatus === 'waiting') {
-                turnText = `Aguardando jogadores... (${state.playerIds.length}/4)`;
-                statusColor = "var(--md-sys-color-primary)";
-            } else if (state.gameStatus === 'playing') {
-                if (state.currentPlayerId === currentUserId) {
-                    turnText = "É a sua vez!";
-                    statusColor = "var(--md-sys-color-success)";
-                } else {
-                    turnText = `Vez de: ${state.currentPlayerId.substring(0, 5)}...`;
-                    statusColor = "#E65100"; // Laranja
-                }
-            } else if (state.gameStatus === 'ended') {
-                turnText = `Fim de Jogo! Vencedor: ${state.winner.substring(0, 5)}...`;
-                statusColor = "var(--md-sys-color-primary)";
-            }
-            
-            gameInfo.innerHTML = `
-                <div class="card">
-                    <h2>Jogo: ${state.gameId}</h2>
-                    <p class="turn-status" style="color: ${statusColor}; font-weight: 500;">${turnText}</p>
-                    <div class="chips-container">
-                        <span class="chip">Jogadores: ${state.playerIds.length}/4</span>
-                        ${state.gameStatus === 'playing' ? `<span class="chip">Peças no monte: ${state.boneyard.length}</span>` : ''}
-                    </div>
-                </div>
-            `;
-
-            // 2. Botão de Iniciar (apenas para o Host)
-            if (state.gameStatus === 'waiting' && state.hostId === currentUserId) {
-                const gameInfoCard = gameInfo.querySelector('.card');
-                if (state.playerIds.length >= 2) {
-                    const startGameBtn = document.createElement('button');
-                    startGameBtn.innerHTML = `<span class="material-icons">play_arrow</span> Iniciar Jogo (${state.playerIds.length} jogadores)`;
-                    startGameBtn.className = "button button-filled";
-                    startGameBtn.style.marginTop = "1rem";
-                    startGameBtn.onclick = () => startGame(state);
-                    gameInfoCard.appendChild(startGameBtn);
-                } else {
-                    const waitingText = document.createElement('p');
-                    waitingText.style.fontSize = "0.875rem";
-                    waitingText.style.color = "var(--md-sys-color-on-surface-variant)";
-                    waitingText.style.marginTop = "1rem";
-                    waitingText.innerText = "Aguardando pelo menos 2 jogadores...";
-                    gameInfoCard.appendChild(waitingText);
-                }
-            }
-
-            // Se o jogo não começou, não renderiza o resto
-            if (state.gameStatus !== 'playing' && state.gameStatus !== 'ended') {
-                gameControls.classList.add('hidden');
-                // Limpa áreas de jogo para não mostrar lixo
-                opponentHands.innerHTML = '';
-                boardArea.innerHTML = `
-                    <div class="board-empty-message">
-                        <span class="material-icons">groups</span>
-                        <p>Aguardando o host iniciar o jogo...</p>
-                    </div>`;
-                playerHand.innerHTML = '';
-                return;
-            }
-            
-            gameControls.classList.remove('hidden');
-
-            const isMyTurn = state.currentPlayerId === currentUserId && state.gameStatus === 'playing';
-
-            // 3. Mãos dos Oponentes
-            state.playerIds.forEach(pid => {
-                if (pid === currentUserId) return; // Pula o próprio jogador
-                const hand = state.players[pid] ? state.players[pid].hand : [];
-                
-                const opponentDiv = document.createElement('div');
-                opponentDiv.className = 'opponent-hand';
-                opponentDiv.innerHTML = `
-                    <div class="opponent-info">
-                        <span>${pid.substring(0, 5)}...</span>
-                        <span class="chip">${hand.length} peças</span>
-                    </div>
-                    <div class="domino-back-container">
-                        ${[...Array(hand.length)].map(() => `<div class="domino-back"></div>`).join('')}
-                    </div>
-                `;
-                opponentHands.appendChild(opponentDiv);
-            });
-
-            // 4. Tabuleiro (Board)
-            if (state.board.length === 0) {
-                boardArea.innerHTML = `
-                    <div class="board-empty-message">
-                        <span class="material-icons">dashboard_customize</span>
-                        <p>O jogo começará aqui</p>
-                    </div>
-                `;
-            } else {
-                state.board.forEach(piece => {
-                    boardArea.appendChild(createDominoElement(piece, true));
-                });
-            }
-
-            // 5. Mão do Jogador
-            const myHand = state.players[currentUserId] ? state.players[currentUserId].hand : [];
-            
-            if (myHand.length === 0 && state.gameStatus === 'playing') {
-                playerHand.innerHTML = `
-                    <div style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem;">
-                        <span class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">inventory_2</span>
-                        <p>Você não tem peças</p>
-                    </div>
-                `;
-            } else {
-                myHand.forEach((piece, index) => {
-                    const pieceEl = createDominoElement(piece, false);
-                    if (isMyTurn) {
-                        pieceEl.onclick = () => onPieceClick(piece, index);
-                    } else {
-                        pieceEl.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                    playerHand.appendChild(pieceEl);
-                });
-            }
-
-            // 6. Controles (Monte, Passar)
-            boneyard.innerHTML = `<span class="material-icons">style</span> Monte (${state.boneyard.length})`;
-            
-            if (isMyTurn) {
-                boneyard.classList.remove('opacity-50', 'cursor-not-allowed');
-                passTurnBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                boneyard.disabled = state.boneyard.length === 0;
-                passTurnBtn.disabled = false;
-                
-                playerHand.classList.add('ring-active');
-            } else {
-                boneyard.classList.add('opacity-50', 'cursor-not-allowed');
-                passTurnBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                boneyard.disabled = true;
-                passTurnBtn.disabled = true;
-                playerHand.classList.remove('ring-active');
-            }
-            
-            if(boneyard.disabled) boneyard.classList.add('opacity-50');
-
-            // 7. Log
-            if (state.log.length === 0) {
-                gameLog.innerHTML = `<p style="font-style: italic;">Nenhuma ação registrada ainda...</p>`;
-            } else {
-                state.log.slice(-8).reverse().forEach(msg => { // Mostra últimas 8 msgs
-                    const logEntry = document.createElement('p');
-                    logEntry.textContent = msg;
-                    gameLog.appendChild(logEntry);
-                });
-            }
-
-            // 8. Tela de Vitória
-            if (state.gameStatus === 'ended') {
-                showWinScreen(state.winner, state.players);
-            }
-        }
-        
-        function createDominoElement(piece, isBoardPiece) {
-            const el = document.createElement('div');
-            el.className = isBoardPiece ? 'domino domino-board' : 'domino';
-            
-            // Adiciona classe 'double' se for bucha E estiver no tabuleiro
-            if (isBoardPiece && piece.top === piece.bottom) {
-                el.classList.add('double');
-            }
-            
-            el.innerHTML = `
-                <div class="domino-half">${piece.top}</div>
-                <div class="domino-divider"></div>
-                <div class="domino-half">${piece.bottom}</div>
-            `;
-            return el;
-        }
-
-        function showWinScreen(winnerId, players) {
-            let scoreText = "Fim de Jogo!<br><br>";
-            const isWinner = winnerId === currentUserId;
-            
-            const winnerColor = isWinner ? "var(--md-sys-color-success)" : "var(--md-sys-color-primary)";
-            
-            if (isWinner) {
-                scoreText += `<strong style="font-size: 1.5rem; color: ${winnerColor};">🎉 Parabéns, você venceu! 🎉</strong><br><br>`;
-            } else {
-                scoreText += `Vencedor: <strong style="font-size: 1.25rem;">${winnerId.substring(0, 8)}</strong><br><br>`;
-            }
-            
-            scoreText += `Pontuação final (menos é melhor):`;
-            
-            let scores = [];
-            for (const pid in players) {
-                if (players[pid] && players[pid].hand) {
-                    const hand = players[pid].hand;
-                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
-                    scores.push({ pid, score, isCurrentUser: pid === currentUserId });
-                }
-            }
-            
-            scores.sort((a, b) => a.score - b.score);
-            scores.forEach(s => {
-                const userIndicator = s.isCurrentUser ? " (Você)" : "";
-                scoreText += `<br>${s.pid.substring(0, 8)}${userIndicator}: ${s.score} pontos`;
-            });
-            
-            const modalHtml = `
-                <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
-                    <div style="margin-bottom: 1rem;">
-                        <span class="material-icons" style="font-size: 4rem; color: ${winnerColor};">emoji_events</span>
-                    </div>
-                    <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: ${winnerColor};">${isWinner ? 'Vitória!' : 'Fim de Jogo'}</h2>
-                    <div style="font-size: 1.125rem; margin-bottom: 1.5rem; line-height: 1.6;">${scoreText}</div>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem; justify-content: center;">
-                        <button id="new-game-btn" class="button button-filled" style="width: 100%;">
-                            <span class="material-icons">add</span>
-                            Novo Jogo
-                        </button>
-                        <button id="leave-game-btn" class="button button-outlined" style="width: 100%;">
-                            <span class="material-icons">logout</span>
-                            Voltar ao Lobby
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            showModal(modalHtml);
-            
-            document.getElementById('leave-game-btn').onclick = () => {
-                showSpinner('Saindo...');
-                leaveGame();
-            };
-            
-            document.getElementById('new-game-btn').onclick = () => {
-                showSpinner('Saindo...');
-                leaveGame();
-                setTimeout(() => {
-                    gameIdInput.focus();
-                }, 500);
-            };
-        }
-
-        // --- Lógica de Início de Jogo ------------------------------------------
-
-        async function startGame(currentState) {
-            console.log("Iniciando o jogo...");
-            showSpinner("Embaralhando e distribuindo...");
-            try {
-                const { playerIds } = currentState;
-                
-                const deck = createDeck();
-                const shuffledDeck = shuffle(deck);
-                
-                // Distribuir peças
-                const hands = {};
-                playerIds.forEach(pid => { hands[pid] = { hand: [] }; });
-                
-                let piecesPerPlayer = 7;
-                
-                for (let i = 0; i < piecesPerPlayer; i++) {
-                    for (const pid of playerIds) {
-                        if (shuffledDeck.length > 0) { // Garante que não tente tirar de um deck vazio
-                            hands[pid].hand.push(shuffledDeck.pop());
-                        }
-                    }
-                }
-                
-                const boneyard = shuffledDeck; // O que sobrou
-                
-                // Encontrar jogador inicial (maior bucha)
-                let startingPlayerId = null;
-                let highestDouble = -1;
-                
-                playerIds.forEach(pid => {
-                    hands[pid].hand.forEach(piece => {
-                        if (piece.top === piece.bottom && piece.top > highestDouble) {
-                            highestDouble = piece.top;
-                            startingPlayerId = pid;
-                        }
-                    });
-                });
-                
-                // Se ninguém tiver bucha (raro), o host começa
-                if (!startingPlayerId) {
-                    startingPlayerId = currentState.hostId;
-                }
-                
-                const newLog = [...currentState.log, `Jogo iniciado! ${startingPlayerId.substring(0, 5)}... começa.`];
-                
-                // Atualiza o estado do jogo no Firebase
-                await updateDoc(getGameRef(currentState.gameId), {
-                    gameStatus: 'playing',
-                    players: hands,
-                    boneyard: boneyard,
-                    board: [],
-                    openEnds: [null, null],
-                    currentPlayerId: startingPlayerId,
-                    passCount: 0,
-                    log: newLog
-                });
-                
-                // ***** AQUI ESTÁ A CORREÇÃO *****
-                // Esconde o spinner DEPOIS que a atualização for enviada
-                hideModal();
-
-            } catch (e) {
-                console.error("Erro ao iniciar jogo:", e);
-                showToast("Erro ao iniciar jogo", "error");
-                hideModal(); // Esconde o spinner em caso de erro
-            }
-        }
-
-        function createDeck() {
-            const deck = [];
-            for (let i = 0; i <= 6; i++) {
-                for (let j = i; j <= 6; j++) {
-                    deck.push({ top: i, bottom: j });
-                }
-            }
-            return deck; // 28 peças
-        }
-
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
-
-        // --- Lógica de Turno ----------------------------------------------------
-
-        // Modal para escolha de jogada
-        function askMoveChoice(piece, validMoves) {
-            return new Promise((resolve, reject) => {
-                const modalHtml = `
-                    <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
-                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Escolha sua Jogada</h2>
-                        <p style="font-size: 1.125rem; margin-bottom: 1.5rem;">Onde você quer jogar a peça?</p>
-                        
-                        <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-                            ${createDominoElement(piece, false).outerHTML}
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            ${validMoves.includes('left') ? `
-                            <button id="modal-btn-left" class="button button-filled" style="width: 100%;">
-                                <span class="material-icons">arrow_back</span>
-                                Na Ponta Esquerda
-                            </button>` : ''}
-                            
-                            ${validMoves.includes('right') ? `
-                            <button id="modal-btn-right" class="button button-filled" style="width: 100%;">
-                                <span class="material-icons">arrow_forward</span>
-                                Na Ponta Direita
-                            </button>` : ''}
-                            
-                            <button id="modal-btn-cancel" class="button button-text" style="width: 100%;">
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                showModal(modalHtml);
-                
-                if (validMoves.includes('left')) {
-                    document.getElementById('modal-btn-left').onclick = () => {
-                        hideModal();
-                        resolve('left');
-                    };
-                }
-                if (validMoves.includes('right')) {
-                    document.getElementById('modal-btn-right').onclick = () => {
-                        hideModal();
-                        resolve('right');
-                    };
-                }
-                document.getElementById('modal-btn-cancel').onclick = () => {
-                    hideModal();
-                    reject(new Error("Jogada cancelada"));
-                };
-            });
-        }
-
-        async function onPieceClick(piece, pieceIndex) {
-            console.log("Peça clicada:", piece);
-            const state = localGameState;
-            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') {
-                return;
-            }
-
-            const { board, openEnds } = state;
-            const [leftEnd, rightEnd] = openEnds;
-            
-            let playedPiece = { ...piece };
-
-            const validMoves = [];
-            if (board.length === 0) {
-                validMoves.push('first');
-            } else {
-                if (piece.top === leftEnd || piece.bottom === leftEnd) {
-                    validMoves.push('left');
-                }
-                if (piece.top === rightEnd || piece.bottom === rightEnd) {
-                    validMoves.push('right');
-                }
-            }
-
-            if (validMoves.length === 0) {
-                showToast("Movimento inválido. Esta peça não encaixa.", "warning");
-                return;
-            }
-
-            let move;
-            try {
-                // Se a peça for uma bucha, e puder ser jogada em ambos os lados, pergunte.
-                // Se não for bucha, só há uma forma de encaixar, não precisa perguntar.
-                if (validMoves.length > 1 && piece.top !== piece.bottom) {
-                    move = await askMoveChoice(piece, validMoves);
-                } else {
-                    move = validMoves[0];
-                }
-            } catch (e) {
-                console.log("Jogada cancelada pelo usuário.");
-                return; // Usuário apertou 'cancelar'
-            }
-            
-            let newBoard = [...board];
-            let newOpenEnds = [...openEnds];
-            
-            if (move === 'first') {
-                newBoard.push(playedPiece);
-                newOpenEnds = [playedPiece.top, playedPiece.bottom];
-            } else if (move === 'left') {
-                if (piece.top === leftEnd) {
-                    playedPiece = { top: piece.bottom, bottom: piece.top }; // Inverte
-                }
-                newBoard.unshift(playedPiece); // Adiciona no início
-                newOpenEnds[0] = playedPiece.top; // Nova ponta esquerda
-            } else if (move === 'right') {
-                if (piece.bottom === rightEnd) {
-                    playedPiece = { top: piece.bottom, bottom: piece.top }; // Inverte
-                }
-                newBoard.push(playedPiece); // Adiciona no fim
-                newOpenEnds[1] = playedPiece.bottom; // Nova ponta direita
-            }
-
-            const myHand = state.players[currentUserId].hand;
-            const newHand = myHand.filter((_, i) => i !== pieceIndex);
-            
-            const newPlayers = {
-                ...state.players,
-                [currentUserId]: { hand: newHand }
-            };
-
-            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
-            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... jogou [${playedPiece.top}|${playedPiece.bottom}].`];
-
-            const updatePayload = {
-                board: newBoard,
-                openEnds: newOpenEnds,
-                players: newPlayers,
-                currentPlayerId: nextPlayerId,
-                passCount: 0, // Reseta a contagem de passes
-                log: newLog,
-                gameStatus: state.gameStatus,
-                winner: state.winner
-            };
-
-            if (newHand.length === 0) {
-                console.log("JOGADOR VENCEU!");
-                updatePayload.gameStatus = 'ended';
-                updatePayload.winner = currentUserId;
-                showToast("🎉 Parabéns! Você venceu o jogo! 🎉", "success", 5000);
-            }
-            
-            try {
-                await updateDoc(getGameRef(currentGameId), updatePayload);
-            } catch (e) {
-                console.error("Erro ao jogar peça:", e);
-                showToast("Erro ao jogar peça. Tente novamente.", "error");
-            }
-        }
-
-        async function drawFromBoneyard() {
-            const state = localGameState;
-            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
-            
-            if (state.boneyard.length === 0) {
-                showToast("Monte vazio. Não há peças para comprar.", "warning");
-                return;
-            }
-
-            const newBoneyard = [...state.boneyard];
-            const drawnPiece = newBoneyard.pop();
-
-            const myHand = state.players[currentUserId].hand;
-            const newHand = [...myHand, drawnPiece];
-            
-            const newPlayers = {
-                ...state.players,
-                [currentUserId]: { hand: newHand }
-            };
-
-            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... comprou do monte.`];
-
-            try {
-                await updateDoc(getGameRef(currentGameId), {
-                    boneyard: newBoneyard,
-                    players: newPlayers,
-                    log: newLog
-                });
-                showToast(`Você comprou a peça [${drawnPiece.top}|${drawnPiece.bottom}].`, "info");
-            } catch (e) {
-                console.error("Erro ao comprar do monte:", e);
-                showToast("Erro ao comprar do monte. Tente novamente.", "error");
-            }
-        }
-
-        async function passTurn() {
-            const state = localGameState;
-            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
-            
-            const myHand = state.players[currentUserId].hand;
-            const [leftEnd, rightEnd] = state.openEnds;
-
-            let canPlay = false;
-            if (state.board.length === 0) {
-                canPlay = myHand.length > 0;
-            } else {
-                for (const piece of myHand) {
-                    if (piece.top === leftEnd || piece.bottom === leftEnd || piece.top === rightEnd || piece.bottom === rightEnd) {
-                        canPlay = true;
-                        break;
-                    }
-                }
-            }
-
-            if (canPlay) {
-                showToast("Você tem uma peça que pode ser jogada!", "warning");
-                return;
-            }
-            
-            if (state.boneyard.length > 0) {
-                showToast("Você deve comprar do monte antes de passar!", "warning");
-                return;
-            }
-
-            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
-            const newPassCount = (state.passCount || 0) + 1;
-            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... passou o turno.`];
-            
-            const updatePayload = {
-                currentPlayerId: nextPlayerId,
-                passCount: newPassCount,
-                log: newLog,
-                gameStatus: state.gameStatus,
-                winner: state.winner
-            };
-
-            if (newPassCount >= state.playerIds.length) {
-                console.log("JOGO BLOQUEADO!");
-                updatePayload.gameStatus = 'ended';
-                
-                let minScore = Infinity;
-                let winnerId = null;
-                
-                state.playerIds.forEach(pid => {
-                    const hand = state.players[pid].hand;
-                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
-                    if (score < minScore) {
-                        minScore = score;
-                        winnerId = pid;
-                    } else if (score === minScore) {
-                        // Em caso de empate, as regras variam.
-                        // Aqui, vamos manter o primeiro que encontramos com o score mínimo.
-                        if (winnerId === null) winnerId = pid;
-                    }
-                });
-                
-                if (winnerId === null) winnerId = state.hostId; // Fallback
-                
-                updatePayload.winner = winnerId;
-                updatePayload.log.push(`Jogo bloqueado! Vencedor: ${winnerId.substring(0, 5)}... com ${minScore} pontos.`);
-            }
-
-            try {
-                await updateDoc(getGameRef(currentGameId), updatePayload);
-                showToast("Você passou a vez.", "info");
-            } catch (e) {
-                console.error("Erro ao passar turno:", e);
-                showToast("Erro ao passar turno. Tente novamente.", "error");
-            }
-        }
-
-        function getNextPlayerId(playerIds, currentPlayerId) {
-            const currentIndex = playerIds.indexOf(currentPlayerId);
-            const nextIndex = (currentIndex + 1) % playerIds.length;
-            return playerIds[nextIndex];
-        }
-
-    </script>
 </head>
 <body>
 
@@ -1821,6 +795,1004 @@
         </div>
     </div>
 
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            onAuthStateChanged,
+            signInWithCustomToken
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            updateDoc, 
+            onSnapshot,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuração do Firebase ---------------------------------------------
+        
+        // Configuração do Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyByyM8RvGNM5pyrQIQ7nCH6mmgYAIpq0bc",
+          authDomain: "rifas-c414b.firebaseapp.com",
+          databaseURL: "https://rifas-c414b-default-rtdb.firebaseio.com",
+          projectId: "rifas-c414b",
+          storageBucket: "rifas-c414b.firebasestorage.app",
+          messagingSenderId: "770195193538",
+          appId: "1:770195193538:web:48e585ac5661d27f3dc55b"
+        };
+        
+        // Variáveis do ambiente do Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'domino-default';
+        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let app, auth, db;
+        let currentUserId = null;
+        let currentGameId = null;
+        let localGameState = null;
+        let gameUnsubscribe = null;
+
+        // Elementos da UI
+        let authScreen, gameScreen, modalOverlay, modalContent, gameIdInput, createGameBtn, joinGameBtn;
+        let gameInfo, opponentHands, boardArea, playerHand, gameControls, boneyard, passTurnBtn, gameLog;
+        let userIdDisplay;
+        let toastContainer;
+        let authWarningBox;
+
+        // --- Funções de UI (Modal, Toast) ---------------------------------------
+
+        function showSpinner(message = "Carregando...") {
+            modalOverlay.classList.remove('hidden');
+            modalOverlay.style.opacity = '1';
+            modalContent.innerHTML = `
+                <div class="loading-spinner-container">
+                    <div class="loading-spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showModal(htmlContent) {
+            modalOverlay.classList.remove('hidden');
+            modalOverlay.style.opacity = '1';
+            modalContent.innerHTML = htmlContent;
+        }
+        
+        function hideModal() {
+            modalOverlay.style.opacity = '0';
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }, 200);
+        }
+        
+        // Função para mostrar notificações toast
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'info';
+            if (type === 'success') icon = 'check_circle';
+            if (type === 'error') icon = 'error';
+            if (type === 'warning') icon = 'warning';
+            
+            toast.innerHTML = `
+                <span class="material-icons">${icon}</span>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toastContainer.contains(toast)) {
+                        toastContainer.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // --- Funções Principais --------------------------------------------------
+
+        window.onload = () => {
+            // Inicializar Firebase
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug');
+                
+                // Obter referências da UI
+                authScreen = document.getElementById('auth-screen');
+                gameScreen = document.getElementById('game-screen');
+                modalOverlay = document.getElementById('modal-overlay');
+                modalContent = document.getElementById('modal-content');
+                gameIdInput = document.getElementById('game-id-input');
+                createGameBtn = document.getElementById('create-game-btn');
+                joinGameBtn = document.getElementById('join-game-btn');
+                gameInfo = document.getElementById('game-info');
+                opponentHands = document.getElementById('opponent-hands');
+                boardArea = document.getElementById('board-area');
+                playerHand = document.getElementById('player-hand');
+                gameControls = document.getElementById('game-controls');
+                boneyard = document.getElementById('boneyard');
+                passTurnBtn = document.getElementById('pass-turn-btn');
+                gameLog = document.getElementById('game-log');
+                userIdDisplay = document.getElementById('user-id-display');
+                toastContainer = document.getElementById('toast-container');
+                authWarningBox = document.getElementById('firebase-auth-warning');
+
+                // Mostrar spinner de conexão inicial
+                showSpinner('Conectando...');
+
+                // Iniciar autenticação
+                handleAuth();
+
+                // Listeners de botões
+                createGameBtn.onclick = createGame;
+                joinGameBtn.onclick = joinGame;
+                boneyard.onclick = drawFromBoneyard;
+                passTurnBtn.onclick = passTurn;
+
+            } catch (e) {
+                console.error("Erro ao inicializar:", e);
+                showModal(`
+                    <div class="card" style="text-align: center; padding: 1.5rem;">
+                        <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
+                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro na Inicialização</h2>
+                        <p style="color: var(--md-sys-color-on-surface-variant);">Não foi possível carregar o jogo. Verifique o console.</p>
+                        <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">${e.message}</p>
+                    </div>
+                `);
+            }
+        };
+
+        // *** FLUXO DE AUTENTICAÇÃO ROBUSTO ***
+        async function handleAuth() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // Caso 1: Usuário está logado
+                    currentUserId = user.uid;
+                    console.log("Autenticado com UID:", currentUserId);
+                    userIdDisplay.textContent = `Seu ID: ${currentUserId}`;
+                    
+                    hideModal();
+                    authScreen.classList.remove('hidden');
+                    gameScreen.classList.add('hidden');
+                } else {
+                    // Caso 2: Usuário NÃO está logado
+                    console.log("Nenhum usuário logado. Tentando login...");
+                    try {
+                        if (authToken) {
+                            console.log("Tentando login com Custom Token...");
+                            await signInWithCustomToken(auth, authToken);
+                        } else {
+                            console.log("Tentando login anônimo...");
+                            await signInAnonymously(auth);
+                        }
+                    } catch (e) {
+                        // Caso 3: A tentativa de login FALHOU
+                        console.error("Erro na autenticação:", e);
+                        
+                        // Mostra o aviso fixo na tela de lobby
+                        if (authWarningBox) authWarningBox.style.display = 'block';
+
+                        // Mostra o modal de erro fatal
+                        showModal(`
+                            <div class="card" style="text-align: center; padding: 1.5rem;">
+                                <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
+                                <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro de Autenticação</h2>
+                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 1rem;">
+                                    Não foi possível conectar. Verifique se o login <strong>"Anônimo"</strong>
+                                    está ativado no seu projeto Firebase.
+                                </p>
+                                <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">Firebase: ${e.message}</p>
+                                <button id="reload-btn" class="button button-filled" style="margin-top: 1.5rem;">Tentar Novamente</button>
+                            </div>
+                        `);
+                        document.getElementById('reload-btn').onclick = () => window.location.reload();
+                    }
+                }
+            });
+        }
+
+        function getGameRef(gameId) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'domino_games', gameId);
+        }
+
+        // --- Lógica de Lobby (Criar/Entrar) -------------------------------------
+
+        async function createGame() {
+            const gameId = gameIdInput.value.trim().toUpperCase();
+            if (!gameId) {
+                showToast("Digite um ID para o jogo", "warning");
+                gameIdInput.focus();
+                return;
+            }
+
+            if (gameId.length < 3) {
+                showToast("ID deve ter pelo menos 3 caracteres", "warning");
+                gameIdInput.focus();
+                return;
+            }
+
+            showSpinner('Criando jogo...');
+            const gameRef = getGameRef(gameId);
+
+            try {
+                const gameDoc = await getDoc(gameRef);
+                if (gameDoc.exists()) {
+                    showToast("Jogo já existe. Tente outro ID.", "error");
+                    hideModal();
+                    return;
+                }
+
+                const newGameState = {
+                    gameId: gameId,
+                    hostId: currentUserId,
+                    playerIds: [currentUserId],
+                    players: {},
+                    gameStatus: 'waiting',
+                    board: [],
+                    boneyard: [],
+                    openEnds: [null, null],
+                    currentPlayerId: null,
+                    passCount: 0,
+                    log: [`Jogo "${gameId}" criado por ${currentUserId.substring(0, 5)}...`],
+                    winner: null,
+                    createdAt: new Date().toISOString()
+                };
+
+                await setDoc(gameRef, newGameState);
+                console.log("Jogo criado:", gameId);
+                showToast(`Jogo "${gameId}" criado com sucesso!`, "success");
+                listenToGame(gameId);
+
+            } catch (e) {
+                console.error("Erro ao criar jogo:", e);
+                showToast("Erro ao criar jogo. Tente novamente.", "error");
+                hideModal();
+            }
+        }
+
+        async function joinGame() {
+            const gameId = gameIdInput.value.trim().toUpperCase();
+            if (!gameId) {
+                showToast("Digite um ID de jogo", "warning");
+                gameIdInput.focus();
+                return;
+            }
+
+            showSpinner('Entrando no jogo...');
+            const gameRef = getGameRef(gameId);
+
+            try {
+                const gameDoc = await getDoc(gameRef);
+                if (!gameDoc.exists()) {
+                    showToast("Jogo não encontrado", "error");
+                    hideModal();
+                    return;
+                }
+
+                const gameState = gameDoc.data();
+
+                if (gameState.gameStatus !== 'waiting' && gameState.gameStatus !== 'ended') {
+                    if(gameState.gameStatus === 'playing') {
+                        if (!gameState.playerIds.includes(currentUserId)) {
+                            showToast("Jogo já começou", "error");
+                            hideModal();
+                            return;
+                        }
+                    }
+                }
+
+                if (gameState.playerIds.includes(currentUserId)) {
+                    console.log("Reentrando no jogo...");
+                    showToast("Reentrando no jogo...", "info");
+                    listenToGame(gameId);
+                    return;
+                }
+
+                if (gameState.playerIds.length >= 4 && gameState.gameStatus === 'waiting') {
+                    showToast("Jogo cheio (máximo 4 jogadores)", "error");
+                    hideModal();
+                    return;
+                }
+
+                // Adiciona novo jogador (apenas se 'waiting')
+                if (gameState.gameStatus === 'waiting') {
+                    const newPlayerIds = [...gameState.playerIds, currentUserId];
+                    const newLog = [...gameState.log, `${currentUserId.substring(0, 5)}... entrou no jogo.`];
+                    
+                    await updateDoc(gameRef, {
+                        playerIds: newPlayerIds,
+                        log: newLog
+                    });
+                }
+
+                console.log("Entrou no jogo:", gameId);
+                showToast(`Entrou no jogo "${gameId}"!`, "success");
+                listenToGame(gameId);
+
+            } catch (e) {
+                console.error("Erro ao entrar no jogo:", e);
+                showToast("Erro ao entrar no jogo. Tente novamente.", "error");
+                hideModal();
+            }
+        }
+
+        function listenToGame(gameId) {
+            currentGameId = gameId;
+            hideModal();
+            authScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            const gameRef = getGameRef(gameId);
+
+            if (gameUnsubscribe) {
+                gameUnsubscribe();
+            }
+
+            gameUnsubscribe = onSnapshot(gameRef, (doc) => {
+                if (doc.exists()) {
+                    console.log("Dados do jogo recebidos:", doc.data());
+                    localGameState = doc.data();
+                    renderGame(localGameState);
+                } else {
+                    console.warn("O jogo foi deletado ou não existe.");
+                    showToast("O jogo foi encerrado", "error");
+                    leaveGame();
+                }
+            }, (error) => {
+                console.error("Erro no listener do jogo:", error);
+                showToast("Erro de conexão com o jogo", "error");
+                leaveGame();
+            });
+        }
+
+        function leaveGame() {
+            if (gameUnsubscribe) {
+                gameUnsubscribe();
+            }
+            gameUnsubscribe = null;
+            localGameState = null;
+            currentGameId = null;
+
+            gameScreen.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+            hideModal();
+        }
+
+        // --- Renderização do Jogo -----------------------------------------------
+
+        function renderGame(state) {
+            if (!state) return;
+            
+            // Se um modal de "loading" estiver aberto e o jogo avançar
+            // para 'playing' ou 'ended', devemos fechar o modal.
+            const isLoadingModal = !!modalContent.querySelector('.loading-spinner-container');
+            if (isLoadingModal && (state.gameStatus === 'playing' || state.gameStatus === 'ended')) {
+                hideModal();
+            }
+            
+            // Não renderiza se um modal (que não é de loading) estiver ativo
+            if (!modalOverlay.classList.contains('hidden') && state.gameStatus !== 'ended') {
+                return;
+            }
+
+            // Limpa áreas
+            opponentHands.innerHTML = '';
+            playerHand.innerHTML = '';
+            boardArea.innerHTML = '';
+            gameLog.innerHTML = '';
+
+            // 1. Informações do Jogo
+            let turnText = "Carregando...";
+            let statusColor = "var(--md-sys-color-on-surface-variant)";
+            
+            if (state.gameStatus === 'waiting') {
+                turnText = `Aguardando jogadores... (${state.playerIds.length}/4)`;
+                statusColor = "var(--md-sys-color-primary)";
+            } else if (state.gameStatus === 'playing') {
+                if (state.currentPlayerId === currentUserId) {
+                    turnText = "É a sua vez!";
+                    statusColor = "var(--md-sys-color-success)";
+                } else {
+                    turnText = `Vez de: ${state.currentPlayerId.substring(0, 5)}...`;
+                    statusColor = "#E65100";
+                }
+            } else if (state.gameStatus === 'ended') {
+                turnText = `Fim de Jogo! Vencedor: ${state.winner.substring(0, 5)}...`;
+                statusColor = "var(--md-sys-color-primary)";
+            }
+            
+            gameInfo.innerHTML = `
+                <div class="card">
+                    <h2>Jogo: ${state.gameId}</h2>
+                    <p class="turn-status" style="color: ${statusColor}; font-weight: 500;">${turnText}</p>
+                    <div class="chips-container">
+                        <span class="chip">Jogadores: ${state.playerIds.length}/4</span>
+                        ${state.gameStatus === 'playing' ? `<span class="chip">Peças no monte: ${state.boneyard.length}</span>` : ''}
+                    </div>
+                </div>
+            `;
+
+            // 2. Botão de Iniciar (apenas para o Host)
+            if (state.gameStatus === 'waiting' && state.hostId === currentUserId) {
+                const gameInfoCard = gameInfo.querySelector('.card');
+                if (state.playerIds.length >= 2) {
+                    const startGameBtn = document.createElement('button');
+                    startGameBtn.innerHTML = `<span class="material-icons">play_arrow</span> Iniciar Jogo (${state.playerIds.length} jogadores)`;
+                    startGameBtn.className = "button button-filled";
+                    startGameBtn.style.marginTop = "1rem";
+                    startGameBtn.onclick = () => startGame(state);
+                    gameInfoCard.appendChild(startGameBtn);
+                } else {
+                    const waitingText = document.createElement('p');
+                    waitingText.style.fontSize = "0.875rem";
+                    waitingText.style.color = "var(--md-sys-color-on-surface-variant)";
+                    waitingText.style.marginTop = "1rem";
+                    waitingText.innerText = "Aguardando pelo menos 2 jogadores...";
+                    gameInfoCard.appendChild(waitingText);
+                }
+            }
+
+            // Se o jogo não começou, não renderiza o resto
+            if (state.gameStatus !== 'playing' && state.gameStatus !== 'ended') {
+                gameControls.classList.add('hidden');
+                opponentHands.innerHTML = '';
+                boardArea.innerHTML = `
+                    <div class="board-empty-message">
+                        <span class="material-icons">groups</span>
+                        <p>Aguardando o host iniciar o jogo...</p>
+                    </div>`;
+                playerHand.innerHTML = '';
+                return;
+            }
+            
+            gameControls.classList.remove('hidden');
+
+            const isMyTurn = state.currentPlayerId === currentUserId && state.gameStatus === 'playing';
+
+            // 3. Mãos dos Oponentes
+            state.playerIds.forEach(pid => {
+                if (pid === currentUserId) return;
+                const hand = state.players[pid] ? state.players[pid].hand : [];
+                
+                const opponentDiv = document.createElement('div');
+                opponentDiv.className = 'opponent-hand';
+                opponentDiv.innerHTML = `
+                    <div class="opponent-info">
+                        <span>${pid.substring(0, 5)}...</span>
+                        <span class="chip">${hand.length} peças</span>
+                    </div>
+                    <div class="domino-back-container">
+                        ${[...Array(hand.length)].map(() => `<div class="domino-back"></div>`).join('')}
+                    </div>
+                `;
+                opponentHands.appendChild(opponentDiv);
+            });
+
+            // 4. Tabuleiro (Board)
+            if (state.board.length === 0) {
+                boardArea.innerHTML = `
+                    <div class="board-empty-message">
+                        <span class="material-icons">dashboard_customize</span>
+                        <p>O jogo começará aqui</p>
+                    </div>
+                `;
+            } else {
+                state.board.forEach(piece => {
+                    boardArea.appendChild(createDominoElement(piece, true));
+                });
+            }
+
+            // 5. Mão do Jogador
+            const myHand = state.players[currentUserId] ? state.players[currentUserId].hand : [];
+            
+            if (myHand.length === 0 && state.gameStatus === 'playing') {
+                playerHand.innerHTML = `
+                    <div style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem;">
+                        <span class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">inventory_2</span>
+                        <p>Você não tem peças</p>
+                    </div>
+                `;
+            } else {
+                myHand.forEach((piece, index) => {
+                    const pieceEl = createDominoElement(piece, false);
+                    if (isMyTurn) {
+                        pieceEl.onclick = () => onPieceClick(piece, index);
+                    } else {
+                        pieceEl.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    playerHand.appendChild(pieceEl);
+                });
+            }
+
+            // 6. Controles (Monte, Passar)
+            boneyard.innerHTML = `<span class="material-icons">style</span> Monte (${state.boneyard.length})`;
+            
+            if (isMyTurn) {
+                boneyard.classList.remove('opacity-50', 'cursor-not-allowed');
+                passTurnBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                boneyard.disabled = state.boneyard.length === 0;
+                passTurnBtn.disabled = false;
+                
+                playerHand.classList.add('ring-active');
+            } else {
+                boneyard.classList.add('opacity-50', 'cursor-not-allowed');
+                passTurnBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                boneyard.disabled = true;
+                passTurnBtn.disabled = true;
+                playerHand.classList.remove('ring-active');
+            }
+            
+            if(boneyard.disabled) boneyard.classList.add('opacity-50');
+
+            // 7. Log
+            if (state.log.length === 0) {
+                gameLog.innerHTML = `<p style="font-style: italic;">Nenhuma ação registrada ainda...</p>`;
+            } else {
+                state.log.slice(-8).reverse().forEach(msg => {
+                    const logEntry = document.createElement('p');
+                    logEntry.textContent = msg;
+                    gameLog.appendChild(logEntry);
+                });
+            }
+
+            // 8. Tela de Vitória
+            if (state.gameStatus === 'ended') {
+                showWinScreen(state.winner, state.players);
+            }
+        }
+        
+        function createDominoElement(piece, isBoardPiece) {
+            const el = document.createElement('div');
+            el.className = isBoardPiece ? 'domino domino-board' : 'domino';
+            
+            if (isBoardPiece && piece.top === piece.bottom) {
+                el.classList.add('double');
+            }
+            
+            el.innerHTML = `
+                <div class="domino-half">${piece.top}</div>
+                <div class="domino-divider"></div>
+                <div class="domino-half">${piece.bottom}</div>
+            `;
+            return el;
+        }
+
+        function showWinScreen(winnerId, players) {
+            let scoreText = "Fim de Jogo!<br><br>";
+            const isWinner = winnerId === currentUserId;
+            
+            const winnerColor = isWinner ? "var(--md-sys-color-success)" : "var(--md-sys-color-primary)";
+            
+            if (isWinner) {
+                scoreText += `<strong style="font-size: 1.5rem; color: ${winnerColor};">🎉 Parabéns, você venceu! 🎉</strong><br><br>`;
+            } else {
+                scoreText += `Vencedor: <strong style="font-size: 1.25rem;">${winnerId.substring(0, 8)}</strong><br><br>`;
+            }
+            
+            scoreText += `Pontuação final (menos é melhor):`;
+            
+            let scores = [];
+            for (const pid in players) {
+                if (players[pid] && players[pid].hand) {
+                    const hand = players[pid].hand;
+                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
+                    scores.push({ pid, score, isCurrentUser: pid === currentUserId });
+                }
+            }
+            
+            scores.sort((a, b) => a.score - b.score);
+            scores.forEach(s => {
+                const userIndicator = s.isCurrentUser ? " (Você)" : "";
+                scoreText += `<br>${s.pid.substring(0, 8)}${userIndicator}: ${s.score} pontos`;
+            });
+            
+            const modalHtml = `
+                <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
+                    <div style="margin-bottom: 1rem;">
+                        <span class="material-icons" style="font-size: 4rem; color: ${winnerColor};">emoji_events</span>
+                    </div>
+                    <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: ${winnerColor};">${isWinner ? 'Vitória!' : 'Fim de Jogo'}</h2>
+                    <div style="font-size: 1.125rem; margin-bottom: 1.5rem; line-height: 1.6;">${scoreText}</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; justify-content: center;">
+                        <button id="new-game-btn" class="button button-filled" style="width: 100%;">
+                            <span class="material-icons">add</span>
+                            Novo Jogo
+                        </button>
+                        <button id="leave-game-btn" class="button button-outlined" style="width: 100%;">
+                            <span class="material-icons">logout</span>
+                            Voltar ao Lobby
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalHtml);
+            
+            document.getElementById('leave-game-btn').onclick = () => {
+                showSpinner('Saindo...');
+                leaveGame();
+            };
+            
+            document.getElementById('new-game-btn').onclick = () => {
+                showSpinner('Saindo...');
+                leaveGame();
+                setTimeout(() => {
+                    gameIdInput.focus();
+                }, 500);
+            };
+        }
+
+        // --- Lógica de Início de Jogo ------------------------------------------
+
+        async function startGame(currentState) {
+            console.log("Iniciando o jogo...");
+            showSpinner("Embaralhando e distribuindo...");
+            try {
+                const { playerIds } = currentState;
+                
+                const deck = createDeck();
+                const shuffledDeck = shuffle(deck);
+                
+                // Distribuir peças
+                const hands = {};
+                playerIds.forEach(pid => { hands[pid] = { hand: [] }; });
+                
+                let piecesPerPlayer = 7;
+                
+                for (let i = 0; i < piecesPerPlayer; i++) {
+                    for (const pid of playerIds) {
+                        if (shuffledDeck.length > 0) {
+                            hands[pid].hand.push(shuffledDeck.pop());
+                        }
+                    }
+                }
+                
+                const boneyard = shuffledDeck;
+                
+                // Encontrar jogador inicial (maior bucha)
+                let startingPlayerId = null;
+                let highestDouble = -1;
+                
+                playerIds.forEach(pid => {
+                    hands[pid].hand.forEach(piece => {
+                        if (piece.top === piece.bottom && piece.top > highestDouble) {
+                            highestDouble = piece.top;
+                            startingPlayerId = pid;
+                        }
+                    });
+                });
+                
+                // Se ninguém tiver bucha (raro), o host começa
+                if (!startingPlayerId) {
+                    startingPlayerId = currentState.hostId;
+                }
+                
+                const newLog = [...currentState.log, `Jogo iniciado! ${startingPlayerId.substring(0, 5)}... começa.`];
+                
+                // Atualiza o estado do jogo no Firebase
+                await updateDoc(getGameRef(currentState.gameId), {
+                    gameStatus: 'playing',
+                    players: hands,
+                    boneyard: boneyard,
+                    board: [],
+                    openEnds: [null, null],
+                    currentPlayerId: startingPlayerId,
+                    passCount: 0,
+                    log: newLog
+                });
+                
+                hideModal();
+
+            } catch (e) {
+                console.error("Erro ao iniciar jogo:", e);
+                showToast("Erro ao iniciar jogo", "error");
+                hideModal();
+            }
+        }
+
+        function createDeck() {
+            const deck = [];
+            for (let i = 0; i <= 6; i++) {
+                for (let j = i; j <= 6; j++) {
+                    deck.push({ top: i, bottom: j });
+                }
+            }
+            return deck;
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // --- Lógica de Turno ----------------------------------------------------
+
+        // Modal para escolha de jogada
+        function askMoveChoice(piece, validMoves) {
+            return new Promise((resolve, reject) => {
+                const modalHtml = `
+                    <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
+                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Escolha sua Jogada</h2>
+                        <p style="font-size: 1.125rem; margin-bottom: 1.5rem;">Onde você quer jogar a peça?</p>
+                        
+                        <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                            ${createDominoElement(piece, false).outerHTML}
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            ${validMoves.includes('left') ? `
+                            <button id="modal-btn-left" class="button button-filled" style="width: 100%;">
+                                <span class="material-icons">arrow_back</span>
+                                Na Ponta Esquerda
+                            </button>` : ''}
+                            
+                            ${validMoves.includes('right') ? `
+                            <button id="modal-btn-right" class="button button-filled" style="width: 100%;">
+                                <span class="material-icons">arrow_forward</span>
+                                Na Ponta Direita
+                            </button>` : ''}
+                            
+                            <button id="modal-btn-cancel" class="button button-text" style="width: 100%;">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                showModal(modalHtml);
+                
+                if (validMoves.includes('left')) {
+                    document.getElementById('modal-btn-left').onclick = () => {
+                        hideModal();
+                        resolve('left');
+                    };
+                }
+                if (validMoves.includes('right')) {
+                    document.getElementById('modal-btn-right').onclick = () => {
+                        hideModal();
+                        resolve('right');
+                    };
+                }
+                document.getElementById('modal-btn-cancel').onclick = () => {
+                    hideModal();
+                    reject(new Error("Jogada cancelada"));
+                };
+            });
+        }
+
+        async function onPieceClick(piece, pieceIndex) {
+            console.log("Peça clicada:", piece);
+            const state = localGameState;
+            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') {
+                return;
+            }
+
+            const { board, openEnds } = state;
+            const [leftEnd, rightEnd] = openEnds;
+            
+            let playedPiece = { ...piece };
+
+            const validMoves = [];
+            if (board.length === 0) {
+                validMoves.push('first');
+            } else {
+                if (piece.top === leftEnd || piece.bottom === leftEnd) {
+                    validMoves.push('left');
+                }
+                if (piece.top === rightEnd || piece.bottom === rightEnd) {
+                    validMoves.push('right');
+                }
+            }
+
+            if (validMoves.length === 0) {
+                showToast("Movimento inválido. Esta peça não encaixa.", "warning");
+                return;
+            }
+
+            let move;
+            try {
+                if (validMoves.length > 1 && piece.top !== piece.bottom) {
+                    move = await askMoveChoice(piece, validMoves);
+                } else {
+                    move = validMoves[0];
+                }
+            } catch (e) {
+                console.log("Jogada cancelada pelo usuário.");
+                return;
+            }
+            
+            let newBoard = [...board];
+            let newOpenEnds = [...openEnds];
+            
+            if (move === 'first') {
+                newBoard.push(playedPiece);
+                newOpenEnds = [playedPiece.top, playedPiece.bottom];
+            } else if (move === 'left') {
+                if (piece.top === leftEnd) {
+                    playedPiece = { top: piece.bottom, bottom: piece.top };
+                }
+                newBoard.unshift(playedPiece);
+                newOpenEnds[0] = playedPiece.top;
+            } else if (move === 'right') {
+                if (piece.bottom === rightEnd) {
+                    playedPiece = { top: piece.bottom, bottom: piece.top };
+                }
+                newBoard.push(playedPiece);
+                newOpenEnds[1] = playedPiece.bottom;
+            }
+
+            const myHand = state.players[currentUserId].hand;
+            const newHand = myHand.filter((_, i) => i !== pieceIndex);
+            
+            const newPlayers = {
+                ...state.players,
+                [currentUserId]: { hand: newHand }
+            };
+
+            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
+            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... jogou [${playedPiece.top}|${playedPiece.bottom}].`];
+
+            const updatePayload = {
+                board: newBoard,
+                openEnds: newOpenEnds,
+                players: newPlayers,
+                currentPlayerId: nextPlayerId,
+                passCount: 0,
+                log: newLog,
+                gameStatus: state.gameStatus,
+                winner: state.winner
+            };
+
+            if (newHand.length === 0) {
+                console.log("JOGADOR VENCEU!");
+                updatePayload.gameStatus = 'ended';
+                updatePayload.winner = currentUserId;
+                showToast("🎉 Parabéns! Você venceu o jogo! 🎉", "success", 5000);
+            }
+            
+            try {
+                await updateDoc(getGameRef(currentGameId), updatePayload);
+            } catch (e) {
+                console.error("Erro ao jogar peça:", e);
+                showToast("Erro ao jogar peça. Tente novamente.", "error");
+            }
+        }
+
+        async function drawFromBoneyard() {
+            const state = localGameState;
+            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
+            
+            if (state.boneyard.length === 0) {
+                showToast("Monte vazio. Não há peças para comprar.", "warning");
+                return;
+            }
+
+            const newBoneyard = [...state.boneyard];
+            const drawnPiece = newBoneyard.pop();
+
+            const myHand = state.players[currentUserId].hand;
+            const newHand = [...myHand, drawnPiece];
+            
+            const newPlayers = {
+                ...state.players,
+                [currentUserId]: { hand: newHand }
+            };
+
+            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... comprou do monte.`];
+
+            try {
+                await updateDoc(getGameRef(currentGameId), {
+                    boneyard: newBoneyard,
+                    players: newPlayers,
+                    log: newLog
+                });
+                showToast(`Você comprou a peça [${drawnPiece.top}|${drawnPiece.bottom}].`, "info");
+            } catch (e) {
+                console.error("Erro ao comprar do monte:", e);
+                showToast("Erro ao comprar do monte. Tente novamente.", "error");
+            }
+        }
+
+        async function passTurn() {
+            const state = localGameState;
+            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
+            
+            const myHand = state.players[currentUserId].hand;
+            const [leftEnd, rightEnd] = state.openEnds;
+
+            let canPlay = false;
+            if (state.board.length === 0) {
+                canPlay = myHand.length > 0;
+            } else {
+                for (const piece of myHand) {
+                    if (piece.top === leftEnd || piece.bottom === leftEnd || piece.top === rightEnd || piece.bottom === rightEnd) {
+                        canPlay = true;
+                        break;
+                    }
+                }
+            }
+
+            if (canPlay) {
+                showToast("Você tem uma peça que pode ser jogada!", "warning");
+                return;
+            }
+            
+            if (state.boneyard.length > 0) {
+                showToast("Você deve comprar do monte antes de passar!", "warning");
+                return;
+            }
+
+            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
+            const newPassCount = (state.passCount || 0) + 1;
+            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... passou o turno.`];
+            
+            const updatePayload = {
+                currentPlayerId: nextPlayerId,
+                passCount: newPassCount,
+                log: newLog,
+                gameStatus: state.gameStatus,
+                winner: state.winner
+            };
+
+            if (newPassCount >= state.playerIds.length) {
+                console.log("JOGO BLOQUEADO!");
+                updatePayload.gameStatus = 'ended';
+                
+                let minScore = Infinity;
+                let winnerId = null;
+                
+                state.playerIds.forEach(pid => {
+                    const hand = state.players[pid].hand;
+                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
+                    if (score < minScore) {
+                        minScore = score;
+                        winnerId = pid;
+                    } else if (score === minScore) {
+                        if (winnerId === null) winnerId = pid;
+                    }
+                });
+                
+                if (winnerId === null) winnerId = state.hostId;
+                
+                updatePayload.winner = winnerId;
+                updatePayload.log.push(`Jogo bloqueado! Vencedor: ${winnerId.substring(0, 5)}... com ${minScore} pontos.`);
+            }
+
+            try {
+                await updateDoc(getGameRef(currentGameId), updatePayload);
+                showToast("Você passou a vez.", "info");
+            } catch (e) {
+                console.error("Erro ao passar turno:", e);
+                showToast("Erro ao passar turno. Tente novamente.", "error");
+            }
+        }
+
+        function getNextPlayerId(playerIds, currentPlayerId) {
+            const currentIndex = playerIds.indexOf(currentPlayerId);
+            const nextIndex = (currentIndex + 1) % playerIds.length;
+            return playerIds[nextIndex];
+        }
+
+    </script>
 </body>
 </html>
-
