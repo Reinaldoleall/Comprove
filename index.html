@@ -578,12 +578,17 @@
             margin-bottom: 0.75rem;
             text-align: center;
         }
+        
+        /* * >>> CORREÇÃO DE SCROLL (Falta de Scroll) <<<
+         * flex-wrap: nowrap -> Força os itens para uma linha
+         * justify-content: flex-start -> Alinha à esquerda, melhor para scroll
+         */
         #player-hand {
             min-height: 140px;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start; /* Alterado de 'center' */
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap; /* Alterado de 'wrap' */
             gap: 0.75rem;
             padding: 1rem;
             background-color: var(--md-sys-color-surface-variant);
@@ -1185,8 +1190,17 @@
                 hideModal();
             }
             
-            // Não renderiza se um modal (que não é de loading) estiver ativo
-            if (!modalOverlay.classList.contains('hidden') && state.gameStatus !== 'ended') {
+            /* * >>> CORREÇÃO DE "JOGO CONGELADO" <<<
+             * Verifica se o modal está visível E não está em processo de 
+             * fechamento (isModalHiding) E não é um modal de loading.
+             * Isso permite que o render() continue mesmo durante a animação 
+             * de 200ms do hideModal().
+             */
+            const isModalVisible = !modalOverlay.classList.contains('hidden');
+            const isModalHiding = modalOverlay.style.opacity === '0';
+            const isLoadingModalCheck = !!modalContent.querySelector('.loading-spinner-container');
+
+            if (isModalVisible && !isModalHiding && !isLoadingModalCheck && state.gameStatus !== 'ended') {
                 return;
             }
 
@@ -1796,3 +1810,4 @@
     </script>
 </body>
 </html>
+
