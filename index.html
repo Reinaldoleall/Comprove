@@ -1,744 +1,36 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão - Coordenador & Consultores</title>
-    
-    <!-- Material Design 3 -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Dominó Multiplayer</title>
+    <!-- Carrega o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
-    <!-- Firebase SDK (Modular v11+) -->
-    <!-- Deixado como 'module' para usar import/export -->
-
-    <style>
-        :root {
-            --md-primary: #6750A4;
-            --md-on-primary: #FFFFFF;
-            --md-primary-container: #EADDFF;
-            --md-on-primary-container: #21005D;
-            --md-secondary: #625B71;
-            --md-on-secondary: #FFFFFF;
-            --md-secondary-container: #E8DEF8;
-            --md-on-secondary-container: #1D192B;
-            --md-tertiary: #7D5260;
-            --md-on-tertiary: #FFFFFF;
-            --md-tertiary-container: #FFD8E4;
-            --md-on-tertiary-container: #31111D;
-            --md-surface: #FEF7FF;
-            --md-on-surface: #1D1B20;
-            --md-surface-variant: #E7E0EC;
-            --md-on-surface-variant: #49454F;
-            --md-error: #BA1A1A;
-            --md-on-error: #FFFFFF;
-            --md-shadow: rgba(0, 0, 0, 0.1);
-            --md-shadow-hover: rgba(0, 0, 0, 0.2);
-            --md-success: #4CAF50;
-            --md-on-success: #FFFFFF;
-            --md-warning: #FFC107;
-            --md-on-warning: #000000;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        body {
-            background-color: var(--md-surface);
-            color: var(--md-on-surface);
-            line-height: 1.5;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* --- Componentes de UI --- */
-
-        /* Header */
-        header {
-            background-color: var(--md-primary);
-            color: var(--md-on-primary);
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px var(--md-shadow);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 500;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--md-secondary-container);
-            color: var(--md-on-secondary-container);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-            font-size: 1.25rem;
-            overflow: hidden;
-        }
-        
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Navigation */
-        nav {
-            background-color: var(--md-surface);
-            border-bottom: 1px solid var(--md-surface-variant);
-            padding: 0 20px;
-            display: flex;
-            gap: 20px;
-            overflow-x: auto;
-        }
-
-        .nav-item {
-            padding: 16px 4px;
-            cursor: pointer;
-            position: relative;
-            color: var(--md-on-surface-variant);
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
-        }
-
-        .nav-item.active {
-            color: var(--md-primary);
-            border-bottom-color: var(--md-primary);
-        }
-
-        /* Cards */
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px var(--md-shadow);
-            border: 1px solid var(--md-surface-variant);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: var(--md-primary);
-        }
-        
-        .card-subtitle {
-            font-size: 0.875rem;
-            color: var(--md-on-surface-variant);
-            margin-bottom: 16px;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 10px 24px;
-            border-radius: 20px;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background-color: var(--md-primary);
-            color: var(--md-on-primary);
-        }
-        
-        .btn-primary:hover {
-             box-shadow: 0 2px 4px var(--md-shadow-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--md-secondary-container);
-            color: var(--md-on-secondary-container);
-        }
-
-        .btn-outlined {
-            background-color: transparent;
-            border: 1px solid var(--md-primary);
-            color: var(--md-primary);
-        }
-        
-        .btn-icon {
-            padding: 8px;
-            border-radius: 50%;
-            background-color: transparent;
-        }
-        
-        .btn-icon:hover {
-            background-color: var(--md-surface-variant);
-        }
-
-        .btn-small {
-            padding: 6px 16px;
-            font-size: 0.875rem;
-        }
-        
-        .btn-success {
-            background-color: var(--md-success);
-            color: var(--md-on-success);
-        }
-        
-        .btn-danger {
-            background-color: var(--md-error);
-            color: var(--md-on-error);
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--md-on-surface-variant);
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="date"],
-        input[type="file"],
-        select, 
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid var(--md-surface-variant);
-            background-color: var(--md-surface);
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--md-primary);
-            box-shadow: 0 0 0 2px var(--md-primary-container);
-        }
-        
-        input[type="file"] {
-            border-style: dashed;
-        }
-
-        /* Status badges */
-        .status {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            display: inline-block;
-        }
-
-        .status-pending { background-color: var(--md-warning); color: var(--md-on-warning); }
-        .status-approved { background-color: var(--md-success); color: var(--md-on-success); }
-        .status-rejected { background-color: var(--md-error); color: var(--md-on-error); }
-        .status-accepted { background-color: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
-        .status-closed { background-color: var(--md-surface-variant); color: var(--md-on-surface-variant); }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--md-surface-variant);
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 12px 16px;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--md-on-surface-variant);
-        }
-
-        .tab.active {
-            color: var(--md-primary);
-            border-bottom: 2px solid var(--md-primary);
-        }
-
-        /* Hidden sections */
-        .section, .tab-content {
-            display: none;
-        }
-
-        .section.active, .tab-content.active {
-            display: block;
-        }
-
-        /* Login screen */
-        .login-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            padding: 20px;
-        }
-
-        .login-card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 12px var(--md-shadow);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .login-title {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-        }
-
-        .login-subtitle {
-            color: var(--md-on-surface-variant);
-            margin-bottom: 30px;
-        }
-
-        /* Dashboard grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        
-        .stat-card {
-            padding: 24px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 500;
-            color: var(--md-primary);
-        }
-        
-        .stat-label {
-            font-size: 1rem;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .stat-saldo-negativo {
-            color: var(--md-error);
-        }
-
-        /* List items */
-        .list-item {
-            padding: 16px;
-            border-bottom: 1px solid var(--md-surface-variant);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .list-item:last-child {
-            border-bottom: none;
-        }
-        
-        .list-item-content {
-            flex-grow: 1;
-        }
-        
-        .list-item-title {
-            font-weight: 500;
-            font-size: 1.1rem;
-        }
-        
-        .list-item-subtitle {
-            font-size: 0.9rem;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .list-item-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background-color: white;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 90%;
-            width: 500px;
-            box-shadow: 0 4px 12px var(--md-shadow);
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-bottom: 16px;
-        }
-        
-        .modal-body {
-            margin-bottom: 24px;
-        }
-        
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        
-        /* Invoice (Nota Fiscal) styles */
-        .invoice-item {
-            background-color: var(--md-surface);
-            border: 1px solid var(--md-surface-variant);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .invoice-details {
-            font-size: 0.9rem;
-        }
-        
-        .invoice-amount {
-            font-weight: 500;
-            color: var(--md-tertiary);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            .list-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .list-item-actions {
-                margin-top: 10px;
-                width: 100%;
-                justify-content: flex-start;
-            }
-        }
-        
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: var(--md-on-surface-variant);
-        }
-    </style>
-</head>
-<body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-container">
-        <div class="login-card">
-            <h1 class="login-title">Sistema de Gestão</h1>
-            <p class="login-subtitle">Faça login com sua conta Google para continuar</p>
-            <button id="loginButton" class="btn btn-primary">
-                <span class="material-icons">login</span>
-                Entrar com Google
-            </button>
-        </div>
-    </div>
-
-    <!-- Main App (hidden until login) -->
-    <div id="app" style="display: none;">
-        <header>
-            <div class="logo">Gestão</div>
-            <div class="user-info" id="userInfoButton">
-                <div id="userName">Usuário</div>
-                <div class="user-avatar" id="userAvatar">
-                    <span>U</span>
-                </div>
-            </div>
-        </header>
-
-        <nav id="mainNav">
-            <!-- Nav items serão injetados pelo JS com base na função -->
-        </nav>
-
-        <div class="container">
-            <!-- Dashboard Section -->
-            <div id="dashboard" class="section active">
-                <h1>Dashboard</h1>
-                <div class="dashboard-grid" id="dashboardGrid">
-                    <!-- Dashboard cards serão injetados pelo JS -->
-                </div>
-            </div>
-
-            <!-- Consultants Section (Coordinator) -->
-            <div id="consultants" class="section">
-                <h1>Gerenciar Consultores</h1>
-                <div class="card">
-                    <h2 class="card-title">Meus Consultores</h2>
-                    <div id="consultantsList" class="loading">
-                        <p>Carregando...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Payments Section (Coordinator) -->
-            <div id="payments-coord" class="section">
-                <div class="tabs">
-                    <div class="tab active" data-tab="makePayment">Fazer Pagamento</div>
-                    <div class="tab" data-tab="paymentHistory">Histórico de Pagamentos</div>
-                </div>
-                
-                <div id="makePayment" class="tab-content active">
-                    <div class="card">
-                        <h2 class="card-title">Realizar Adiantamento</h2>
-                        <form id="paymentForm">
-                            <div class="form-group">
-                                <label for="consultantSelect">Consultor</label>
-                                <select id="consultantSelect" required>
-                                    <option value="">Selecione um consultor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="paymentAmount">Valor (R$)</label>
-                                <input type="number" id="paymentAmount" step="0.01" min="0" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="paymentDescription">Descrição (Ex: Adiantamento Outubro)</label>
-                                <textarea id="paymentDescription" rows="3" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <span class="material-icons">send</span>
-                                Enviar Pagamento
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                
-                <div id="paymentHistory" class="tab-content">
-                    <div class="card">
-                        <h2 class="card-title">Histórico de Pagamentos</h2>
-                        <div id="paymentHistoryList" class="loading">
-                            <p>Carregando...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Payments Section (Consultant) -->
-            <div id="payments-consult" class="section">
-                <h1>Meus Pagamentos</h1>
-                <div class="card">
-                    <h2 class="card-title">Pagamentos Recebidos</h2>
-                    <div id="myPaymentsList" class="loading">
-                        <p>Carregando...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions Section (Coordinator & Consultant) -->
-            <div id="actions" class="section">
-                <!-- Varia com a role -->
-            </div>
-
-            <!-- Reports Section (Coordinator) -->
-            <div id="reports" class="section">
-                <h1>Relatórios</h1>
-                <div class="card">
-                    <h2 class="card-title">Gerar Relatórios</h2>
-                    <div class="form-group">
-                        <label for="reportType">Tipo de Relatório</label>
-                        <select id="reportType">
-                            <option value="financial">Financeiro</option>
-                            <option value="actions">Ações</option>
-                        </select>
-                    </div>
-                    <button id="generateReportPDF" class="btn btn-primary">
-                        <span class="material-icons">description</span>
-                        Baixar PDF
-                    </button>
-                    <button id="shareReport" class="btn btn-secondary" style="margin-left: 10px;">
-                        <span class="material-icons">share</span>
-                        Compartilhar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal: Primeiro Acesso (Escolher Função) -->
-    <div id="roleModal" class="modal-overlay">
-        <div class="modal">
-            <h2 class="modal-title">Primeiro Acesso</h2>
-            <div class="modal-body">
-                <p>Bem-vindo! Para configurar sua conta, por favor, selecione sua função:</p>
-                <div class="form-group" style="margin-top: 20px;">
-                    <label for="roleSelect">Eu sou:</label>
-                    <select id="roleSelect">
-                        <option value="">Selecione...</option>
-                        <option value="coordinator">Coordenador</option>
-                        <option value="consultant">Consultor</option>
-                    </select>
-                </div>
-                <div class="form-group" id="coordinatorIdInput" style="display: none;">
-                    <label for="coordinatorId">ID do Coordenador</label>
-                    <input type="text" id="coordinatorId" placeholder="Peça este ID ao seu coordenador">
-                    <small>Seu coordenador encontra este ID no perfil dele.</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="saveRoleButton" class="btn btn-primary">Salvar</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal: Perfil do Usuário -->
-    <div id="profileModal" class="modal-overlay">
-        <div class="modal">
-            <h2 class="modal-title">Meu Perfil</h2>
-            <div class="modal-body">
-                <p><strong>Nome:</strong> <span id="profileName"></span></p>
-                <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-                <p><strong>Função:</strong> <span id="profileRole"></span></p>
-                <div id="profileCoordinatorId" style="display: none;">
-                    <p><strong>Meu ID de Coordenador (para compartilhar):</strong></p>
-                    <input type="text" id="myCoordinatorId" readonly style="background: #eee; cursor: copy;">
-                </div>
-                <div id="profileMyCoordinator" style="display: none;">
-                    <p><strong>Meu Coordenador:</strong> <span id="myCoordinatorName"></span></p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="logoutButton" class="btn btn-danger">
-                    <span class="material-icons">logout</span>
-                    Sair
-                </button>
-                <button id="closeProfileModal" class="btn btn-secondary">Fechar</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal: Adicionar Nota Fiscal (Comprovação) -->
-    <div id="invoiceModal" class="modal-overlay">
-        <div class="modal">
-            <form id="invoiceForm">
-                <h2 class="modal-title">Adicionar Comprovação</h2>
-                <div class="modal-body">
-                    <p>Adicionando comprovação para o pagamento: <strong id="invoicePaymentDescription"></strong></p>
-                    <input type="hidden" id="invoicePaymentId">
-                    <div class="form-group">
-                        <label for="invoiceAmount">Valor da Nota (R$)</label>
-                        <input type="number" id="invoiceAmount" step="0.01" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="invoiceDescription">Descrição (Ex: Almoço Cliente X)</label>
-                        <input type="text" id="invoiceDescription" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="invoiceFile">Arquivo da Nota (PDF, JPG, PNG)</label>
-                        <input type="file" id="invoiceFile" accept=".pdf,.jpg,.jpeg,.png" required>
-                    </div>
-                     <div id="uploadProgress" style="display: none;">
-                        <progress id="uploadProgressBar" value="0" max="100"></progress>
-                        <span id="uploadProgressText"></span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="closeInvoiceModal" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Comprovação</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Alerta Customizado -->
-    <div id="alertModal" class="modal-overlay">
-        <div class="modal">
-            <h2 class="modal-title" id="alertModalTitle">Aviso</h2>
-            <div classs="modal-body">
-                <p id="alertModalMessage"></p>
-            </div>
-            <div class="modal-footer">
-                <button id="closeAlertModal" class="btn btn-primary">OK</button>
-            </div>
-        </div>
-    </div>
-
-
+    <!-- Carrega os SDKs do Firebase -->
     <script type="module">
-        // Importar Firebase
+        // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, 
-            signInWithPopup, 
-            GoogleAuthProvider, 
-            onAuthStateChanged, 
-            signOut
-            // Removido signInWithCustomToken e signInAnonymously pois não são mais necessários com config própria
+            signInAnonymously, 
+            onAuthStateChanged,
+            signInWithCustomToken
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, 
-            setLogLevel, 
             doc, 
-            getDoc, 
             setDoc, 
-            addDoc, 
-            collection, 
-            query, 
-            where, 
+            getDoc, 
+            updateDoc, 
             onSnapshot,
-            updateDoc,
-            Timestamp,
-            getDocs // Adicionado getDocs
+            setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { 
-            getStorage, 
-            ref, 
-            uploadBytesResumable, 
-            getDownloadURL 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // Configuração do Firebase (Fornecida pelo usuário)
+        // --- Configuração do Firebase ---------------------------------------------
+        
+        // Configuração do Firebase (hardcoded, conforme solicitado pelo usuário)
         const firebaseConfig = {
           apiKey: "AIzaSyByyM8RvGNM5pyrQIQ7nCH6mmgYAIpq0bc",
           authDomain: "rifas-c414b.firebaseapp.com",
@@ -748,1081 +40,1382 @@
           messagingSenderId: "770195193538",
           appId: "1:770195193538:web:48e585ac5661d27f3dc55b"
         };
-        // O appID não é mais necessário para os paths, pois usaremos coleções raiz
-
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-        setLogLevel('Debug'); // Para logs no console
-
-        // Variáveis globais de estado
-        let currentUser = null;
-        let currentUserData = null; // Dados do Firestore (role, etc.)
-        let unsubscribeListeners = []; // Array para guardar os listeners do onSnapshot
-
-        // --- Paths do Firestore (Coleções Raiz) ---
-        // Alterado para usar coleções raiz no projeto do usuário (ex: 'users', 'payments')
-        // Você DEVE configurar as Regras de Segurança (Security Rules) no seu console do Firebase
-        // para permitir 'read' e 'write' nestas coleções.
-        const USERS_COL = `users`;
-        const PAYMENTS_COL = `payments`;
-        const INVOICES_COL = `invoices`;
-        const ACTIONS_COL = `actionRequests`;
-
-        // --- Elementos DOM ---
-        const loginScreen = document.getElementById('loginScreen');
-        const appScreen = document.getElementById('app');
-        const loginButton = document.getElementById('loginButton');
-        const logoutButton = document.getElementById('logoutButton');
-        const mainNav = document.getElementById('mainNav');
         
-        // Modais
-        const roleModal = document.getElementById('roleModal');
-        const profileModal = document.getElementById('profileModal');
-        const invoiceModal = document.getElementById('invoiceModal');
-        const alertModal = document.getElementById('alertModal');
-        const closeAlertModal = document.getElementById('closeAlertModal');
+        // Variáveis do ambiente do Canvas (necessárias para o caminho do DB e auth)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'domino-default';
+        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        // Elementos de Navegação
-        // Note: querySelectorAll será chamado *depois* que o nav for preenchido
-        
-        // --- Funções de Alerta Customizado ---
-        function showAlert(title, message) {
-            document.getElementById('alertModalTitle').textContent = title;
-            document.getElementById('alertModalMessage').textContent = message;
-            alertModal.classList.add('active');
-        }
-        closeAlertModal.addEventListener('click', () => alertModal.classList.remove('active'));
+        let app, auth, db;
+        let currentUserId = null;
+        let currentGameId = null;
+        let localGameState = null;
+        let gameUnsubscribe = null;
 
-        // --- Lógica de Autenticação ---
+        // Elementos da UI
+        let authScreen, gameScreen, modalOverlay, modalContent, gameIdInput, createGameBtn, joinGameBtn;
+        let gameInfo, opponentHands, boardArea, playerHand, gameControls, boneyard, passTurnBtn, gameLog;
+        let userIdDisplay;
+        let toastContainer;
 
-        // Listener principal do estado de autenticação
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Usuário está logado
-                currentUser = user;
-                checkUserRole(user);
-            } else {
-                // Usuário está deslogado
-                currentUser = null;
-                currentUserData = null;
-                loginScreen.style.display = 'flex';
-                appScreen.style.display = 'none';
-                // Limpar listeners antigos
-                clearFirestoreListeners();
-            }
-        });
-
-        // Login com Google
-        loginButton.addEventListener('click', () => {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider)
-                .catch((error) => {
-                    console.error('Erro no login com Google:', error);
-                    showAlert('Erro de Login', error.message);
-                });
-        });
-
-        // Logout
-        logoutButton.addEventListener('click', () => {
-            signOut(auth).catch((error) => {
-                console.error('Erro no logout:', error);
-            });
-            profileModal.classList.remove('active');
-        });
-
-        // --- Lógica de Funções (Roles) ---
-
-        async function checkUserRole(user) {
-            const userRef = doc(db, USERS_COL, user.uid);
-            const userDoc = await getDoc(userRef);
-
-            if (userDoc.exists()) {
-                // Usuário já tem função definida
-                currentUserData = userDoc.data();
-                showApp();
-            } else {
-                // Primeiro acesso, mostrar modal de escolha de função
-                roleModal.classList.add('active');
-            }
-        }
-
-        // Mostrar/esconder campo de ID do Coordenador no modal
-        document.getElementById('roleSelect').addEventListener('change', (e) => {
-            const role = e.target.value;
-            const coordIdInput = document.getElementById('coordinatorIdInput');
-            if (role === 'consultant') {
-                coordIdInput.style.display = 'block';
-            } else {
-                coordIdInput.style.display = 'none';
-            }
-        });
-
-        // Salvar função (primeiro acesso)
-        document.getElementById('saveRoleButton').addEventListener('click', async () => {
-            const role = document.getElementById('roleSelect').value;
-            const coordinatorId = document.getElementById('coordinatorId').value.trim();
-            
-            if (!role) {
-                showAlert('Aviso', 'Por favor, selecione uma função.');
-                return;
+        // Estilos customizados para as peças com Material Design 3
+        const style = document.createElement('style');
+        style.textContent = `
+            :root {
+                --md-sys-color-primary: #6750A4;
+                --md-sys-color-on-primary: #FFFFFF;
+                --md-sys-color-primary-container: #EADDFF;
+                --md-sys-color-on-primary-container: #21005D;
+                --md-sys-color-secondary: #625B71;
+                --md-sys-color-on-secondary: #FFFFFF;
+                --md-sys-color-secondary-container: #E8DEF8;
+                --md-sys-color-on-secondary-container: #1D192B;
+                --md-sys-color-surface: #FFFBFE;
+                --md-sys-color-on-surface: #1C1B1F;
+                --md-sys-color-surface-variant: #E7E0EC;
+                --md-sys-color-on-surface-variant: #49454F;
+                --md-sys-color-outline: #79747E;
+                --md-sys-color-error: #B3261E;
+                --md-sys-color-on-error: #FFFFFF;
+                --md-sys-color-error-container: #F9DEDC;
+                --md-sys-color-on-error-container: #410E0B;
+                --md-sys-color-success: #0D652D;
+                --md-sys-color-on-success: #FFFFFF;
+                --md-sys-color-success-container: #A5F3C1;
+                --md-sys-color-on-success-container: #00210B;
             }
             
-            if (role === 'consultant' && !coordinatorId) {
-                showAlert('Aviso', 'Consultores precisam inserir o ID do Coordenador.');
-                return;
+            .domino {
+                width: 4rem;
+                height: 8rem;
+                border: 2px solid var(--md-sys-color-on-surface);
+                background-color: var(--md-sys-color-surface);
+                border-radius: 0.75rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                align-items: center;
+                font-size: 1.875rem;
+                font-weight: bold;
+                color: var(--md-sys-color-on-surface);
+                cursor: pointer;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+                flex-shrink: 0; /* Impede que as peças encolham no flex */
+            }
+            
+            .domino::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(103, 80, 164, 0.05) 0%, rgba(103, 80, 164, 0.1) 100%);
+                z-index: 0;
+            }
+            
+            .domino:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            
+            .domino-half {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                z-index: 1;
+                position: relative;
+            }
+            
+            .domino-divider {
+                height: 2px;
+                width: 90%;
+                background-color: var(--md-sys-color-outline);
+                opacity: 0.5;
+                z-index: 1;
+            }
+            
+            /* Peça deitada (para o tabuleiro) */
+            .domino-board {
+                width: 8rem;
+                height: 4rem;
+                flex-direction: row;
+                margin: 0.5rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            
+            .domino-board .domino-half {
+                height: 100%;
+            }
+            
+            .domino-board .domino-divider {
+                width: 2px;
+                height: 90%;
+            }
+            
+            /* Peça "girada" (bucha/double) */
+            .domino-board.double {
+                width: 4rem;
+                height: 8rem;
+                flex-direction: column;
+            }
+            
+            .domino-board.double .domino-divider {
+                width: 90%;
+                height: 2px;
+            }
+            
+            /* Mão do oponente */
+            .domino-back {
+                width: 2.5rem;
+                height: 5rem;
+                background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
+                border: 2px solid var(--md-sys-color-primary);
+                border-radius: 0.5rem;
+                margin: 0.25rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .domino-back::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+                animation: shine 3s infinite linear;
+            }
+            
+            @keyframes shine {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+            }
+            
+            /* Material Design 3 Buttons */
+            .m3-button {
+                padding: 0.75rem 1.5rem;
+                border-radius: 1.25rem;
+                font-weight: 500;
+                font-size: 0.875rem;
+                letter-spacing: 0.025rem;
+                text-transform: none;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                border: none;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            
+            .m3-button-filled {
+                background-color: var(--md-sys-color-primary);
+                color: var(--md-sys-color-on-primary);
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+            }
+            
+            .m3-button-filled:hover {
+                background-color: var(--md-sys-color-primary);
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+                transform: translateY(-2px);
+            }
+            
+            .m3-button-outlined {
+                background-color: transparent;
+                color: var(--md-sys-color-primary);
+                border: 1px solid var(--md-sys-color-outline);
+            }
+            
+            .m3-button-outlined:hover {
+                background-color: var(--md-sys-color-primary-container);
+            }
+            
+            .m3-button-text {
+                background-color: transparent;
+                color: var(--md-sys-color-primary);
+            }
+            
+            .m3-button-text:hover {
+                background-color: var(--md-sys-color-primary-container);
+            }
+            
+            /* Cards */
+            .m3-card {
+                background-color: var(--md-sys-color-surface);
+                border-radius: 0.75rem;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+                padding: 1.5rem;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .m3-card:hover {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            
+            /* Chips */
+            .m3-chip {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.25rem 0.75rem;
+                border-radius: 0.5rem;
+                background-color: var(--md-sys-color-surface-variant);
+                color: var(--md-sys-color-on-surface-variant);
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
+            
+            /* Toast notifications */
+            .toast {
+                padding: 1rem 1.5rem;
+                border-radius: 0.75rem;
+                background-color: var(--md-sys-color-surface);
+                color: var(--md-sys-color-on-surface);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .toast.show {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            
+            .toast.success {
+                border-left: 4px solid var(--md-sys-color-success);
+            }
+            
+            .toast.error {
+                border-left: 4px solid var(--md-sys-color-error);
+            }
+            
+            .toast.warning {
+                border-left: 4px solid #F59E0B;
+            }
+            
+            /* Scrollbars Customizados (CSS POLISH) */
+            #board-area::-webkit-scrollbar, 
+            #player-hand::-webkit-scrollbar, 
+            #game-log::-webkit-scrollbar {
+                height: 8px;
+                width: 8px;
+            }
+            
+            #board-area::-webkit-scrollbar-thumb, 
+            #player-hand::-webkit-scrollbar-thumb, 
+            #game-log::-webkit-scrollbar-thumb {
+                background-color: var(--md-sys-color-primary);
+                border-radius: 4px;
+            }
+            
+            #board-area::-webkit-scrollbar-track, 
+            #player-hand::-webkit-scrollbar-track, 
+            #game-log::-webkit-scrollbar-track {
+                background-color: var(--md-sys-color-surface-variant);
+                border-radius: 4px;
             }
 
-            let userData = {
-                name: currentUser.displayName,
-                email: currentUser.email,
-                role: role,
-                createdAt: Timestamp.now()
-            };
-
-            if (role === 'consultant') {
-                // Verificar se o Coordenador existe
-                const coordRef = doc(db, USERS_COL, coordinatorId);
-                const coordDoc = await getDoc(coordRef);
-                
-                if (!coordDoc.exists() || coordDoc.data().role !== 'coordinator') {
-                    showAlert('Erro', 'O ID do Coordenador informado não é válido ou não existe.');
-                    return;
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .domino {
+                    width: 3rem;
+                    height: 6rem;
+                    font-size: 1.5rem;
                 }
-                userData.coordinatorId = coordinatorId;
-                userData.coordinatorName = coordDoc.data().name;
+                
+                .domino-board {
+                    width: 6rem;
+                    height: 3rem;
+                }
+                
+                .domino-back {
+                    width: 2rem;
+                    height: 4rem;
+                }
             }
+        `;
+        document.head.appendChild(style);
 
-            // Salvar dados do usuário no Firestore
-            const userRef = doc(db, USERS_COL, currentUser.uid);
-            try {
-                await setDoc(userRef, userData);
-                currentUserData = userData;
-                roleModal.classList.remove('active');
-                showApp();
-            } catch (error) {
-                console.error("Erro ao salvar função:", error);
-                showAlert('Erro', 'Não foi possível salvar sua função: ' + error.message);
-            }
-        });
+        // --- Funções de UI (Modal, Toast) ---------------------------------------
 
-        // --- Lógica de UI Principal ---
+        function showSpinner(message = "Carregando...") {
+            modalOverlay.classList.remove('hidden');
+            modalContent.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p class="text-white text-lg">${message}</p>
+                </div>
+            `;
+        }
 
-        function showApp() {
-            loginScreen.style.display = 'none';
-            appScreen.style.display = 'block';
-
-            // Configurar Perfil
-            document.getElementById('userName').textContent = currentUser.displayName;
-            const avatar = document.getElementById('userAvatar');
-            if (currentUser.photoURL) {
-                avatar.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar">`;
-            } else {
-                avatar.innerHTML = `<span>${currentUser.displayName.charAt(0).toUpperCase()}</span>`;
-            }
-
-            // Configurar Modal de Perfil
-            document.getElementById('profileName').textContent = currentUserData.name;
-            document.getElementById('profileEmail').textContent = currentUserData.email;
-            document.getElementById('profileRole').textContent = currentUserData.role === 'coordinator' ? 'Coordenador' : 'Consultor';
-
-            if (currentUserData.role === 'coordinator') {
-                document.getElementById('profileCoordinatorId').style.display = 'block';
-                document.getElementById('myCoordinatorId').value = currentUser.uid;
-            } else {
-                 document.getElementById('profileCoordinatorId').style.display = 'none';
-            }
-            
-            if (currentUserData.role === 'consultant') {
-                document.getElementById('profileMyCoordinator').style.display = 'block';
-                document.getElementById('myCoordinatorName').textContent = currentUserData.coordinatorName || 'Não vinculado';
-            } else {
-                document.getElementById('profileMyCoordinator').style.display = 'none';
-            }
-
-            // Configurar Navegação e Seções
-            setupNavigation(currentUserData.role);
-            setupTabs(); // Configura listeners para as abas (ex: Pagamentos)
-            
-            // Carregar dados iniciais (Dashboard)
-            loadDataForSection('dashboard');
+        function showModal(htmlContent) {
+            modalOverlay.classList.remove('hidden');
+            modalContent.innerHTML = htmlContent;
         }
         
-        // Copiar ID do Coordenador
-        document.getElementById('myCoordinatorId').addEventListener('click', (e) => {
-            e.target.select();
+        function hideModal() {
+            modalOverlay.classList.add('hidden');
+            modalContent.innerHTML = ''; // Limpa o conteúdo
+        }
+        
+        function getSpinnerHtml(message = "Carregando...") {
+            return `
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p class="text-white text-lg">${message}</p>
+                </div>
+            `;
+        }
+
+        // Função para mostrar notificações toast
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'info';
+            if (type === 'success') icon = 'check_circle';
+            if (type === 'error') icon = 'error';
+            if (type === 'warning') icon = 'warning';
+            
+            toast.innerHTML = `
+                <span class="material-icons" style="font-size: 1.25rem;">${icon}</span>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toastContainer.contains(toast)) {
+                        toastContainer.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // --- Funções Principais --------------------------------------------------
+
+        window.onload = () => {
+            // Inicializar Firebase
             try {
-                // Tenta o método moderno (se falhar, o 'catch' usa o 'execCommand')
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(e.target.value).then(() => {
-                        showAlert('Copiado!', 'Seu ID de Coordenador foi copiado.');
-                    });
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug'); // Para logs de debug do Firestore
+                
+                // Obter referências da UI
+                authScreen = document.getElementById('auth-screen');
+                gameScreen = document.getElementById('game-screen');
+                modalOverlay = document.getElementById('modal-overlay');
+                modalContent = document.getElementById('modal-content');
+                gameIdInput = document.getElementById('game-id-input');
+                createGameBtn = document.getElementById('create-game-btn');
+                joinGameBtn = document.getElementById('join-game-btn');
+                gameInfo = document.getElementById('game-info');
+                opponentHands = document.getElementById('opponent-hands');
+                boardArea = document.getElementById('board-area');
+                playerHand = document.getElementById('player-hand');
+                gameControls = document.getElementById('game-controls');
+                boneyard = document.getElementById('boneyard');
+                passTurnBtn = document.getElementById('pass-turn-btn');
+                gameLog = document.getElementById('game-log');
+                userIdDisplay = document.getElementById('user-id-display');
+                toastContainer = document.getElementById('toast-container');
+
+                // Mostrar spinner de conexão inicial
+                showSpinner('Conectando...');
+
+                // Iniciar autenticação
+                handleAuth(); // **NOVA LÓGICA ROBUSTA**
+
+                // Listeners de botões
+                createGameBtn.onclick = createGame;
+                joinGameBtn.onclick = joinGame;
+                boneyard.onclick = drawFromBoneyard;
+                passTurnBtn.onclick = passTurn;
+
+            } catch (e) {
+                console.error("Erro ao inicializar:", e);
+                showModal(`
+                    <div class="m3-card text-center p-6">
+                        <span class="material-icons text-5xl text-red-500 mb-4">error</span>
+                        <h2 class="text-2xl font-bold mb-2">Erro na Inicialização</h2>
+                        <p class="text-gray-700">Não foi possível carregar o jogo. Verifique o console.</p>
+                        <p class="text-xs text-gray-500">${e.message}</p>
+                    </div>
+                `);
+            }
+        };
+
+        // *** MELHORIA CRÍTICA DE AUTENTICAÇÃO ***
+        // Este é o novo fluxo robusto. Ele usa onAuthStateChanged como a
+        // única fonte da verdade e reage a mudanças de estado.
+        async function handleAuth() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // Caso 1: Usuário está logado (ou acabou de logar)
+                    currentUserId = user.uid;
+                    console.log("Autenticado com UID:", currentUserId);
+                    userIdDisplay.innerText = `Seu ID de Jogador: ${currentUserId.substring(0, 8)}`;
+                    
+                    hideModal(); // Esconde o spinner
+                    authScreen.classList.remove('hidden');
+                    gameScreen.classList.add('hidden');
                 } else {
-                    // Fallback para document.execCommand
-                    document.execCommand('copy');
-                    showAlert('Copiado!', 'Seu ID de Coordenador foi copiado.');
+                    // Caso 2: Usuário NÃO está logado (user === null)
+                    console.log("Nenhum usuário logado. Tentando login...");
+                    // Mantém o spinner "Conectando..." visível
+                    try {
+                        if (authToken) {
+                            console.log("Tentando login com Custom Token...");
+                            await signInWithCustomToken(auth, authToken);
+                            // Se sucesso, onAuthStateChanged vai rodar de novo, caindo no "if (user)"
+                        } else {
+                            console.log("Tentando login anônimo...");
+                            await signInAnonymously(auth);
+                            // Se sucesso, onAuthStateChanged vai rodar de novo, caindo no "if (user)"
+                        }
+                    } catch (e) {
+                        // Caso 3: A tentativa de login FALHOU
+                        console.error("Erro na autenticação:", e);
+                        showModal(`
+                            <div class="m3-card text-center p-6">
+                                <span class="material-icons text-5xl text-red-500 mb-4">error</span>
+                                <h2 class="text-2xl font-bold mb-2">Erro de Autenticação</h2>
+                                <p class="text-gray-700 mb-4">Não foi possível conectar. Verifique se o login anônimo (ou o provedor de token) está ativado no seu projeto Firebase.</p>
+                                <p class="text-xs text-gray-500">${e.message}</p>
+                            </div>
+                        `);
+                    }
                 }
-            } catch (err) {
-                console.error("Erro ao copiar:", err);
-                showAlert('Erro', 'Não foi possível copiar o ID.');
-            }
-        });
-
-        // Abrir/Fechar Modal de Perfil
-        document.getElementById('userInfoButton').addEventListener('click', () => profileModal.classList.add('active'));
-        document.getElementById('closeProfileModal').addEventListener('click', () => profileModal.classList.remove('active'));
-
-
-        function setupNavigation(role) {
-            let navHTML = '';
-            
-            // Abas comuns
-            navHTML += `<div class="nav-item active" data-section="dashboard">Dashboard</div>`;
-            
-            if (role === 'coordinator') {
-                navHTML += `<div class="nav-item" data-section="consultants">Consultores</div>`;
-                navHTML += `<div class="nav-item" data-section="payments-coord">Pagamentos</div>`;
-                navHTML += `<div class="nav-item" data-section="actions">Ações</div>`;
-                navHTML += `<div class="nav-item" data-section="reports">Relatórios</div>`;
-            } else {
-                // Consultor
-                navHTML += `<div class="nav-item" data-section="payments-consult">Meus Pagamentos</div>`;
-                navHTML += `<div class="nav-item" data-section="actions">Solicitar Ação</div>`;
-            }
-            
-            mainNav.innerHTML = navHTML;
-            
-            // Adicionar listeners aos novos nav-items
-            mainNav.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const sectionId = item.getAttribute('data-section');
-                    
-                    mainNav.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                    item.classList.add('active');
-                    
-                    document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
-                    document.getElementById(sectionId).classList.add('active');
-                    
-                    // Carregar dados da seção clicada
-                    loadDataForSection(sectionId);
-                });
-            });
-
-            // Configurar a seção "Ações" com base na função
-            setupActionsSection(role);
-        }
-        
-        function setupTabs() {
-             document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    const parentSection = tab.closest('.section');
-                    
-                    if (!parentSection) return; // Segurança
-                    
-                    parentSection.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    parentSection.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                    const activeTabContent = parentSection.querySelector(`#${tabId}`);
-                    if (activeTabContent) {
-                        activeTabContent.classList.add('active');
-                    }
-                });
             });
         }
-        
-        // Limpar listeners do Firestore para evitar duplicatas
-        function clearFirestoreListeners() {
-            unsubscribeListeners.forEach(unsub => unsub());
-            unsubscribeListeners = [];
-        }
-        
-        // --- Carregamento de Dados ---
-        
-        function loadDataForSection(sectionId) {
-            clearFirestoreListeners(); // Limpa listeners antigos
-            
-            switch(sectionId) {
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
-                case 'consultants':
-                    loadConsultants();
-                    break;
-                case 'payments-coord':
-                    loadConsultantsForPayment(); // Preenche o select
-                    loadPaymentHistory();
-                    break;
-                case 'payments-consult':
-                    loadMyPayments();
-                    break;
-                case 'actions':
-                    loadActionRequests();
-                    break;
-            }
-        }
-        
-        // --- NOVA FUNÇÃO ---
-        /**
-         * Processa um arquivo antes do upload.
-         * Se for imagem, redimensiona e comprime.
-         * Se for PDF ou outro, retorna o arquivo original.
-         */
-        async function processFileForUpload(file) {
-            // 1. Define constraints
-            const MAX_WIDTH = 1280;
-            const MAX_HEIGHT = 1280;
-            const JPEG_QUALITY = 0.8; // 80% quality
-            const fileType = file.type;
 
-            // 2. Check if it's an image
-            if (!fileType.startsWith('image/')) {
-                // Not an image (e.g., PDF), return it as-is
-                console.log('Arquivo não é imagem, enviando como está:', fileType);
-                return file;
+
+        function getGameRef(gameId) {
+            // Todos os jogos são públicos para que outros possam encontrá-los
+            return doc(db, 'artifacts', appId, 'public', 'data', 'domino_games', gameId);
+        }
+
+        // --- Lógica de Lobby (Criar/Entrar) -------------------------------------
+
+        async function createGame() {
+            const gameId = gameIdInput.value.trim().toUpperCase();
+            if (!gameId) {
+                showToast("Digite um ID para o jogo", "warning");
+                gameIdInput.focus();
+                return;
             }
 
-            // 3. It's an image, so we process it
-            console.log('Arquivo é imagem, processando...');
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.src = URL.createObjectURL(file);
-                
-                img.onload = () => {
-                    let width = img.width;
-                    let height = img.height;
+            if (gameId.length < 3) {
+                showToast("ID deve ter pelo menos 3 caracteres", "warning");
+                gameIdInput.focus();
+                return;
+            }
 
-                    // 4. Calculate new dimensions
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height = height * (MAX_WIDTH / width);
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width = width * (MAX_HEIGHT / height);
-                            height = MAX_HEIGHT;
-                        }
-                    }
+            showSpinner('Criando jogo...');
+            const gameRef = getGameRef(gameId);
 
-                    // 5. Create canvas and draw
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    URL.revokeObjectURL(img.src); // Liberar memória
+            try {
+                const gameDoc = await getDoc(gameRef);
+                if (gameDoc.exists()) {
+                    showToast("Jogo já existe. Tente outro ID.", "error");
+                    hideModal();
+                    return;
+                }
 
-                    // 6. Convert canvas to blob (JPEG com compressão)
-                    canvas.toBlob(
-                        (blob) => {
-                            if (!blob) {
-                                reject(new Error('Falha ao converter canvas para Blob'));
-                                return;
-                            }
-                            // Criar um novo "File" do blob
-                            const resizedFile = new File([blob], file.name, {
-                                type: 'image/jpeg',
-                                lastModified: Date.now(),
-                            });
-                            console.log('Imagem processada:', resizedFile);
-                            resolve(resizedFile);
-                        },
-                        'image/jpeg', // Força o formato JPEG para compressão
-                        JPEG_QUALITY
-                    );
+                const newGameState = {
+                    gameId: gameId,
+                    hostId: currentUserId,
+                    playerIds: [currentUserId], // Começa com o host
+                    players: {}, // Mãos e scores
+                    gameStatus: 'waiting', // waiting, playing, ended
+                    board: [], // Peças no tabuleiro
+                    boneyard: [], // Peças no monte
+                    openEnds: [null, null], // [esquerda, direita]
+                    currentPlayerId: null,
+                    passCount: 0,
+                    log: [`Jogo "${gameId}" criado por ${currentUserId.substring(0, 5)}...`],
+                    winner: null,
+                    createdAt: new Date().toISOString()
                 };
 
-                img.onerror = (error) => {
-                    console.error("Erro ao carregar imagem:", error);
-                    reject(new Error('Falha ao carregar imagem para processamento'));
-                };
-            });
-        }
-        // --- FIM DA NOVA FUNÇÃO ---
+                await setDoc(gameRef, newGameState);
+                console.log("Jogo criado:", gameId);
+                showToast(`Jogo "${gameId}" criado com sucesso!`, "success");
+                listenToGame(gameId);
 
-        
-        // 1. Dashboard
-        async function loadDashboardData() {
-            const grid = document.getElementById('dashboardGrid');
-            grid.innerHTML = ''; // Limpa
-            
-            if (currentUserData.role === 'coordinator') {
-                // Dashboard Coordenador
-                
-                // Queries
-                const paymentsQuery = query(collection(db, PAYMENTS_COL), where('coordinatorId', '==', currentUser.uid));
-                const invoicesQuery = query(collection(db, INVOICES_COL), where('coordinatorId', '==', currentUser.uid));
-                const actionsQuery = query(collection(db, ACTIONS_COL), where('coordinatorId', '==', currentUser.uid), where('status', '==', 'pending'));
-
-                let totalEnviado = 0;
-                let totalComprovado = 0;
-                let acoesPendentes = 0;
-
-                try {
-                    const paymentsSnap = await getDocs(paymentsQuery);
-                    paymentsSnap.forEach(doc => {
-                        totalEnviado += doc.data().amount;
-                    });
-                    
-                    const invoicesSnap = await getDocs(invoicesQuery);
-                     invoicesSnap.forEach(doc => {
-                        totalComprovado += doc.data().amount;
-                    });
-                    
-                    const actionsSnap = await getDocs(actionsQuery);
-                    acoesPendentes = actionsSnap.size;
-                    
-                    const saldo = totalEnviado - totalComprovado;
-                    
-                    grid.innerHTML = `
-                        <div class="card stat-card">
-                            <div class="stat-value">R$ ${totalEnviado.toFixed(2)}</div>
-                            <div class="stat-label">Total Enviado</div>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-value">R$ ${totalComprovado.toFixed(2)}</div>
-                            <div class="stat-label">Total Comprovado</div>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-value ${saldo < 0 ? 'stat-saldo-negativo' : ''}">R$ ${saldo.toFixed(2)}</div>
-                            <div class="stat-label">Saldo Pendente</div>
-                        </div>
-                         <div class="card stat-card">
-                            <div class="stat-value">${acoesPendentes}</div>
-                            <div class="stat-label">Ações Pendentes</div>
-                        </div>
-                    `;
-
-                } catch (e) {
-                    console.error("Erro ao calcular dashboard do coordenador:", e);
-                    grid.innerHTML = '<p>Erro ao carregar resumo.</p>';
-                }
-                
-            } else {
-                // Dashboard Consultor
-                const paymentsQuery = query(collection(db, PAYMENTS_COL), where('consultantId', '==', currentUser.uid), where('status', '==', 'accepted'));
-                const invoicesQuery = query(collection(db, INVOICES_COL), where('consultantId', '==', currentUser.uid));
-
-                let totalRecebido = 0;
-                let totalComprovado = 0;
-
-                try {
-                    const paymentsSnap = await getDocs(paymentsQuery);
-                    paymentsSnap.forEach(doc => {
-                        totalRecebido += doc.data().amount;
-                    });
-                    
-                    const invoicesSnap = await getDocs(invoicesQuery);
-                     invoicesSnap.forEach(doc => {
-                        totalComprovado += doc.data().amount;
-                    });
-                    
-                    const saldo = totalRecebido - totalComprovado;
-                    
-                    grid.innerHTML = `
-                        <div class="card stat-card">
-                            <div class="stat-value">R$ ${totalRecebido.toFixed(2)}</div>
-                            <div class="stat-label">Total Recebido (Aceito)</div>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-value">R$ ${totalComprovado.toFixed(2)}</div>
-                            <div class="stat-label">Total Comprovado</div>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-value ${saldo < 0 ? 'stat-saldo-negativo' : ''}">R$ ${saldo.toFixed(2)}</div>
-                            <div class="stat-label">Saldo Atual</div>
-                        </div>
-                    `;
-
-                } catch (e) {
-                    console.error("Erro ao calcular dashboard do consultor:", e);
-                    grid.innerHTML = '<p>Erro ao carregar resumo.</p>';
-                }
-            }
-        }
-        
-        // 2. Coordenador: Carregar Consultores
-        function loadConsultants() {
-            const list = document.getElementById('consultantsList');
-            list.innerHTML = '<p class="loading">Carregando consultores...</p>';
-            
-            const q = query(collection(db, USERS_COL), where('coordinatorId', '==', currentUser.uid));
-            
-            const unsub = onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
-                    list.innerHTML = '<p>Você ainda não tem consultores vinculados.</p>';
-                    return;
-                }
-                
-                list.innerHTML = ''; // Limpa
-                snapshot.forEach(doc => {
-                    const consultant = doc.data();
-                    const consultantEl = document.createElement('div');
-                    consultantEl.className = 'list-item';
-                    consultantEl.innerHTML = `
-                        <div class="list-item-content">
-                            <div class="list-item-title">${consultant.name}</div>
-                            <div class="list-item-subtitle">${consultant.email}</div>
-                        </div>
-                        <div class="list-item-actions">
-                            <button class="btn btn-secondary btn-small" disabled>Ver Detalhes</button>
-                        </div>
-                    `;
-                    list.appendChild(consultantEl);
-                });
-            }, (error) => {
-                console.error("Erro ao carregar consultores:", error);
-                list.innerHTML = '<p>Erro ao carregar consultores.</p>';
-            });
-            
-            unsubscribeListeners.push(unsub);
-        }
-
-        // 3. Coordenador: Carregar Consultores (para select de pagamento)
-        async function loadConsultantsForPayment() {
-            const select = document.getElementById('consultantSelect');
-            select.innerHTML = '<option value="">Carregando...</option>';
-            
-            const q = query(collection(db, USERS_COL), where('coordinatorId', '==', currentUser.uid));
-            
-            try {
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) {
-                    select.innerHTML = '<option value="">Nenhum consultor encontrado</option>';
-                    return;
-                }
-                
-                select.innerHTML = '<option value="">Selecione um consultor</option>';
-                snapshot.forEach(doc => {
-                    const consultant = doc.data();
-                    const option = document.createElement('option');
-                    option.value = doc.id; // Salva o UID
-                    option.textContent = consultant.name;
-                    option.dataset.name = consultant.name; // Salva o nome
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error("Erro ao carregar consultores para pagamento:", error);
-                select.innerHTML = '<option value="">Erro ao carregar</option>';
-            }
-        }
-        
-        // 4. Coordenador: Histórico de Pagamentos
-        function loadPaymentHistory() {
-            const list = document.getElementById('paymentHistoryList');
-            list.innerHTML = '<p class="loading">Carregando histórico...</p>';
-            
-            const q = query(collection(db, PAYMENTS_COL), where('coordinatorId', '==', currentUser.uid));
-            
-            const unsub = onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
-                    list.innerHTML = '<p>Nenhum pagamento realizado.</p>';
-                    return;
-                }
-                
-                list.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const payment = doc.data();
-                    const paymentEl = document.createElement('div');
-                    paymentEl.className = 'card';
-                    paymentEl.style.marginBottom = '10px';
-                    
-                    const statusClass = `status-${payment.status}`;
-                    const statusText = payment.status.charAt(0).toUpperCase() + payment.status.slice(1);
-                    
-                    paymentEl.innerHTML = `
-                        <div class="list-item">
-                            <div class="list-item-content">
-                                <div class="list-item-title">${payment.consultantName} - R$ ${payment.amount.toFixed(2)}</div>
-                                <div class="list-item-subtitle">${payment.description}</div>
-                            </div>
-                            <div class="list-item-actions">
-                                <span class="status ${statusClass}">${statusText}</span>
-                            </div>
-                        </div>
-                        <div class="invoice-list-container" id="invoices-for-${doc.id}">
-                            <small>Comprovações:</small>
-                            <p class="loading">Carregando...</p>
-                        </div>
-                    `;
-                    list.appendChild(paymentEl);
-                    // Carregar notas fiscais para este pagamento
-                    loadInvoicesForPayment(doc.id);
-                });
-            }, (error) => {
-                console.error("Erro ao carregar pagamentos:", error);
-                list.innerHTML = '<p>Erro ao carregar pagamentos.</p>';
-            });
-            
-            unsubscribeListeners.push(unsub);
-        }
-        
-        // 4a. Coordenador: Carregar Notas de um Pagamento
-        function loadInvoicesForPayment(paymentId) {
-            const container = document.getElementById(`invoices-for-${paymentId}`);
-            if (!container) return; // Segurança
-            
-            const q = query(collection(db, INVOICES_COL), where('paymentId', '==', paymentId));
-            
-            const unsub = onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
-                    container.innerHTML = '<small>Nenhuma comprovação enviada.</small>';
-                    return;
-                }
-                
-                container.innerHTML = '<small>Comprovações:</small>';
-                snapshot.forEach(doc => {
-                    const invoice = doc.data();
-                    const invoiceEl = document.createElement('div');
-                    invoiceEl.className = 'invoice-item';
-                    invoiceEl.innerHTML = `
-                        <div class="invoice-details">
-                            ${invoice.description}
-                            <span class="invoice-amount">- R$ ${invoice.amount.toFixed(2)}</span>
-                        </div>
-                        <a href="${invoice.fileUrl}" target="_blank" class="btn btn-outlined btn-small">
-                            <span class="material-icons">download</span>
-                            Baixar
-                        </a>
-                    `;
-                    container.appendChild(invoiceEl);
-                });
-            }, (error) => {
-                console.error("Erro ao carregar notas:", error);
-                container.innerHTML = '<small>Erro ao carregar notas.</small>';
-            });
-            
-            unsubscribeListeners.push(unsub);
-        }
-
-        // 5. Consultor: Carregar Meus Pagamentos
-        function loadMyPayments() {
-            const list = document.getElementById('myPaymentsList');
-            list.innerHTML = '<p class="loading">Carregando pagamentos...</p>';
-            
-            const q = query(collection(db, PAYMENTS_COL), where('consultantId', '==', currentUser.uid));
-            
-            const unsub = onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
-                    list.innerHTML = '<p>Nenhum pagamento recebido.</p>';
-                    return;
-                }
-                
-                list.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const payment = doc.data();
-                    const paymentId = doc.id;
-                    const paymentEl = document.createElement('div');
-                    paymentEl.className = 'list-item';
-                    
-                    const statusClass = `status-${payment.status}`;
-                    const statusText = payment.status.charAt(0).toUpperCase() + payment.status.slice(1);
-                    
-                    let actionsHTML = `<span class="status ${statusClass}">${statusText}</span>`;
-                    
-                    if (payment.status === 'pending') {
-                        actionsHTML = `<button class="btn btn-success btn-small" data-payment-id="${paymentId}">
-                                         <span class="material-icons">check</span> Aceitar
-                                       </button>`;
-                    } else if (payment.status === 'accepted') {
-                         actionsHTML = `<button class="btn btn-primary btn-small" data-payment-id="${paymentId}" data-payment-desc="${payment.description}">
-                                         <span class="material-icons">add_circle</span> Adicionar Comprovação
-                                       </button>`;
-                    }
-                    
-                    paymentEl.innerHTML = `
-                        <div class="list-item-content">
-                            <div class="list-item-title">${payment.description} - R$ ${payment.amount.toFixed(2)}</div>
-                            <div class="list-item-subtitle">De: ${payment.coordinatorName}</div>
-                        </div>
-                        <div class="list-item-actions" id="actions-for-${paymentId}">
-                            ${actionsHTML}
-                        </div>
-                    `;
-                    list.appendChild(paymentEl);
-                });
-                
-                // Adicionar listeners aos botões
-                list.querySelectorAll('[data-payment-id]').forEach(button => {
-                    if (button.textContent.includes('Aceitar')) {
-                        button.addEventListener('click', () => acceptPayment(button.dataset.paymentId));
-                    } else if (button.textContent.includes('Adicionar')) {
-                        button.addEventListener('click', () => openInvoiceModal(button.dataset.paymentId, button.dataset.paymentDesc));
-                    }
-                });
-                
-            }, (error) => {
-                console.error("Erro ao carregar pagamentos:", error);
-                list.innerHTML = '<p>Erro ao carregar pagamentos.</p>';
-            });
-            
-            unsubscribeListeners.push(unsub);
-        }
-        
-        // 6. Consultor: Aceitar Pagamento
-        async function acceptPayment(paymentId) {
-            const paymentRef = doc(db, PAYMENTS_COL, paymentId);
-            try {
-                await updateDoc(paymentRef, {
-                    status: 'accepted'
-                });
-                showAlert('Sucesso', 'Pagamento aceito! Agora você pode adicionar comprovações.');
             } catch (e) {
-                console.error("Erro ao aceitar pagamento:", e);
-                showAlert('Erro', 'Não foi possível aceitar o pagamento.');
+                console.error("Erro ao criar jogo:", e);
+                showToast("Erro ao criar jogo. Tente novamente.", "error");
+                hideModal();
             }
         }
-        
-        // 7. Consultor: Abrir Modal de Nota Fiscal
-        function openInvoiceModal(paymentId, paymentDescription) {
-            document.getElementById('invoicePaymentId').value = paymentId;
-            document.getElementById('invoicePaymentDescription').textContent = paymentDescription;
-            invoiceModal.classList.add('active');
+
+        async function joinGame() {
+            const gameId = gameIdInput.value.trim().toUpperCase();
+            if (!gameId) {
+                showToast("Digite um ID de jogo", "warning");
+                gameIdInput.focus();
+                return;
+            }
+
+            showSpinner('Entrando no jogo...');
+            const gameRef = getGameRef(gameId);
+
+            try {
+                const gameDoc = await getDoc(gameRef);
+                if (!gameDoc.exists()) {
+                    showToast("Jogo não encontrado", "error");
+                    hideModal();
+                    return;
+                }
+
+                const gameState = gameDoc.data();
+
+                if (gameState.gameStatus !== 'waiting' && gameState.gameStatus !== 'ended') {
+                    // Permite re-entrar se o jogo acabou para ver o placar
+                    if(gameState.gameStatus === 'playing') {
+                        showToast("Jogo já começou", "error");
+                        hideModal();
+                        return;
+                    }
+                }
+
+                if (gameState.playerIds.includes(currentUserId)) {
+                    // Já está no jogo, apenas começa a escutar
+                    console.log("Reentrando no jogo...");
+                    showToast("Reentrando no jogo...", "info");
+                    listenToGame(gameId);
+                    return;
+                }
+
+                if (gameState.playerIds.length >= 4 && gameState.gameStatus === 'waiting') {
+                    showToast("Jogo cheio (máximo 4 jogadores)", "error");
+                    hideModal();
+                    return;
+                }
+
+                // Adiciona novo jogador (apenas se 'waiting')
+                if (gameState.gameStatus === 'waiting') {
+                    const newPlayerIds = [...gameState.playerIds, currentUserId];
+                    const newLog = [...gameState.log, `${currentUserId.substring(0, 5)}... entrou no jogo.`];
+                    
+                    await updateDoc(gameRef, {
+                        playerIds: newPlayerIds,
+                        log: newLog
+                    });
+                }
+
+                console.log("Entrou no jogo:", gameId);
+                showToast(`Entrou no jogo "${gameId}"!`, "success");
+                listenToGame(gameId);
+
+            } catch (e) {
+                console.error("Erro ao entrar no jogo:", e);
+                showToast("Erro ao entrar no jogo. Tente novamente.", "error");
+                hideModal();
+            }
         }
-        
-        document.getElementById('closeInvoiceModal').addEventListener('click', () => {
-            invoiceModal.classList.remove('active');
-            document.getElementById('invoiceForm').reset();
-        });
-        
-        // --- Lógica de Ações ---
-        
-        function setupActionsSection(role) {
-            const section = document.getElementById('actions');
-            if (role === 'coordinator') {
-                section.innerHTML = `
-                    <h1>Ações Solicitadas</h1>
-                    <div class="card">
-                        <h2 class="card-title">Solicitações Pendentes dos Consultores</h2>
-                        <div id="actionRequestsList" class="loading"><p>Carregando...</p></div>
+
+        function listenToGame(gameId) {
+            currentGameId = gameId;
+            hideModal(); // Esconde o spinner de "entrando..."
+            authScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            const gameRef = getGameRef(gameId);
+
+            if (gameUnsubscribe) {
+                gameUnsubscribe(); // Para de escutar jogos antigos
+            }
+
+            gameUnsubscribe = onSnapshot(gameRef, (doc) => {
+                if (doc.exists()) {
+                    console.log("Dados do jogo recebidos:", doc.data());
+                    localGameState = doc.data();
+                    renderGame(localGameState);
+                } else {
+                    console.warn("O jogo foi deletado ou não existe.");
+                    showToast("O jogo foi encerrado", "error");
+                    leaveGame();
+                }
+            }, (error) => {
+                console.error("Erro no listener do jogo:", error);
+                showToast("Erro de conexão com o jogo", "error");
+                leaveGame();
+            });
+        }
+
+        function leaveGame() {
+            if (gameUnsubscribe) {
+                gameUnsubscribe();
+            }
+            gameUnsubscribe = null;
+            localGameState = null;
+            currentGameId = null;
+
+            gameScreen.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+            hideModal(); // Garante que qualquer modal (ex: vitória) seja fechado
+        }
+
+        // --- Renderização do Jogo -----------------------------------------------
+
+        function renderGame(state) {
+            if (!state) return;
+            
+            // Não renderiza se um modal estiver ativo (exceto tela de vitória)
+            if (!modalOverlay.classList.contains('hidden') && state.gameStatus !== 'ended') {
+                return;
+            }
+
+            // Limpa áreas
+            opponentHands.innerHTML = '';
+            playerHand.innerHTML = '';
+            boardArea.innerHTML = '';
+            gameLog.innerHTML = '';
+
+            // 1. Informações do Jogo
+            let turnText = "Carregando...";
+            let statusColor = "text-gray-600";
+            
+            if (state.gameStatus === 'waiting') {
+                turnText = `Aguardando jogadores... (${state.playerIds.length}/4)`;
+                statusColor = "text-blue-600";
+            } else if (state.gameStatus === 'playing') {
+                if (state.currentPlayerId === currentUserId) {
+                    turnText = "É a sua vez!";
+                    statusColor = "text-green-600 font-semibold";
+                } else {
+                    turnText = `Vez de: ${state.currentPlayerId.substring(0, 5)}...`;
+                    statusColor = "text-amber-600";
+                }
+            } else if (state.gameStatus === 'ended') {
+                turnText = `Fim de Jogo! Vencedor: ${state.winner.substring(0, 5)}...`;
+                statusColor = "text-purple-600 font-semibold";
+            }
+            
+            gameInfo.innerHTML = `
+                <div class="m3-card">
+                    <h2 class="text-xl font-bold text-gray-800">Jogo: ${state.gameId}</h2>
+                    <p class="text-lg ${statusColor} mt-2">${turnText}</p>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        <span class="m3-chip">Jogadores: ${state.playerIds.length}/4</span>
+                        ${state.gameStatus === 'playing' ? `<span class="m3-chip">Peças no monte: ${state.boneyard.length}</span>` : ''}
                     </div>
-                `;
-            } else {
-                // Consultor
-                section.innerHTML = `
-                    <h1>Solicitar Ação</h1>
-                    <div class="card">
-                        <h2 class="card-title">Solicitar Nova Ação</h2>
-                        <form id="actionRequestForm">
-                            <div class="form-group">
-                                <label for="actionType">Tipo de Ação</label>
-                                <select id="actionType" required>
-                                    <option value="">Selecione o tipo</option>
-                                    <option value="degustacao">Degustação</option>
-                                    <option value="promocao">Promoção</option>
-                                    <option value="evento">Evento</option>
-                                    <option value="outro">Outro</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="storeName">Nome da Loja</label>
-                                <input type="text" id="storeName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="plannedDate">Data Planejada</label>
-                                <input type="date" id="plannedDate" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="actionDescription">Descrição da Ação</label>
-                                <textarea id="actionDescription" rows="4" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <span class="material-icons">send</span>
-                                Enviar Solicitação
-                            </button>
-                        </form>
-                    </div>
-                    <div class="card" style="margin-top: 20px;">
-                        <h2 class="card-title">Minhas Solicitações</h2>
-                        <div id="myActionRequestsList" class="loading"><p>Carregando...</p></div>
-                    </div>
-                `;
-                // Adicionar listener ao novo formulário
-                const form = document.getElementById('actionRequestForm');
-                if (form) {
-                    form.addEventListener('submit', handleActionRequestSubmit);
+                </div>
+            `;
+
+            // 2. Botão de Iniciar (apenas para o Host)
+            if (state.gameStatus === 'waiting' && state.hostId === currentUserId) {
+                if (state.playerIds.length >= 2) {
+                    const startGameBtn = document.createElement('button');
+                    startGameBtn.innerHTML = `<span class="material-icons" style="font-size: 1.125rem;">play_arrow</span> Iniciar Jogo (${state.playerIds.length} jogadores)`;
+                    startGameBtn.className = "m3-button m3-button-filled mt-4";
+                    startGameBtn.onclick = () => startGame(state);
+                    gameInfo.querySelector('.m3-card').appendChild(startGameBtn);
+                } else {
+                    const waitingText = document.createElement('p');
+                    waitingText.className = "text-sm text-gray-500 mt-3";
+                    waitingText.innerText = "Aguardando pelo menos 2 jogadores...";
+                    gameInfo.querySelector('.m3-card').appendChild(waitingText);
                 }
             }
+
+            // Se o jogo não começou, não renderiza o resto
+            if (state.gameStatus !== 'playing' && state.gameStatus !== 'ended') {
+                gameControls.classList.add('hidden');
+                return;
+            }
+            
+            gameControls.classList.remove('hidden');
+
+            const isMyTurn = state.currentPlayerId === currentUserId && state.gameStatus === 'playing';
+
+            // 3. Mãos dos Oponentes
+            state.playerIds.forEach(pid => {
+                if (pid === currentUserId) return; // Pula o próprio jogador
+                const hand = state.players[pid] ? state.players[pid].hand : [];
+                
+                const opponentDiv = document.createElement('div');
+                opponentDiv.className = 'flex flex-col items-center mx-4';
+                opponentDiv.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="font-medium text-gray-700">${pid.substring(0, 5)}...</span>
+                        <span class="m3-chip">${hand.length} peças</span>
+                    </div>
+                `;
+                
+                const cardsDiv = document.createElement('div');
+                cardsDiv.className = 'flex flex-wrap justify-center';
+                for (let i = 0; i < hand.length; i++) {
+                    cardsDiv.innerHTML += `<div class="domino-back"></div>`;
+                }
+                opponentDiv.appendChild(cardsDiv);
+                opponentHands.appendChild(opponentDiv);
+            });
+
+            // 4. Tabuleiro (Board)
+            if (state.board.length === 0) {
+                const emptyBoardMsg = document.createElement('div');
+                emptyBoardMsg.className = 'flex flex-col items-center justify-center h-full text-gray-500';
+                emptyBoardMsg.innerHTML = `
+                    <span class="material-icons mb-2" style="font-size: 3rem;">dashboard_customize</span>
+                    <p class="text-lg">O jogo começará aqui</p>
+                `;
+                boardArea.appendChild(emptyBoardMsg);
+            } else {
+                state.board.forEach(piece => {
+                    boardArea.appendChild(createDominoElement(piece, true));
+                });
+            }
+
+            // 5. Mão do Jogador
+            const myHand = state.players[currentUserId] ? state.players[currentUserId].hand : [];
+            
+            if (myHand.length === 0) {
+                const emptyHandMsg = document.createElement('div');
+                emptyHandMsg.className = 'text-center text-gray-500 py-4';
+                emptyHandMsg.innerHTML = `
+                    <span class="material-icons mb-2" style="font-size: 2rem;">inventory_2</span>
+                    <p>Você não tem peças</p>
+                `;
+                playerHand.appendChild(emptyHandMsg);
+            } else {
+                myHand.forEach((piece, index) => {
+                    const pieceEl = createDominoElement(piece, false);
+                    if (isMyTurn) {
+                        pieceEl.onclick = () => onPieceClick(piece, index);
+                        pieceEl.classList.add('cursor-pointer');
+                    } else {
+                        pieceEl.classList.add('opacity-70', 'cursor-not-allowed');
+                    }
+                    playerHand.appendChild(pieceEl);
+                });
+            }
+
+            // 6. Controles (Monte, Passar)
+            boneyard.innerHTML = `<span class="material-icons" style="font-size: 1.25rem;">style</span> Monte (${state.boneyard.length})`;
+            
+            if (isMyTurn) {
+                boneyard.classList.remove('opacity-50', 'cursor-not-allowed');
+                passTurnBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                boneyard.disabled = state.boneyard.length === 0;
+                passTurnBtn.disabled = false;
+                
+                // Adiciona efeito visual para indicar que é a vez do jogador
+                playerHand.classList.add('ring-2', 'ring-green-500', 'ring-opacity-50', 'rounded-lg');
+            } else {
+                boneyard.classList.add('opacity-50', 'cursor-not-allowed');
+                passTurnBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                boneyard.disabled = true;
+                passTurnBtn.disabled = true;
+                playerHand.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50', 'rounded-lg');
+            }
+
+            // 7. Log
+            if (state.log.length === 0) {
+                const emptyLogMsg = document.createElement('p');
+                emptyLogMsg.className = 'text-sm text-gray-500 italic';
+                emptyLogMsg.innerText = "Nenhuma ação registrada ainda...";
+                gameLog.appendChild(emptyLogMsg);
+            } else {
+                state.log.slice(-8).reverse().forEach(msg => { // Mostra últimas 8 msgs
+                    const logEntry = document.createElement('p');
+                    logEntry.className = 'text-sm text-gray-700 py-1 border-b border-gray-100 last:border-b-0';
+                    logEntry.innerText = msg;
+                    gameLog.appendChild(logEntry);
+                });
+            }
+
+            // 8. Tela de Vitória
+            if (state.gameStatus === 'ended') {
+                showWinScreen(state.winner, state.players);
+            }
         }
         
-        async function handleActionRequestSubmit(e) {
-            e.preventDefault();
-            const form = e.target;
-            const actionData = {
-                consultantId: currentUser.uid,
-                consultantName: currentUserData.name,
-                coordinatorId: currentUserData.coordinatorId, // Vincular ao coordenador
-                actionType: form.actionType.value,
-                storeName: form.storeName.value,
-                plannedDate: form.plannedDate.value,
-                description: form.actionDescription.value,
-                status: 'pending',
-                createdAt: Timestamp.now()
+        function createDominoElement(piece, isBoardPiece) {
+            const el = document.createElement('div');
+            el.className = isBoardPiece ? 'domino-board' : 'domino';
+            
+            // Adiciona classe 'double' se for bucha E estiver no tabuleiro
+            if (isBoardPiece && piece.top === piece.bottom) {
+                el.classList.add('double');
+            }
+            
+            el.innerHTML = `
+                <div class="domino-half">${piece.top}</div>
+                <div class="domino-divider"></div>
+                <div class="domino-half">${piece.bottom}</div>
+            `;
+            return el;
+        }
+
+        function showWinScreen(winnerId, players) {
+            let scoreText = "Fim de Jogo!<br>";
+            const isWinner = winnerId === currentUserId;
+            
+            if (isWinner) {
+                scoreText += `<strong class="text-2xl text-green-600">🎉 Parabéns, você venceu! 🎉</strong><br><br>`;
+            } else {
+                scoreText += `Vencedor: <strong class="text-xl">${winnerId.substring(0, 8)}</strong><br><br>`;
+            }
+            
+            scoreText += `Pontuação final:`;
+            
+            let scores = [];
+            for (const pid in players) {
+                const hand = players[pid].hand;
+                const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
+                scores.push({ pid, score, isCurrentUser: pid === currentUserId });
+            }
+            
+            scores.sort((a, b) => a.score - b.score);
+            scores.forEach(s => {
+                const userIndicator = s.isCurrentUser ? " (Você)" : "";
+                scoreText += `<br>${s.pid.substring(0, 8)}${userIndicator}: ${s.score} pontos`;
+            });
+            
+            const modalHtml = `
+                <div class="m3-card max-w-md w-full mx-4 text-center">
+                    <div class="mb-4">
+                        <span class="material-icons text-6xl ${isWinner ? 'text-green-500' : 'text-purple-500'}">emoji_events</span>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-4 ${isWinner ? 'text-green-600' : 'text-purple-600'}">${isWinner ? 'Vitória!' : 'Fim de Jogo'}</h2>
+                    <div class="text-lg mb-6">${scoreText}</div>
+                    <div class="flex gap-3 justify-center">
+                        <button id="new-game-btn" class="m3-button m3-button-filled">
+                            <span class="material-icons" style="font-size: 1.125rem;">add</span>
+                            Novo Jogo
+                        </button>
+                        <button id="leave-game-btn" class="m3-button m3-button-outlined">
+                            <span class="material-icons" style="font-size: 1.125rem;">logout</span>
+                            Voltar ao Lobby
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalHtml);
+            
+            document.getElementById('leave-game-btn').onclick = () => {
+                showSpinner('Saindo...');
+                leaveGame();
             };
             
-            try {
-                await addDoc(collection(db, ACTIONS_COL), actionData);
-                showAlert('Sucesso', 'Solicitação de ação enviada!');
-                form.reset();
-                // loadActionRequests() será chamado pelo listener onSnapshot
-            } catch (error) {
-                console.error("Erro ao enviar solicitação:", error);
-                showAlert('Erro', 'Não foi possível enviar a solicitação.');
-            }
+            document.getElementById('new-game-btn').onclick = () => {
+                showSpinner('Saindo...');
+                leaveGame();
+                setTimeout(() => {
+                    gameIdInput.focus();
+                }, 500);
+            };
         }
-        
-        function loadActionRequests() {
-            if (currentUserData.role === 'coordinator') {
-                // Coordenador: vê ações dos seus consultores
-                const list = document.getElementById('actionRequestsList');
-                if (!list) return; // Seção não ativa
-                list.innerHTML = '<p class="loading">Carregando solicitações...</p>';
-                
-                const q = query(collection(db, ACTIONS_COL), where('coordinatorId', '==', currentUser.uid));
-                
-                const unsub = onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
-                        list.innerHTML = '<p>Nenhuma solicitação de ação encontrada.</p>';
-                        return;
-                    }
-                    list.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const action = doc.data();
-                        const actionId = doc.id;
-                        const actionEl = document.createElement('div');
-                        actionEl.className = 'list-item';
-                        
-                        const statusClass = `status-${action.status}`;
-                        const statusText = action.status.charAt(0).toUpperCase() + action.status.slice(1);
-                        
-                        let actionsHTML = `<span class="status ${statusClass}">${statusText}</span>`;
-                        if(action.status === 'pending') {
-                            actionsHTML = `
-                                <button class="btn btn-success btn-small" data-action-id="${actionId}" data-status="approved">
-                                    <span class="material-icons">check</span> Aprovar
-                                </button>
-                                <button class="btn btn-danger btn-small" data-action-id="${actionId}" data-status="rejected">
-                                    <span class="material-icons">close</span> Rejeitar
-                                </button>
-                            `;
-                        }
-                        
-                        actionEl.innerHTML = `
-                            <div class="list-item-content">
-                                <div class="list-item-title">${action.actionType} - ${action.storeName}</div>
-                                <div class="list-item-subtitle">Por: ${action.consultantName} | Data: ${action.plannedDate}</div>
-                            </div>
-                            <div class="list-item-actions">
-                                ${actionsHTML}
-                            </div>
-                        `;
-                        list.appendChild(actionEl);
-                    });
-                    
-                    // Listeners dos botões de aprovar/rejeitar
-                    list.querySelectorAll('[data-action-id]').forEach(button => {
-                        button.addEventListener('click', () => updateActionStatus(button.dataset.actionId, button.dataset.status));
-                    });
-                    
-                }, (error) => {
-                    console.error("Erro ao carregar ações:", error);
-                    list.innerHTML = '<p>Erro ao carregar ações.</p>';
-                });
-                unsubscribeListeners.push(unsub);
-                
-            } else {
-                // Consultor: vê suas próprias ações
-                const list = document.getElementById('myActionRequestsList');
-                if (!list) return; // Seção não ativa
-                list.innerHTML = '<p class="loading">Carregando minhas solicitações...</p>';
-                
-                const q = query(collection(db, ACTIONS_COL), where('consultantId', '==', currentUser.uid));
-                
-                 const unsub = onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
-                        list.innerHTML = '<p>Nenhuma solicitação enviada.</p>';
-                        return;
-                    }
-                    list.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const action = doc.data();
-                        const actionEl = document.createElement('div');
-                        actionEl.className = 'list-item';
-                        
-                        const statusClass = `status-${action.status}`;
-                        const statusText = action.status.charAt(0).toUpperCase() + action.status.slice(1);
 
-                        actionEl.innerHTML = `
-                            <div class="list-item-content">
-                                <div class="list-item-title">${action.actionType} - ${action.storeName}</div>
-                                <div class="list-item-subtitle">Data: ${action.plannedDate}</div>
-                            </div>
-                            <div class="list-item-actions">
-                                <span class="status ${statusClass}">${statusText}</span>
-                            </div>
-                        `;
-                        list.appendChild(actionEl);
-                    });
-                 }, (error) => {
-                    console.error("Erro ao carregar minhas ações:", error);
-                    list.innerHTML = '<p>Erro ao carregar ações.</p>';
-                });
-                unsubscribeListeners.push(unsub);
-            }
-        }
-        
-        async function updateActionStatus(actionId, newStatus) {
-            const actionRef = doc(db, ACTIONS_COL, actionId);
+        // --- Lógica de Início de Jogo ------------------------------------------
+
+        async function startGame(currentState) {
+            console.log("Iniciando o jogo...");
+            showSpinner("Embaralhando e distribuindo...");
             try {
-                await updateDoc(actionRef, { status: newStatus });
-                showAlert('Sucesso', `Ação ${newStatus === 'approved' ? 'aprovada' : 'rejeitada'}.`);
+                const { playerIds } = currentState;
+                
+                const deck = createDeck();
+                const shuffledDeck = shuffle(deck);
+                
+                // Distribuir peças
+                const hands = {};
+                playerIds.forEach(pid => { hands[pid] = { hand: [] }; });
+                
+                let piecesPerPlayer = 7;
+                // Regra de dominó: 2-4 jogadores, 7 peças.
+                
+                for (let i = 0; i < piecesPerPlayer; i++) {
+                    for (const pid of playerIds) {
+                        hands[pid].hand.push(shuffledDeck.pop());
+                    }
+                }
+                
+                const boneyard = shuffledDeck; // O que sobrou
+                
+                // Encontrar jogador inicial (maior bucha)
+                let startingPlayerId = null;
+                let highestDouble = -1;
+                
+                playerIds.forEach(pid => {
+                    hands[pid].hand.forEach(piece => {
+                        if (piece.top === piece.bottom && piece.top > highestDouble) {
+                            highestDouble = piece.top;
+                            startingPlayerId = pid;
+                        }
+                    });
+                });
+                
+                // Se ninguém tiver bucha (raro), o host começa
+                if (!startingPlayerId) {
+                    startingPlayerId = currentState.hostId;
+                }
+                
+                const newLog = [...currentState.log, `Jogo iniciado! ${startingPlayerId.substring(0, 5)}... começa.`];
+                
+                // Atualiza o estado do jogo no Firebase
+                await updateDoc(getGameRef(currentState.gameId), {
+                    gameStatus: 'playing',
+                    players: hands,
+                    boneyard: boneyard,
+                    board: [],
+                    openEnds: [null, null],
+                    currentPlayerId: startingPlayerId,
+                    passCount: 0,
+                    log: newLog
+                });
+                
+                // hideModal() será chamado pelo onSnapshot que recebe o novo estado
+
             } catch (e) {
-                console.error("Erro ao atualizar ação:", e);
-                showAlert('Erro', 'Não foi possível atualizar o status da ação.');
+                console.error("Erro ao iniciar jogo:", e);
+                showToast("Erro ao iniciar jogo", "error");
+                hideModal();
             }
         }
 
-        // --- Formulários ---
-        
-        // Coordenador: Enviar Pagamento
-        const paymentForm = document.getElementById('paymentForm');
-        if (paymentForm) {
-            paymentForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const form = e.target;
-                const selectedOption = form.consultantSelect.options[form.consultantSelect.selectedIndex];
+        function createDeck() {
+            const deck = [];
+            for (let i = 0; i <= 6; i++) {
+                for (let j = i; j <= 6; j++) {
+                    deck.push({ top: i, bottom: j });
+                }
+            }
+            return deck; // 28 peças
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // --- Lógica de Turno ----------------------------------------------------
+
+        // **NOVO** Modal para escolha de jogada
+        function askMoveChoice(piece, validMoves) {
+            return new Promise((resolve, reject) => {
+                const modalHtml = `
+                    <div class="m3-card max-w-md w-full mx-4 text-center">
+                        <h2 class="text-2xl font-bold mb-4">Escolha sua Jogada</h2>
+                        <p class="text-lg mb-6">Onde você quer jogar a peça [${piece.top}|${piece.bottom}]?</p>
+                        
+                        <!-- Peça de exemplo -->
+                        <div class="flex justify-center mb-6">
+                            ${createDominoElement(piece, false).outerHTML}
+                        </div>
+                        
+                        <div class="flex flex-col gap-3">
+                            ${validMoves.includes('left') ? `
+                            <button id="modal-btn-left" class="m3-button m3-button-filled w-full">
+                                <span class="material-icons" style="font-size: 1.125rem;">arrow_back</span>
+                                Na Ponta Esquerda
+                            </button>` : ''}
+                            
+                            ${validMoves.includes('right') ? `
+                            <button id="modal-btn-right" class="m3-button m3-button-filled w-full">
+                                <span class="material-icons" style="font-size: 1.125rem;">arrow_forward</span>
+                                Na Ponta Direita
+                            </button>` : ''}
+                            
+                            <button id="modal-btn-cancel" class="m3-button m3-button-text w-full">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                `;
                 
-                const paymentData = {
-                    coordinatorId: currentUser.uid,
-                    coordinatorName: currentUserData.name,
-                    consultantId: selectedOption.value,
-                    consultantName: selectedOption.dataset.name,
-                    amount: parseFloat(form.paymentAmount.value),
-                    description: form.paymentDescription.value,
-                    status: 'pending',
-                    createdAt: Timestamp.now()
+                showModal(modalHtml);
+                
+                if (validMoves.includes('left')) {
+                    document.getElementById('modal-btn-left').onclick = () => {
+                        hideModal();
+                        resolve('left');
+                    };
+                }
+                if (validMoves.includes('right')) {
+                    document.getElementById('modal-btn-right').onclick = () => {
+                        hideModal();
+                        resolve('right');
+                    };
+                }
+                document.getElementById('modal-btn-cancel').onclick = () => {
+                    hideModal();
+                    reject(new Error("Jogada cancelada"));
                 };
-                
-                if (!paymentData.consultantId) {
-                    showAlert('Aviso', 'Por favor, selecione um consultor.');
-                    return;
-                }
-                
-                try {
-                    await addDoc(collection(db, PAYMENTS_COL), paymentData);
-                    showAlert('Sucesso', 'Pagamento enviado para aceite do consultor.');
-                    form.reset();
-                    // Mudar para a aba de histórico
-                    document.querySelector('[data-tab="paymentHistory"]').click();
-                } catch (error) {
-                    console.error("Erro ao enviar pagamento:", error);
-                    showAlert('Erro', 'Não foi possível enviar o pagamento.');
-                }
             });
         }
-        
-        // Consultor: Enviar Nota Fiscal (Comprovação)
-        const invoiceForm = document.getElementById('invoiceForm');
-        if (invoiceForm) {
-            invoiceForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const form = e.target;
-                const paymentId = form.invoicePaymentId.value;
-                const amount = parseFloat(form.invoiceAmount.value);
-                const description = form.invoiceDescription.value;
-                const file = form.invoiceFile.files[0];
-                
-                if (!file || !amount || !description) {
-                    showAlert('Aviso', 'Preencha todos os campos.');
-                    return;
+
+        async function onPieceClick(piece, pieceIndex) {
+            console.log("Peça clicada:", piece);
+            const state = localGameState;
+            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') {
+                return;
+            }
+
+            const { board, openEnds } = state;
+            const [leftEnd, rightEnd] = openEnds;
+            
+            let playedPiece = { ...piece }; // Peça como será jogada (pode ser invertida)
+
+            // **LÓGICA DE MOVIMENTO MELHORADA**
+            const validMoves = [];
+            if (board.length === 0) {
+                validMoves.push('first');
+            } else {
+                if (piece.top === leftEnd || piece.bottom === leftEnd) {
+                    validMoves.push('left');
                 }
+                if (piece.top === rightEnd || piece.bottom === rightEnd) {
+                    validMoves.push('right');
+                }
+            }
+
+            if (validMoves.length === 0) {
+                showToast("Movimento inválido. Esta peça não encaixa.", "warning");
+                return;
+            }
+
+            let move;
+            try {
+                // Se pode jogar em > 1 lugar (ex: 'left' e 'right'), pergunta ao usuário
+                if (validMoves.length > 1) {
+                    move = await askMoveChoice(piece, validMoves);
+                } else {
+                    move = validMoves[0];
+                }
+            } catch (e) {
+                console.log("Jogada cancelada pelo usuário.");
+                return; // Usuário apertou 'cancelar'
+            }
+
+            // Se chegou aqui, o movimento é válido e foi escolhido.
+            
+            // 1. Atualiza o tabuleiro
+            let newBoard = [...board];
+            let newOpenEnds = [...openEnds];
+            
+            if (move === 'first') {
+                newBoard.push(playedPiece);
+                newOpenEnds = [playedPiece.top, playedPiece.bottom];
+            } else if (move === 'left') {
+                if (piece.top === leftEnd) {
+                    playedPiece = { top: piece.bottom, bottom: piece.top }; // Inverte
+                }
+                newBoard.unshift(playedPiece); // Adiciona no início
+                newOpenEnds[0] = playedPiece.top; // Nova ponta esquerda
+            } else if (move === 'right') {
+                if (piece.bottom === rightEnd) {
+                    playedPiece = { top: piece.bottom, bottom: piece.top }; // Inverte
+                }
+                newBoard.push(playedPiece); // Adiciona no fim
+                newOpenEnds[1] = playedPiece.bottom; // Nova ponta direita
+            }
+
+            // 2. Atualiza a mão do jogador
+            const myHand = state.players[currentUserId].hand;
+            const newHand = myHand.filter((_, i) => i !== pieceIndex);
+            
+            // 3. Atualiza o objeto 'players'
+            const newPlayers = {
+                ...state.players,
+                [currentUserId]: { hand: newHand }
+            };
+
+            // 4. Próximo jogador
+            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
+
+            // 5. Log
+            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... jogou [${playedPiece.top}|${playedPiece.bottom}].`];
+
+            // 6. Prepara o payload
+            const updatePayload = {
+                board: newBoard,
+                openEnds: newOpenEnds,
+                players: newPlayers,
+                currentPlayerId: nextPlayerId,
+                passCount: 0, // Reseta a contagem de passes
+                log: newLog,
+                gameStatus: state.gameStatus,
+                winner: state.winner
+            };
+
+            // 7. Verifica condição de vitória
+            if (newHand.length === 0) {
+                console.log("JOGADOR VENCEU!");
+                updatePayload.gameStatus = 'ended';
+                updatePayload.winner = currentUserId;
+                showToast("🎉 Parabéns! Você venceu o jogo! 🎉", "success", 5000);
+            }
+            
+            // 8. Envia a atualização
+            try {
+                await updateDoc(getGameRef(currentGameId), updatePayload);
+            } catch (e) {
+                console.error("Erro ao jogar peça:", e);
+                showToast("Erro ao jogar peça. Tente novamente.", "error");
+            }
+        }
+
+        async function drawFromBoneyard() {
+            const state = localGameState;
+            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
+            
+            if (state.boneyard.length === 0) {
+                showToast("Monte vazio. Não há peças para comprar.", "warning");
+                return;
+            }
+
+            // Pega a peça
+            const newBoneyard = [...state.boneyard];
+            const drawnPiece = newBoneyard.pop(); // Pega a última peça
+
+            // Adiciona na mão
+            const myHand = state.players[currentUserId].hand;
+            const newHand = [...myHand, drawnPiece];
+            
+            // Atualiza players
+            const newPlayers = {
+                ...state.players,
+                [currentUserId]: { hand: newHand }
+            };
+
+            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... comprou do monte.`];
+
+            // Atualiza Firebase. O turno NÃO PASSA. O jogador pode jogar ou passar.
+            try {
+                await updateDoc(getGameRef(currentGameId), {
+                    boneyard: newBoneyard,
+                    players: newPlayers,
+                    log: newLog
+                });
+                showToast(`Você comprou a peça [${drawnPiece.top}|${drawnPiece.bottom}].`, "info");
+            } catch (e) {
+                console.error("Erro ao comprar do monte:", e);
+                showToast("Erro ao comprar do monte. Tente novamente.", "error");
+            }
+        }
+
+        async function passTurn() {
+            const state = localGameState;
+            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
+            
+            // Verifica se o jogador pode mesmo passar
+            const myHand = state.players[currentUserId].hand;
+            const [leftEnd, rightEnd] = state.openEnds;
+
+            let canPlay = false;
+            if (state.board.length === 0) {
+                canPlay = myHand.length > 0; // Se for o primeiro, pode jogar qualquer coisa
+            } else {
+                for (const piece of myHand) {
+                    if (piece.top === leftEnd || piece.bottom === leftEnd || piece.top === rightEnd || piece.bottom === rightEnd) {
+                        canPlay = true;
+                        break;
+                    }
+                }
+            }
+
+            if (canPlay) {
+                showToast("Você tem uma peça que pode ser jogada!", "warning");
+                return;
+            }
+            
+            if (state.boneyard.length > 0) {
+                showToast("Você deve comprar do monte antes de passar!", "warning");
+                return;
+            }
+
+            // Se chegou aqui, o jogador não pode jogar E o monte está vazio.
+            // O passe é válido.
+
+            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
+            const newPassCount = (state.passCount || 0) + 1;
+            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... passou o turno.`];
+            
+            const updatePayload = {
+                currentPlayerId: nextPlayerId,
+                passCount: newPassCount,
+                log: newLog,
+                gameStatus: state.gameStatus,
+                winner: state.winner
+            };
+
+            // Verifica se o jogo está bloqueado
+            if (newPassCount >= state.playerIds.length) {
+                console.log("JOGO BLOQUEADO!");
+                updatePayload.gameStatus = 'ended';
+                // Encontra o vencedor pela menor soma de pontos
+                let minScore = Infinity;
+                let winnerId = null;
                 
-                // UI de Upload
-                const progressContainer = document.getElementById('uploadProgress');
-                const progressBar = document.getElementById('uploadProgressBar');
-                const progressText = document.getElementById('uploadProgressText');
-                progressContainer.style.display = 'block';
-                progressBar.value = 0;
-                progressText.textContent = '0%';
-
-                try {
-                    // --- ALTERAÇÃO AQUI ---
-                    // "Tratar" o arquivo (imagem ou PDF) antes de fazer upload
-                    showAlert('Processando...', 'Estamos otimizando o arquivo, aguarde.');
-                    const fileToUpload = await processFileForUpload(file);
-                    alertModal.classList.remove('active'); // Fecha o modal "Processando"
-                    // --- FIM DA ALTERAÇÃO ---
-
-                    // 1. Criar referência no Storage
-                    const filePath = `invoices/${currentUser.uid}/${paymentId}_${Date.now()}_${fileToUpload.name}`;
-                    const storageRef = ref(storage, filePath);
-                    
-                    // 2. Iniciar Upload
-                    const uploadTask = uploadBytesResumable(storageRef, fileToUpload); // <-- Usa fileToUpload
-                    
-                    // 3. Monitorar Upload
-                    uploadTask.on('state_changed', 
-                        (snapshot) => {
-                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            progressBar.value = progress;
-                            progressText.textContent = `${Math.round(progress)}%`;
-                        }, 
-                        (error) => {
-                            console.error("Erro no upload:", error);
-                            showAlert('Erro de Upload', error.message);
-                            progressContainer.style.display = 'none';
-                        }, 
-                        async () => {
-                            // 4. Upload completo, pegar URL
-                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                            
-                            // 5. Salvar dados no Firestore
-                            const invoiceData = {
-                                consultantId: currentUser.uid,
-                                coordinatorId: currentUserData.coordinatorId,
-                                paymentId: paymentId,
-                                amount: amount,
-                                description: description,
-                                fileUrl: downloadURL,
-                                fileName: fileToUpload.name, // <-- Usa fileToUpload.name
-                                filePath: filePath,
-                                createdAt: Timestamp.now()
-                            };
-                            
-                            await addDoc(collection(db, INVOICES_COL), invoiceData);
-                            
-                            showAlert('Sucesso', 'Comprovação enviada!');
-                            invoiceModal.classList.remove('active');
-                            form.reset();
-                            progressContainer.style.display = 'none';
-                            loadDashboardData(); // Recalcular saldo
+                state.playerIds.forEach(pid => {
+                    const hand = state.players[pid].hand;
+                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
+                    if (score < minScore) {
+                        minScore = score;
+                        winnerId = pid;
+                    } else if (score === minScore) {
+                        // Lógica de desempate (ex: quem jogou por último, ou o abridor)
+                        // Por simplicidade, o primeiro a atingir o minScore vence
+                        if (winnerId === null) {
+                            winnerId = pid;
                         }
-                    );
-                    
-                } catch (error) {
-                     console.error("Erro ao salvar comprovação:", error);
-                     showAlert('Erro', `Não foi possível salvar a comprovação: ${error.message}`);
-                     progressContainer.style.display = 'none';
-                }
-            });
+                    }
+                });
+                
+                // Se ninguém tiver peças (empate 0-0, raro), o 'winnerId' pode ser o primeiro jogador
+                if (winnerId === null) winnerId = state.hostId; 
+                
+                updatePayload.winner = winnerId;
+                updatePayload.log.push(`Jogo bloqueado! Vencedor: ${winnerId.substring(0, 5)}... com ${minScore} pontos.`);
+            }
+
+            try {
+                await updateDoc(getGameRef(currentGameId), updatePayload);
+                showToast("Você passou a vez.", "info");
+            } catch (e) {
+                console.error("Erro ao passar turno:", e);
+                showToast("Erro ao passar turno. Tente novamente.", "error");
+            }
         }
-        
-        // --- Relatórios (Demo) ---
-        document.getElementById('generateReportPDF').addEventListener('click', () => {
-            showAlert('Não implementado', 'A geração de PDF é um recurso avançado não incluído nesta demonstração.');
-        });
-        document.getElementById('shareReport').addEventListener('click', () => {
-            showAlert('Não implementado', 'O compartilhamento direto com WhatsApp é um recurso avançado não incluído nesta demonstração.');
-        });
+
+        function getNextPlayerId(playerIds, currentPlayerId) {
+            const currentIndex = playerIds.indexOf(currentPlayerId);
+            const nextIndex = (currentIndex + 1) % playerIds.length;
+            return playerIds[nextIndex];
+        }
 
     </script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-100 font-sans flex items-center justify-center min-h-screen p-4">
+
+    <!-- Tela de Modal (Loading, Vitória, Escolha) -->
+    <div id="modal-overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div id="modal-content">
+            <!-- Conteúdo do modal será injetado aqui -->
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-white text-lg">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container de Toasts -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+        <!-- Notificações Toast serão injetadas aqui -->
+    </div>
+
+    <!-- Tela de Autenticação / Lobby -->
+    <div id="auth-screen" class="hidden max-w-md w-full">
+        <div class="m3-card text-center">
+            <div class="mb-6">
+                <span class="material-icons text-5xl text-purple-500 mb-4">dashboard_customize</span>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Dominó Multiplayer</h1>
+                <p class="text-gray-600">Jogue dominó online com amigos em tempo real</p>
+            </div>
+            
+            <div class="mb-6 p-4 bg-purple-50 rounded-lg">
+                <p id="user-id-display" class="text-sm text-gray-700 font-medium">Carregando ID...</p>
+            </div>
+            
+            <div class="mb-6">
+                <label for="game-id-input" class="block text-sm font-medium text-gray-700 mb-2 text-left">ID do Jogo</label>
+                <input type="text" id="game-id-input" placeholder="Ex: SALA123" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase font-medium"
+                       oninput="this.value = this.value.toUpperCase()" autocomplete="off">
+                <p class="text-xs text-gray-500 mt-2 text-left">Use um ID único para criar ou entrar em um jogo</p>
+            </div>
+            
+            <div class="flex flex-col gap-3">
+                <button id="create-game-btn" class="m3-button m3-button-filled w-full">
+                    <span class="material-icons" style="font-size: 1.125rem;">add</span>
+                    Criar Novo Jogo
+                </button>
+                <button id="join-game-btn" class="m3-button m3-button-outlined w-full">
+                    <span class="material-icons" style="font-size: 1.125rem;">login</span>
+                    Entrar em Jogo Existente
+                </button>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500">Jogue com 2 a 4 jogadores. Cada jogador recebe 7 peças.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela Principal do Jogo -->
+    <div id="game-screen" class="hidden w-full max-w-7xl h-screen flex flex-col p-4">
+        
+        <!-- Header com Info e Mãos dos Oponentes -->
+        <div class="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
+            <div id="game-info" class="flex-1 max-w-md">
+                <!-- Info do jogo será injetada aqui -->
+            </div>
+            
+            <div id="opponent-hands" class="flex flex-wrap justify-center gap-4 flex-1">
+                <!-- Mãos dos oponentes aqui -->
+            </div>
+        </div>
+
+        <!-- Tabuleiro (Centro) -->
+        <div id="board-area" class="flex-grow bg-gradient-to-br from-green-600 to-green-800 border-4 border-green-900 rounded-2xl p-6 flex flex-nowrap justify-start items-center overflow-x-auto shadow-inner min-h-[200px]">
+            <!-- Peças do tabuleiro aqui -->
+        </div>
+
+        <!-- Controles e Log (Meio/Baixo) -->
+        <div class="flex flex-col md:flex-row justify-between items-stretch my-4 gap-4">
+            <div id="game-controls" class="hidden flex flex-col md:flex-row gap-3">
+                <button id="boneyard" class="m3-button m3-button-filled">
+                    <!-- Ícone e texto serão injetados -->
+                </button>
+                <button id="pass-turn-btn" class="m3-button m3-button-outlined">
+                    <span class="material-icons" style="font-size: 1.125rem;">skip_next</span>
+                    Passar Vez
+                </button>
+            </div>
+            <div class="m3-card flex-1 max-w-md ml-auto">
+                <h3 class="font-bold text-gray-800 mb-2">Histórico do Jogo</h3>
+                <div id="game-log" class="h-32 overflow-y-auto">
+                    <!-- Log do Jogo -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Mão do Jogador (Baixo) -->
+        <div class="m3-card rounded-t-2xl rounded-b-none shadow-lg mt-auto">
+            <h3 class="font-bold text-gray-800 mb-3 text-center">Sua Mão</h3>
+            <div id="player-hand" class="min-h-[140px] flex justify-center items-center flex-wrap gap-3 p-4 bg-gray-50 rounded-lg overflow-x-auto">
+                <!-- Peças do jogador aqui -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
-
-
 
