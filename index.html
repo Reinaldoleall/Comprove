@@ -102,9 +102,9 @@
         
         /* Peça na mão do jogador (menor) */
         #player-hand .domino {
-            width: 3rem; /* MUDANÇA: Menor */
-            height: 6rem; /* MUDANÇA: Menor */
-            font-size: 1.25rem; /* MUDANÇA: Menor */
+            width: 3rem; /* Menor */
+            height: 6rem; /* Menor */
+            font-size: 1.25rem; /* Menor */
         }
         
         /* Classe fantasma para Drag-and-Drop */
@@ -146,8 +146,8 @@
 
         /* Peça na mão do oponente (verso) */
         .domino-back {
-            width: 1.5rem; /* MUDANÇA: Menor */
-            height: 3rem; /* MUDANÇA: Menor */
+            width: 1.5rem; /* Menor */
+            height: 3rem; /* Menor */
             background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
             border: 2px solid var(--md-sys-color-primary);
             border-radius: 0.5rem;
@@ -488,7 +488,7 @@
             flex-shrink: 0;
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(5px);
-            padding: 0.25rem 0.5rem; /* MUDANÇA: Mais compacto */
+            padding: 0.25rem 0.5rem; /* Mais compacto */
             width: 100%;
             z-index: 10;
         }
@@ -498,7 +498,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 1rem;
-            min-height: 3.5rem; /* MUDANÇA: Altura da peça .domino-back + margem */
+            min-height: 3.5rem; /* Altura da peça .domino-back + margem */
         }
         .opponent-hand {
             display: flex;
@@ -526,20 +526,18 @@
             flex-grow: 1; /* Ocupa todo o espaço restante */
             display: flex;
             align-items: center; /* Centraliza a corrente verticalmente */
-            justify-content: flex-start; /* Começa a corrente da esquerda */
+            justify-content: center; /* MUDANÇA: Centraliza o conteúdo (a corrente) */
             overflow-x: auto; /* Permite rolar a mesa horizontalmente */
             overflow-y: hidden;
             padding: 2rem;
             position: relative;
-            min-height: 0; /* MUDANÇA: Correção de flexbox para encolhimento */
+            min-height: 0; /* Correção de flexbox para encolhimento */
         }
         
         #domino-chain {
             display: flex;
             align-items: center;
-            /* O margin: auto 0 centraliza verticalmente ENQUANTO o conteúdo é menor que a área */
-            /* Quando fica maior, o flex-start do pai (#board-area) assume */
-            margin: auto 0; 
+            margin: auto; /* MUDANÇA: Centraliza horizontalmente e verticalmente */
             padding: 1rem 0; /* Espaço para as buchas crescerem */
         }
 
@@ -564,44 +562,44 @@
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem; /* MUDANÇA: Mais compacto */
+            padding: 0.5rem; /* Mais compacto */
             width: 100%;
             z-index: 10;
             display: flex;
             align-items: center;
-            gap: 0.5rem; /* MUDANÇA: Mais compacto */
+            gap: 0.5rem; /* Mais compacto */
         }
         
         #game-info {
             flex-shrink: 0;
             color: white;
-            padding: 0.25rem 0.5rem; /* MUDANÇA: Mais compacto */
+            padding: 0.25rem 0.5rem; /* Mais compacto */
             background: rgba(0, 0, 0, 0.3);
             border-radius: 0.5rem;
-            width: 140px; /* MUDANÇA: Mais compacto */
+            width: 140px; /* Mais compacto */
             text-align: center;
         }
         #game-info h2 {
-            font-size: 1rem; /* MUDANÇA: Mais compacto */
+            font-size: 1rem; /* Mais compacto */
             font-weight: bold;
             word-break: break-all;
         }
         #game-info .turn-status {
-            font-size: 0.8rem; /* MUDANÇA: Mais compacto */
+            font-size: 0.8rem; /* Mais compacto */
             margin-top: 0.25rem;
         }
         #game-info .chips-container {
             display: flex;
             flex-wrap: wrap;
             gap: 0.25rem;
-            margin-top: 0.25rem; /* MUDANÇA: Mais compacto */
+            margin-top: 0.25rem; /* Mais compacto */
             justify-content: center;
         }
         
         #player-hand-container {
             flex-grow: 1; /* Ocupa o espaço entre a info e os botões */
             overflow: hidden; /* Controla o overflow da mão */
-            min-width: 80px; /* MUDANÇA: Mais compacto */
+            min-width: 80px; /* Mais compacto */
         }
         
         #player-hand {
@@ -610,7 +608,7 @@
             gap: 0.5rem;
             overflow-x: auto; /* Mão rola horizontalmente */
             padding-bottom: 0.5rem; /* Espaço para a barra de rolagem (oculta) */
-            min-height: 6.5rem; /* MUDANÇA: Altura da peça .domino + padding */
+            min-height: 6.5rem; /* Altura da peça .domino + padding */
             /* Oculta scrollbars */
             scrollbar-width: none; /* Firefox */
         }
@@ -627,8 +625,8 @@
         }
         
         #game-controls .button {
-            padding: 0.5rem 0.75rem; /* MUDANÇA: Botões menores */
-            font-size: 0.75rem; /* MUDANÇA: Botões menores */
+            padding: 0.5rem 0.75rem; /* Botões menores */
+            font-size: 0.75rem; /* Botões menores */
         }
         
         /* Oculta o log */
@@ -1110,6 +1108,7 @@
             sortableInstance = new Sortable(playerHand, {
                 animation: 150,
                 ghostClass: 'domino-ghost', // Classe CSS para o "fantasma"
+                delay: 100, // MUDANÇA: Atraso de 100ms para diferenciar clique de arrastar
                 onEnd: (evt) => {
                     // Atualiza a ordem no ESTADO LOCAL
                     if (localGameState && localGameState.players[currentUserId]) {
