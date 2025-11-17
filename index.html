@@ -2,10 +2,12 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dominó Multiplayer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dominó Multiplayer Imersivo</title>
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Sortable.js (para Drag-and-Drop) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     
     <style>
         /* --- 1. Reset e Variáveis Globais --- */
@@ -39,16 +41,17 @@
             box-sizing: border-box;
         }
 
+        /* O body é o fundo inicial */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(135deg, #F3E5F5, #E3F2FD);
+            color: var(--md-sys-color-on-surface);
+            overflow: hidden; /* Impede o scroll do body */
+            height: 100vh;
+            width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 1rem;
-            color: var(--md-sys-color-on-surface);
-            overflow: hidden; 
         }
 
         /* --- 2. Classes de Peças de Dominó --- */
@@ -95,15 +98,39 @@
             opacity: 0.5;
             z-index: 1;
         }
+        
+        /* Peça na mão do jogador (menor) */
+        #player-hand .domino {
+            width: 3.5rem; /* Menor */
+            height: 7rem; /* Menor */
+            font-size: 1.5rem; /* Menor */
+        }
+        
+        /* Classe fantasma para Drag-and-Drop */
+        .domino-ghost {
+            opacity: 0.5;
+            background: var(--md-sys-color-primary-container);
+        }
 
+        /* Peça no tabuleiro */
         .domino-board {
             width: 8rem;
             height: 4rem;
             flex-direction: row;
-            margin: 0.5rem;
+            margin: -1px; /* Permite que as bordas se sobreponham */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 0; /* Bordas retas no meio da corrente */
         }
         
+        .domino-board:first-child {
+            border-top-left-radius: 0.75rem;
+            border-bottom-left-radius: 0.75rem;
+        }
+        .domino-board:last-child {
+            border-top-right-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+        }
+
         .domino-board .domino-half { height: 100%; }
         .domino-board .domino-divider { width: 2px; height: 90%; }
         
@@ -111,13 +138,15 @@
             width: 4rem;
             height: 8rem;
             flex-direction: column;
+            border-radius: 0.75rem; /* Bucha é sempre arredondada */
         }
 
         .domino-board.double .domino-divider { width: 90%; height: 2px; }
 
+        /* Peça na mão do oponente (verso) */
         .domino-back {
-            width: 2.5rem;
-            height: 5rem;
+            width: 2rem; /* Menor */
+            height: 4rem; /* Menor */
             background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
             border: 2px solid var(--md-sys-color-primary);
             border-radius: 0.5rem;
@@ -223,10 +252,6 @@
             cursor: not-allowed;
         }
         
-        .ring-active {
-            box-shadow: 0 0 0 3px var(--md-sys-color-success);
-        }
-
         /* --- 5. Modal e Toast --- */
         #modal-overlay {
             position: fixed;
@@ -311,24 +336,15 @@
         .toast.error { border-left: 4px solid var(--md-sys-color-error); }
         .toast.warning { border-left: 4px solid #F59E0B; }
 
-        /* --- 6. Layout Principal (Lobby e Jogo) --- */
+        /* --- 6. Layout Principal (Lobby) --- */
         
-        /* Contêiner para centralizar as telas */
-        .screen-container {
-            width: 100%;
-            max-width: 56rem;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-        }
-
         /* Tela de Autenticação */
         #auth-screen {
             max-width: 28rem;
             width: 100%;
             text-align: center;
             margin: auto;
+            padding: 1.5rem;
         }
         
         #auth-screen .icon-container {
@@ -431,52 +447,57 @@
             color: var(--md-sys-color-on-surface-variant);
         }
 
-        /* Tela do Jogo */
+        /* --- 7. Layout Principal (Jogo) --- */
+        
+        /* Custom Scrollbar (Oculto mas funcional) */
+        /* Para Webkit (Chrome, Safari) */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--md-sys-color-primary);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Para Firefox */
+        /* Esconde scrollbars no Firefox mas mantém funcional */
+        .hidden-scrollbar {
+            scrollbar-width: none; /* Firefox */
+        }
+        
         #game-screen {
-            width: 100%;
-            height: 100%;
+            position: fixed;
+            inset: 0;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            background: linear-gradient(135deg, #388E3C, #1B5E20); /* A TELA É A MESA */
+            width: 100vw;
+            height: 100vh;
         }
         
-        .game-header {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            gap: 1rem;
+        /* Barra Superior (Oponentes) */
+        #opponent-hands-container {
             flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            padding: 0.5rem 1rem;
+            width: 100%;
+            z-index: 10;
         }
         
-        #game-info {
-            flex: 1;
-            max-width: 28rem;
-            width: 100%;
-        }
-        #game-info h2 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            word-break: break-all;
-        }
-        #game-info .turn-status {
-            font-size: 1.125rem;
-            margin-top: 0.5rem;
-        }
-        #game-info .chips-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-        }
-
         #opponent-hands {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 1rem;
-            flex: 1;
+            min-height: 4.5rem; /* Altura da peça .domino-back + margem */
         }
         .opponent-hand {
             display: flex;
@@ -487,7 +508,8 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin-bottom: 0.5rem;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .opponent-hand .opponent-info span {
             font-weight: 500;
@@ -498,26 +520,27 @@
             justify-content: center;
         }
         
+        /* Área da Mesa (Centro) */
         #board-area {
-            flex-grow: 1;
-            background: linear-gradient(135deg, #388E3C, #1B5E20);
-            border: 4px solid #1B5E20;
-            border-radius: 1rem;
-            padding: 1rem;
+            flex-grow: 1; /* Ocupa todo o espaço restante */
             display: flex;
-            /* --- INÍCIO DAS MUDANÇAS --- */
-            /* Queremos que as peças "quebrem a linha" */
-            flex-wrap: wrap;
-            /* Centraliza as peças na mesa */
-            justify-content: center; 
-            align-items: center;
-            /* Trocamos o scroll de horizontal para vertical */
-            overflow-y: auto;
-            overflow-x: hidden;
-             /* --- FIM DAS MUDANÇAS --- */
-            box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.1);
-            min-height: 50vh; /* Garante que a mesa seja "maior" */
+            align-items: center; /* Centraliza a corrente verticalmente */
+            justify-content: flex-start; /* Começa a corrente da esquerda */
+            overflow-x: auto; /* Permite rolar a mesa horizontalmente */
+            overflow-y: hidden;
+            padding: 2rem;
+            position: relative;
         }
+        
+        #domino-chain {
+            display: flex;
+            align-items: center;
+            /* O margin: auto 0 centraliza verticalmente ENQUANTO o conteúdo é menor que a área */
+            /* Quando fica maior, o flex-start do pai (#board-area) assume */
+            margin: auto 0; 
+            padding: 1rem 0; /* Espaço para as buchas crescerem */
+        }
+
         .board-empty-message {
             display: flex;
             flex-direction: column;
@@ -526,41 +549,89 @@
             width: 100%;
             color: rgba(255, 255, 255, 0.7);
             text-align: center;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .board-empty-message .material-icons {
             font-size: 3rem;
             margin-bottom: 0.5rem;
         }
-
-        .game-footer {
+        
+        /* Barra Inferior (Jogador) */
+        #game-footer-bar {
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            width: 100%;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        #game-info {
+            flex-shrink: 0;
+            color: white;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.5rem;
+            width: 180px;
+            text-align: center;
+        }
+        #game-info h2 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            word-break: break-all;
+        }
+        #game-info .turn-status {
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        #game-info .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            justify-content: center;
+        }
+        
+        #player-hand-container {
+            flex-grow: 1; /* Ocupa o espaço entre a info e os botões */
+            overflow: hidden; /* Controla o overflow da mão */
+            min-width: 100px; /* Garante um espaço mínimo */
+        }
+        
+        #player-hand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto; /* Mão rola horizontalmente */
+            padding-bottom: 0.5rem; /* Espaço para a barra de rolagem (oculta) */
+            min-height: 8rem; /* Altura da peça .domino + padding */
+            /* Oculta scrollbars */
+            scrollbar-width: none; /* Firefox */
+        }
+        /* Oculta scrollbars Webkit */
+        #player-hand::-webkit-scrollbar {
+            display: none;
+        }
+        
+        #game-controls {
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            align-items: stretch;
-            margin: 1rem 0;
-            gap: 1rem;
-            flex-shrink: 0;
+            gap: 0.5rem;
         }
         
-        #board-area::-webkit-scrollbar, 
-        #player-hand::-webkit-scrollbar, 
-        #game-log::-webkit-scrollbar {
-            height: 8px;
-            width: 8px;
+        #game-controls .button {
+            padding: 0.5rem 1rem; /* Botões menores */
+            font-size: 0.75rem;
         }
         
-        #board-area::-webkit-scrollbar-thumb, 
-        #player-hand::-webkit-scrollbar-thumb, 
-        #game-log::-webkit-scrollbar-thumb {
-            background-color: var(--md-sys-color-primary);
-            border-radius: 4px;
-        }
-        
-        #board-area::-webkit-scrollbar-track, 
-        #player-hand::-webkit-scrollbar-track, 
-        #game-log::-webkit-scrollbar-track {
-            background-color: var(--md-sys-color-surface-variant);
-            border-radius: 4px;
+        /* Oculta o log */
+        #game-log-container {
+            display: none;
         }
         
     </style>
@@ -584,7 +655,7 @@
     </div>
 
     <!-- Tela de Autenticação / Lobby -->
-    <div id="auth-screen" class="card screen-container">
+    <div id="auth-screen" class="card">
         <div class="icon-container">
             <span class="material-icons">dashboard_customize</span>
         </div>
@@ -595,10 +666,6 @@
             <p id="user-id-display">Carregando ID...</p>
         </div>
 
-        <!-- 
-          AVISO DE ERRO DE AUTENTICAÇÃO
-          Este é o aviso que explica o erro da sua imagem.
-        -->
         <div id="firebase-auth-warning">
             <h3>
                 <span class="material-icons">warning</span>
@@ -638,46 +705,54 @@
     </div>
 
     <!-- Tela Principal do Jogo -->
-    <div id="game-screen" class="screen-container hidden">
+    <div id="game-screen" class="hidden">
         
-        <div class="game-header">
-            <div id="game-info">
-                <!-- Info do jogo será injetada aqui -->
-            </div>
-            
+        <!-- 1. Mãos dos Oponentes (Topo) -->
+        <div id="opponent-hands-container">
             <div id="opponent-hands">
                 <!-- Mãos dos oponentes aqui -->
             </div>
         </div>
-
-        <div id="board-area">
-            <!-- Peças do tabuleiro aqui -->
+        
+        <!-- 2. Mesa Principal (Centro) -->
+        <div id="board-area" class="hidden-scrollbar">
+            <div id="domino-chain">
+                <!-- Peças do tabuleiro aqui -->
+            </div>
         </div>
-
-        <div class="game-footer">
+        
+        <!-- 3. Barra de Controle (Base) -->
+        <div id="game-footer-bar">
+            <!-- Info do Jogo -->
+            <div id="game-info">
+                <!-- Info do jogo será injetada aqui -->
+            </div>
+            
+            <!-- Mão do Jogador (Drag-and-Drop) -->
+            <div id="player-hand-container">
+                <div id="player-hand" class="hidden-scrollbar">
+                    <!-- Peças do jogador aqui -->
+                </div>
+            </div>
+            
+            <!-- Controles -->
             <div id="game-controls" class="hidden">
                 <button id="boneyard" class="button button-filled">
-                    <!-- Ícone e texto serão injetados -->
+                    <span class="material-icons">style</span>
+                    Comprar
                 </button>
                 <button id="pass-turn-btn" class="button button-outlined">
                     <span class="material-icons">skip_next</span>
-                    Passar Vez
+                    Passar
                 </button>
-            </div>
-            <div id="game-log-container" class="card">
-                <h3>Histórico do Jogo</h3>
-                <div id="game-log">
-                    <!-- Log do Jogo -->
-                </div>
             </div>
         </div>
 
-        <div id="player-hand-container" class="card">
-            <h3>Sua Mão</h3>
-            <div id="player-hand">
-                <!-- Peças do jogador aqui -->
-            </div>
+        <!-- Oculto -->
+        <div id="game-log-container" class="hidden">
+            <div id="game-log"></div>
         </div>
+        <div id="player-hand-container-old" class="hidden"></div>
     </div>
 
     <script type="module">
@@ -721,6 +796,7 @@
         let currentGameId = null;
         let localGameState = null;
         let gameUnsubscribe = null;
+        let sortableInstance = null; // Instância do Sortable.js
 
         // Elementos da UI
         let authScreen, gameScreen, modalOverlay, modalContent, gameIdInput, createGameBtn, joinGameBtn;
@@ -728,6 +804,7 @@
         let userIdDisplay;
         let toastContainer;
         let authWarningBox;
+        let dominoChain;
 
         // --- Funções de UI (Modal, Toast) ---------------------------------------
 
@@ -808,6 +885,7 @@
                 gameInfo = document.getElementById('game-info');
                 opponentHands = document.getElementById('opponent-hands');
                 boardArea = document.getElementById('board-area');
+                dominoChain = document.getElementById('domino-chain'); // Novo
                 playerHand = document.getElementById('player-hand');
                 gameControls = document.getElementById('game-controls');
                 boneyard = document.getElementById('boneyard');
@@ -828,6 +906,9 @@
                 joinGameBtn.onclick = joinGame;
                 boneyard.onclick = drawFromBoneyard;
                 passTurnBtn.onclick = passTurn;
+                
+                // Inicializa o Sortable.js
+                initSortable();
 
             } catch (e) {
                 console.error("Erro ao inicializar:", e);
@@ -1015,6 +1096,50 @@
                 hideModal();
             }
         }
+        
+        // --- Drag-and-Drop (Sortable.js) ---
+        
+        function initSortable() {
+            if (sortableInstance) {
+                sortableInstance.destroy();
+            }
+            if (!playerHand) return;
+            
+            sortableInstance = new Sortable(playerHand, {
+                animation: 150,
+                ghostClass: 'domino-ghost', // Classe CSS para o "fantasma"
+                onEnd: (evt) => {
+                    // Atualiza a ordem no ESTADO LOCAL
+                    if (localGameState && localGameState.players[currentUserId]) {
+                        const hand = localGameState.players[currentUserId].hand;
+                        const [movedItem] = hand.splice(evt.oldIndex, 1);
+                        hand.splice(evt.newIndex, 0, movedItem);
+                        
+                        // Re-renderiza a mão localmente para atualizar os eventos de clique
+                        renderPlayerHandUI(hand);
+                    }
+                }
+            });
+        }
+        
+        /**
+         * Compara duas mãos para ver se contêm as mesmas peças,
+         * independentemente da ordem.
+         */
+        function handsAreEquivalent(handA, handB) {
+            if (!handA || !handB || handA.length !== handB.length) {
+                return false;
+            }
+            
+            const pieceToString = (p) => `${Math.min(p.top, p.bottom)}-${Math.max(p.top, p.bottom)}`;
+            
+            const sortedA = handA.map(pieceToString).sort().join(',');
+            const sortedB = handB.map(pieceToString).sort().join(',');
+            
+            return sortedA === sortedB;
+        }
+
+        // --- Listener Principal do Jogo ---
 
         function listenToGame(gameId) {
             currentGameId = gameId;
@@ -1031,8 +1156,23 @@
             gameUnsubscribe = onSnapshot(gameRef, (doc) => {
                 if (doc.exists()) {
                     console.log("Dados do jogo recebidos:", doc.data());
-                    localGameState = doc.data();
+                    
+                    const serverState = doc.data();
+                    
+                    // LÓGICA DE PRESERVAÇÃO DA ORDEM DA MÃO
+                    if (localGameState && 
+                        localGameState.players[currentUserId] && 
+                        serverState.players[currentUserId] &&
+                        handsAreEquivalent(localGameState.players[currentUserId].hand, serverState.players[currentUserId].hand)) 
+                    {
+                        // As mãos são as mesmas (só a ordem mudou localmente).
+                        // Mantemos a ordem local!
+                        serverState.players[currentUserId].hand = localGameState.players[currentUserId].hand;
+                    }
+                    
+                    localGameState = serverState;
                     renderGame(localGameState);
+                    
                 } else {
                     console.warn("O jogo foi deletado ou não existe.");
                     showToast("O jogo foi encerrado", "error");
@@ -1063,19 +1203,11 @@
         function renderGame(state) {
             if (!state) return;
             
-            // Se um modal de "loading" estiver aberto e o jogo avançar
-            // para 'playing' ou 'ended', devemos fechar o modal.
             const isLoadingModal = !!modalContent.querySelector('.loading-spinner-container');
             if (isLoadingModal && (state.gameStatus === 'playing' || state.gameStatus === 'ended')) {
                 hideModal();
             }
             
-            /* * >>> CORREÇÃO DE "JOGO CONGELADO" <<<
-             * Verifica se o modal está visível E não está em processo de 
-             * fechamento (isModalHiding) E não é um modal de loading.
-             * Isso permite que o render() continue mesmo durante a animação 
-             * de 200ms do hideModal().
-             */
             const isModalVisible = !modalOverlay.classList.contains('hidden');
             const isModalHiding = modalOverlay.style.opacity === '0';
             const isLoadingModalCheck = !!modalContent.querySelector('.loading-spinner-container');
@@ -1086,58 +1218,56 @@
 
             // Limpa áreas
             opponentHands.innerHTML = '';
-            playerHand.innerHTML = '';
-            boardArea.innerHTML = '';
-            gameLog.innerHTML = '';
+            // playerHand.innerHTML = ''; (Não limpa mais aqui, é controlado por renderPlayerHandUI)
+            dominoChain.innerHTML = ''; // Limpa a corrente
+            // gameLog.innerHTML = ''; (Oculto)
 
-            // 1. Informações do Jogo
+            // 1. Informações do Jogo (na barra inferior)
             let turnText = "Carregando...";
-            let statusColor = "var(--md-sys-color-on-surface-variant)";
+            let statusColor = "white";
             
             if (state.gameStatus === 'waiting') {
-                turnText = `Aguardando jogadores... (${state.playerIds.length}/4)`;
-                statusColor = "var(--md-sys-color-primary)";
+                turnText = `Aguardando... (${state.playerIds.length}/4)`;
+                statusColor = "var(--md-sys-color-primary-container)";
             } else if (state.gameStatus === 'playing') {
                 if (state.currentPlayerId === currentUserId) {
                     turnText = "É a sua vez!";
-                    statusColor = "var(--md-sys-color-success)";
+                    statusColor = "var(--md-sys-color-success-container)";
                 } else {
                     turnText = `Vez de: ${state.currentPlayerId.substring(0, 5)}...`;
                     statusColor = "#E65100";
                 }
             } else if (state.gameStatus === 'ended') {
-                turnText = `Fim de Jogo! Vencedor: ${state.winner.substring(0, 5)}...`;
-                statusColor = "var(--md-sys-color-primary)";
+                turnText = `Fim de Jogo!`;
+                statusColor = "var(--md-sys-color-primary-container)";
             }
             
             gameInfo.innerHTML = `
-                <div class="card">
-                    <h2>Jogo: ${state.gameId}</h2>
-                    <p class="turn-status" style="color: ${statusColor}; font-weight: 500;">${turnText}</p>
-                    <div class="chips-container">
-                        <span class="chip">Jogadores: ${state.playerIds.length}/4</span>
-                        ${state.gameStatus === 'playing' ? `<span class="chip">Peças no monte: ${state.boneyard.length}</span>` : ''}
-                    </div>
+                <h2>${state.gameId}</h2>
+                <p class="turn-status" style="color: ${statusColor}; font-weight: 500;">${turnText}</p>
+                <div class="chips-container">
+                    ${state.gameStatus === 'playing' ? `<span class="chip">Monte: ${state.boneyard.length}</span>` : `<span class="chip">Jogadores: ${state.playerIds.length}/4</span>`}
                 </div>
             `;
 
-            // 2. Botão de Iniciar (apenas para o Host)
+            // 2. Botão de Iniciar (apenas para o Host, dentro do gameInfo)
             if (state.gameStatus === 'waiting' && state.hostId === currentUserId) {
-                const gameInfoCard = gameInfo.querySelector('.card');
                 if (state.playerIds.length >= 2) {
                     const startGameBtn = document.createElement('button');
-                    startGameBtn.innerHTML = `<span class="material-icons">play_arrow</span> Iniciar Jogo (${state.playerIds.length} jogadores)`;
+                    startGameBtn.innerHTML = `<span class="material-icons" style="font-size: 1rem;">play_arrow</span> Iniciar (${state.playerIds.length})`;
                     startGameBtn.className = "button button-filled";
-                    startGameBtn.style.marginTop = "1rem";
+                    startGameBtn.style.marginTop = "0.5rem";
+                    startGameBtn.style.padding = "0.5rem 0.75rem";
+                    startGameBtn.style.fontSize = "0.75rem";
                     startGameBtn.onclick = () => startGame(state);
-                    gameInfoCard.appendChild(startGameBtn);
+                    gameInfo.appendChild(startGameBtn);
                 } else {
                     const waitingText = document.createElement('p');
-                    waitingText.style.fontSize = "0.875rem";
+                    waitingText.style.fontSize = "0.75rem";
                     waitingText.style.color = "var(--md-sys-color-on-surface-variant)";
-                    waitingText.style.marginTop = "1rem";
-                    waitingText.innerText = "Aguardando pelo menos 2 jogadores...";
-                    gameInfoCard.appendChild(waitingText);
+                    waitingText.style.marginTop = "0.5rem";
+                    waitingText.innerText = "Aguarde (mín 2)";
+                    gameInfo.appendChild(waitingText);
                 }
             }
 
@@ -1145,7 +1275,7 @@
             if (state.gameStatus !== 'playing' && state.gameStatus !== 'ended') {
                 gameControls.classList.add('hidden');
                 opponentHands.innerHTML = '';
-                boardArea.innerHTML = `
+                dominoChain.innerHTML = `
                     <div class="board-empty-message">
                         <span class="material-icons">groups</span>
                         <p>Aguardando o host iniciar o jogo...</p>
@@ -1158,7 +1288,7 @@
 
             const isMyTurn = state.currentPlayerId === currentUserId && state.gameStatus === 'playing';
 
-            // 3. Mãos dos Oponentes
+            // 3. Mãos dos Oponentes (no topo)
             state.playerIds.forEach(pid => {
                 if (pid === currentUserId) return;
                 const hand = state.players[pid] ? state.players[pid].hand : [];
@@ -1168,7 +1298,7 @@
                 opponentDiv.innerHTML = `
                     <div class="opponent-info">
                         <span>${pid.substring(0, 5)}...</span>
-                        <span class="chip">${hand.length} peças</span>
+                        <span class="chip" style="background: rgba(255,255,255,0.7); color: black;">${hand.length}p</span>
                     </div>
                     <div class="domino-back-container">
                         ${[...Array(hand.length)].map(() => `<div class="domino-back"></div>`).join('')}
@@ -1179,7 +1309,7 @@
 
             // 4. Tabuleiro (Board)
             if (state.board.length === 0) {
-                boardArea.innerHTML = `
+                dominoChain.innerHTML = `
                     <div class="board-empty-message">
                         <span class="material-icons">dashboard_customize</span>
                         <p>O jogo começará aqui</p>
@@ -1187,34 +1317,16 @@
                 `;
             } else {
                 state.board.forEach(piece => {
-                    boardArea.appendChild(createDominoElement(piece, true));
+                    dominoChain.appendChild(createDominoElement(piece, true));
                 });
             }
 
-            // 5. Mão do Jogador
+            // 5. Mão do Jogador (Renderização separada)
             const myHand = state.players[currentUserId] ? state.players[currentUserId].hand : [];
+            renderPlayerHandUI(myHand); // Usa a função helper
             
-            if (myHand.length === 0 && state.gameStatus === 'playing') {
-                playerHand.innerHTML = `
-                    <div style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem;">
-                        <span class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">inventory_2</span>
-                        <p>Você não tem peças</p>
-                    </div>
-                `;
-            } else {
-                myHand.forEach((piece, index) => {
-                    const pieceEl = createDominoElement(piece, false);
-                    if (isMyTurn) {
-                        pieceEl.onclick = () => onPieceClick(piece, index);
-                    } else {
-                        pieceEl.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                    playerHand.appendChild(pieceEl);
-                });
-            }
-
             // 6. Controles (Monte, Passar)
-            boneyard.innerHTML = `<span class="material-icons">style</span> Monte (${state.boneyard.length})`;
+            boneyard.innerHTML = `<span class="material-icons" style="font-size: 1rem;">style</span> Monte (${state.boneyard.length})`;
             
             if (isMyTurn) {
                 boneyard.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -1222,32 +1334,58 @@
                 boneyard.disabled = state.boneyard.length === 0;
                 passTurnBtn.disabled = false;
                 
-                playerHand.classList.add('ring-active');
+                playerHand.style.border = "2px solid var(--md-sys-color-success)";
+                playerHand.style.borderRadius = "0.5rem";
             } else {
                 boneyard.classList.add('opacity-50', 'cursor-not-allowed');
                 passTurnBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 boneyard.disabled = true;
                 passTurnBtn.disabled = true;
-                playerHand.classList.remove('ring-active');
+                playerHand.style.border = "2px solid transparent";
             }
             
             if(boneyard.disabled) boneyard.classList.add('opacity-50');
 
-            // 7. Log
-            if (state.log.length === 0) {
-                gameLog.innerHTML = `<p style="font-style: italic;">Nenhuma ação registrada ainda...</p>`;
-            } else {
-                state.log.slice(-8).reverse().forEach(msg => {
-                    const logEntry = document.createElement('p');
-                    logEntry.textContent = msg;
-                    gameLog.appendChild(logEntry);
-                });
-            }
-
+            // 7. Log (Oculto)
+            
             // 8. Tela de Vitória
             if (state.gameStatus === 'ended') {
                 showWinScreen(state.winner, state.players);
             }
+        }
+        
+        /**
+         * Renderiza APENAS a mão do jogador.
+         * Esta função é chamada por renderGame e pelo initSortable.
+         */
+        function renderPlayerHandUI(hand) {
+            if (!playerHand) return;
+            
+            const isMyTurn = localGameState.currentPlayerId === currentUserId && localGameState.gameStatus === 'playing';
+            
+            playerHand.innerHTML = ''; // Limpa a mão
+            
+            if (hand.length === 0 && localGameState.gameStatus === 'playing') {
+                playerHand.innerHTML = `
+                    <div style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem; margin: auto;">
+                        <span class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">inventory_2</span>
+                        <p>Você não tem peças</p>
+                    </div>
+                `;
+            } else {
+                hand.forEach((piece) => {
+                    const pieceEl = createDominoElement(piece, false);
+                    if (isMyTurn) {
+                        // Passa a PEÇA, não o índice, para o click
+                        pieceEl.onclick = () => onPieceClick(piece); 
+                    } else {
+                        pieceEl.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    playerHand.appendChild(pieceEl);
+                });
+            }
+            // Re-inicializa o sortable na mão recém-renderizada
+            initSortable();
         }
         
         function createDominoElement(piece, isBoardPiece) {
@@ -1474,10 +1612,25 @@
             });
         }
 
-        async function onPieceClick(piece, pieceIndex) {
+        /**
+         * Chamado quando uma peça na MÃO DO JOGADOR é clicada.
+         * 'piece' é o objeto da peça clicada.
+         */
+        async function onPieceClick(piece) {
             console.log("Peça clicada:", piece);
             const state = localGameState;
             if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') {
+                return;
+            }
+            
+            // Encontra o índice da peça no array de dados (ignora a ordem visual)
+            const pieceIndex = state.players[currentUserId].hand.findIndex(
+                p => p.top === piece.top && p.bottom === piece.bottom
+            );
+            
+            // Se não encontrar (o que não deve acontecer), sai
+            if (pieceIndex === -1) {
+                console.error("Peça clicada não encontrada na mão!", piece);
                 return;
             }
 
@@ -1536,6 +1689,7 @@
             }
 
             const myHand = state.players[currentUserId].hand;
+            // Remove a peça correta usando o pieceIndex
             const newHand = myHand.filter((_, i) => i !== pieceIndex);
             
             const newPlayers = {
