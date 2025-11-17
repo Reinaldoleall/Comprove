@@ -114,33 +114,102 @@
             background: var(--md-sys-color-primary-container);
         }
 
-        /* Peça no tabuleiro */
-        .domino-board {
-            width: 8rem;
-            height: 4rem;
-            flex-direction: row;
-            margin: -1px; /* Permite que as bordas se sobreponham */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border-radius: 0; /* Bordas retas no meio da corrente */
-        }
-        
-        /* Ajuste para o flex-wrap não quebrar a borda */
-        .domino-board.double + .domino-board {
-             border-top-left-radius: 0.75rem;
-             border-bottom-left-radius: 0.75rem;
-        }
+/* Peça no tabuleiro */
+.domino-board {
+    width: 4rem;      /* REDUZIDO: era 6rem */
+    height: 2rem;     /* REDUZIDO: era 3rem */
+    flex-direction: row;
+    margin: -1px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 0;
+}
 
-        .domino-board .domino-half { height: 100%; }
-        .domino-board .domino-divider { width: 2px; height: 90%; }
-        
-        .domino-board.double {
-            width: 4rem;
-            height: 8rem;
-            flex-direction: column;
-            border-radius: 0.75rem; /* Bucha é sempre arredondada */
-        }
+/* Ajuste para o flex-wrap não quebrar a borda */
+.domino-board.double + .domino-board {
+     border-top-left-radius: 0.5rem;   /* REDUZIDO */
+     border-bottom-left-radius: 0.5rem; /* REDUZIDO */
+}
 
-        .domino-board.double .domino-divider { width: 90%; height: 2px; }
+.domino-board .domino-half { 
+    height: 100%; 
+    font-size: 1rem; /* FONTE MENOR */
+}
+
+.domino-board .domino-divider { 
+    width: 2px; 
+    height: 90%; 
+}
+
+/* Bucha no tabuleiro - MUITO MENOR */
+.domino-board.double {
+    width: 2rem;      /* REDUZIDO: era 4rem */
+    height: 4rem;     /* REDUZIDO: era 8rem */
+    flex-direction: column;
+    border-radius: 0.5rem; /* REDUZIDO */
+}
+
+.domino-board.double .domino-divider { 
+    width: 90%; 
+    height: 2px; 
+}
+
+/* Oculta TUDO do game-info exceto durante o jogo ativo */
+#game-info .turn-status[style*="Aguardando"],
+#game-info .turn-status[style*="waiting"],
+#game-info .chips-container,
+#game-info .button {
+    display: none !important;
+}
+
+/* Remove completamente quando não é a vez do jogador */
+#game-info:has(.turn-status:not([style*="sua vez"]):not([style*="Vez de"])) .chips-container {
+    display: none !important;
+}
+
+/* Esconde informações de lobby */
+#game-info .turn-status {
+    display: none !important;
+}
+
+#game-info .turn-status[style*="sua vez"],
+#game-info .turn-status[style*="Vez de"] {
+    display: block !important;
+}
+
+/* Remove o chip de jogadores permanentemente */
+#game-info .chip {
+    display: none !important;
+}
+
+/* Oculta tudo na game-info EXCETO o botão Iniciar */
+#game-info > *:not(.button) {
+    display: none !important;
+}
+
+/* Garante que o botão Iniciar fique visível */
+#game-info .button {
+    display: flex !important;
+    margin-top: 0 !important;
+}
+
+/* Remove qualquer padding extra */
+#game-info {
+    padding: 0.25rem !important;
+    min-width: auto !important;
+    width: auto !important;
+}
+
+/* Ajusta o tamanho do botão */
+#game-info .button {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+}
+
+/* Remove o texto "Aguarde (mín 2)" */
+#game-info p {
+    display: none !important;
+}
 
         /* Peça na mão do oponente (MUITO Compacto) */
         .domino-back {
@@ -549,6 +618,85 @@
         
         /* Oculta o log */
         #game-log-container { display: none; }
+        
+        /* --- NOVAS REGRAS RESPONSIVAS --- */
+        
+        /* Ajustes para telas muito pequenas */
+        @media (max-width: 360px) {
+            #player-hand .domino {
+                width: 2rem;
+                height: 4rem;
+                font-size: 0.8rem;
+            }
+            
+            #player-hand {
+                min-height: 4.5rem;
+            }
+            
+            .domino-back {
+                width: 1rem;
+                height: 2rem;
+            }
+            
+            #game-info {
+                width: 100px;
+            }
+            
+            #game-info h2 {
+                font-size: 0.8rem;
+            }
+            
+            #game-controls .button {
+                padding: 0.3rem 0.4rem;
+                font-size: 0.7rem;
+            }
+        }
+        
+        /* Ajustes para telas muito altas */
+        @media (min-height: 800px) {
+            #opponent-hands-container {
+                padding: 0.5rem;
+            }
+            
+            #game-footer-bar {
+                padding: 0.5rem;
+            }
+        }
+        
+        /* Ajustes para telas muito largas */
+        @media (min-width: 600px) and (max-height: 500px) {
+            #player-hand .domino {
+                width: 2rem;
+                height: 4rem;
+                font-size: 0.8rem;
+            }
+            
+            #player-hand {
+                min-height: 4.5rem;
+            }
+            
+            #game-info {
+                width: 100px;
+            }
+        }
+        
+        /* Garantir que tudo caiba na tela */
+        @media (max-height: 600px) {
+            #board-area {
+                padding: 0.5rem;
+            }
+            
+            #domino-chain {
+                gap: 0.25rem;
+                padding: 0.5rem 0;
+            }
+        }
+        
+        /* Ajuste para garantir que o tabuleiro não ultrapasse a tela */
+        #domino-chain {
+            max-width: 100%;
+            max-height: 100%;
+        }
         
     </style>
 </head>
@@ -1779,6 +1927,4 @@
 
     </script>
 </body>
-</html>
-
-
+    </html>
