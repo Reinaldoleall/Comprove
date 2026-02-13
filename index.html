@@ -4,110 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
     <title>Panasonic · Estoque & Concorrência</title>
-    <!-- Tailwind (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase (compat) + jsPDF + autoTable -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
-        /* pequeno ajuste para azul Panasonic */
-        .bg-panasonic { background-color: #004c97; }
-        .border-panasonic { border-color: #004c97; }
-        .text-panasonic { color: #004c97; }
+        :root { --pana-blue: #004c97; }
+        .bg-panasonic { background-color: var(--pana-blue); }
+        .text-panasonic { color: var(--pana-blue); }
+        .border-panasonic { border-color: var(--pana-blue); }
+        
+        /* Oculta scrollbar para abas mas permite scroll */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         .table-scroll { overflow-x: auto; display: block; white-space: nowrap; }
-        .product-table th { background-color: #f0f4fa; }
-        input:focus { outline: 2px solid #004c97; outline-offset: 1px; }
+        input { transition: all 0.2s; }
+        input:focus { outline: none; border-color: var(--pana-blue); box-shadow: 0 0 0 3px rgba(0, 76, 151, 0.15); }
+        textarea:focus { outline: none; border-color: var(--pana-blue); box-shadow: 0 0 0 3px rgba(0, 76, 151, 0.15); }
     </style>
 </head>
-<body class="bg-gray-50 font-sans antialiased p-4 md:p-6">
+<body class="bg-slate-100 font-sans antialiased p-4 md:p-6 text-gray-800">
 
-    <!-- FIREBASE CONFIG (substitua pelos seus dados) -->
     <script>
-        // 🔥 COLOQUE AQUI SUAS CREDENCIAIS DO FIREBASE 🔥
         const firebaseConfig = {
-  apiKey: "AIzaSyAyfJtCTZdIt5IUG5BZNmDd9UiaKBIyKZY",
-  authDomain: "arenadeconhecimento.firebaseapp.com",
-  databaseURL: "https://arenadeconhecimento-default-rtdb.firebaseio.com",
-  projectId: "arenadeconhecimento",
-  storageBucket: "arenadeconhecimento.firebasestorage.app",
-  messagingSenderId: "889132093510",
-  appId: "1:889132093510:web:d9d7ddd92fec82d247ba47"
-};
-        // Inicializa Firebase
+            apiKey: "AIzaSyAyfJtCTZdIt5IUG5BZNmDd9UiaKBIyKZY",
+            authDomain: "arenadeconhecimento.firebaseapp.com",
+            databaseURL: "https://arenadeconhecimento-default-rtdb.firebaseio.com",
+            projectId: "arenadeconhecimento",
+            storageBucket: "arenadeconhecimento.firebasestorage.app",
+            messagingSenderId: "889132093510",
+            appId: "1:889132093510:web:d9d7ddd92fec82d247ba47"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const concorrentesRef = db.ref('concorrentes');
     </script>
 
-    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-4 md:p-6 border-t-4 border-panasonic">
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-panasonic">
         
-        <!-- cabeçalho com identificação -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">📦 REVENDA</label>
-                <input type="text" id="revenda" placeholder="Nome da revenda" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-panasonic">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">📅 DATA</label>
-                <input type="date" id="data" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-panasonic">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">👤 CONSULTOR</label>
-                <input type="text" id="consultor" placeholder="Seu nome" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-panasonic">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">👥 COORDENADOR</label>
-                <input type="text" id="coordenador" placeholder="Nome do coordenador" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-panasonic">
-            </div>
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h1 class="text-2xl font-black text-panasonic tracking-tight">ESTOQUE & CONCORRÊNCIA</h1>
+            <span class="text-sm text-gray-400 font-medium bg-gray-200 px-3 py-1 rounded-full">Gerador Inteligente</span>
         </div>
 
-        <!-- datalist global para concorrentes (sugestões colaborativas) -->
-        <datalist id="listaConcorrentes"></datalist>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">📦 Revenda</label>
+                    <input type="text" id="revenda" placeholder="Nome da loja" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">📅 Data</label>
+                    <input type="date" id="data" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">👤 Consultor</label>
+                    <input type="text" id="consultor" placeholder="Seu nome" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">👥 Coordenador</label>
+                    <input type="text" id="coordenador" placeholder="Seu coordenador" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                </div>
+            </div>
 
-        <!-- abas por categoria (simples com scroll) -->
-        <div class="mb-4 flex flex-wrap gap-2 border-b border-gray-200">
-            <span class="text-lg font-bold text-panasonic mr-4">CATEGORIAS</span>
-            <a href="#refrigerador" class="tab-link text-sm font-medium px-3 py-2 text-gray-600 hover:text-panasonic">Refrigerador</a>
-            <a href="#lavadora" class="tab-link text-sm font-medium px-3 py-2 text-gray-600 hover:text-panasonic">Lavadora</a>
-            <a href="#microondas" class="tab-link text-sm font-medium px-3 py-2 text-gray-600 hover:text-panasonic">Microondas</a>
-            <a href="#forno" class="tab-link text-sm font-medium px-3 py-2 text-gray-600 hover:text-panasonic">Forno/Cooktop</a>
-            <a href="#pessoais" class="tab-link text-sm font-medium px-3 py-2 text-gray-600 hover:text-panasonic">Cuidados Pessoais</a>
-        </div>
+            <datalist id="listaConcorrentes"></datalist>
 
-        <!-- container dos produtos (gerado via JS) -->
-        <div id="produtos-container" class="space-y-8"></div>
+            <div class="mb-6 flex overflow-x-auto hide-scrollbar gap-2 border-b-2 border-gray-100 pb-2">
+                <a href="#refrigerador" class="tab-link whitespace-nowrap text-sm font-bold px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-panasonic transition">Refrigerador</a>
+                <a href="#lavadora" class="tab-link whitespace-nowrap text-sm font-bold px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-panasonic transition">Lavadora</a>
+                <a href="#microondas" class="tab-link whitespace-nowrap text-sm font-bold px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-panasonic transition">Microondas</a>
+                <a href="#forno" class="tab-link whitespace-nowrap text-sm font-bold px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-panasonic transition">Forno/Cooktop</a>
+                <a href="#pessoais" class="tab-link whitespace-nowrap text-sm font-bold px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-panasonic transition">Cuidados Pessoais</a>
+            </div>
 
-        <!-- observações -->
-        <div class="mt-8">
-            <label class="block text-sm font-medium text-gray-700 mb-2">📝 OBSERVAÇÕES</label>
-            <textarea id="obs" rows="3" placeholder="Observações gerais, promoções, etc..." class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
-        </div>
+            <div id="produtos-container" class="space-y-8"></div>
 
-        <!-- barra de ações -->
-        <div class="mt-8 flex flex-wrap gap-3 justify-end border-t pt-6">
-            <button id="salvarRascunho" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium px-5 py-2 rounded-full shadow-sm flex items-center gap-2 transition">
-                💾 Salvar rascunho local
-            </button>
-            <button id="carregarRascunho" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium px-5 py-2 rounded-full shadow-sm flex items-center gap-2 transition">
-                📂 Carregar rascunho
-            </button>
-            <button id="gerarWhatsApp" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-full shadow-sm flex items-center gap-2 transition">
-                📲 WhatsApp
-            </button>
-            <button id="copiarTexto" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium px-5 py-2 rounded-full shadow-sm flex items-center gap-2 transition">
-                📋 Copiar texto
-            </button>
-            <button id="gerarPDF" class="bg-panasonic hover:bg-blue-800 text-white font-medium px-5 py-2 rounded-full shadow-sm flex items-center gap-2 transition">
-                📄 Gerar PDF azul
-            </button>
+            <div class="mt-8 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <label class="block text-sm font-bold text-gray-700 mb-2">📝 OBSERVAÇÕES GERAIS</label>
+                <textarea id="obs" rows="3" placeholder="Insira aqui destaques de vendas, promoções agressivas da concorrência, etc..." class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm resize-none"></textarea>
+            </div>
+
+            <div class="mt-8 flex flex-wrap gap-3 justify-center lg:justify-end border-t border-gray-200 pt-6">
+                <button id="salvarRascunho" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                    💾 Salvar Rascunho
+                </button>
+                <button id="carregarRascunho" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                    📂 Carregar Rascunho
+                </button>
+                <div class="w-full lg:w-px lg:bg-gray-300 lg:mx-2 hidden lg:block"></div>
+                <button id="copiarTexto" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                    📋 Copiar Relatório
+                </button>
+                <button id="gerarWhatsApp" class="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                    📲 Enviar WhatsApp
+                </button>
+                <button id="gerarPDF" class="bg-panasonic hover:bg-blue-900 text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow-lg shadow-blue-900/20 flex items-center gap-2 transition transform hover:-translate-y-0.5">
+                    📄 Gerar PDF Profissional
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
         (function() {
-            // ---------- LISTA DE PRODUTOS POR CATEGORIA (conforme modelo) ----------
             const categorias = [
                 { id: 'refrigerador', nome: 'REFRIGERADOR', modelos: [
                     "NR-BB71GVFB", "NR-BB71GV7B", "NR-BB71PVFX", "NR-BB71PV7X", "NR-BB71PV4B",
@@ -125,7 +126,7 @@
                     "NN-ST25L", "NN-ST27L", "NN-ST55L", "NN-ST65L", "NN-GT68L",
                     "NN-CD89", "NN-ST67L", "NN-ST61N", "NN-ST66N", "NN-ST67L"
                 ] },
-                { id: 'forno', nome: 'FORNO / COOKTOP / COZINHA', modelos: [
+                { id: 'forno', nome: 'FORNO / COOKTOP', modelos: [
                     "NN-GB68QBRUK", "NN-GB68QSRUK", "HL-CX668SRPK", "HL-CX672BRPK", "NP-6M2FTKBRP",
                     "NP-6M1MBKBRP", "KY-W648CLRPK", "KY-T937XLRPK", "FV-6HSUB2", "FV-9HSDB2"
                 ] },
@@ -135,11 +136,9 @@
                 ] }
             ];
 
-            // ---------- estado dos concorrentes (colaborativo) ----------
             let concorrentesSet = new Set();
             const datalist = document.getElementById('listaConcorrentes');
 
-            // carrega concorrentes do Firebase e atualiza datalist
             function carregarConcorrentes() {
                 concorrentesRef.on('value', (snapshot) => {
                     const data = snapshot.val();
@@ -160,47 +159,45 @@
                 });
             }
 
-            // adiciona novo concorrente ao Firebase (se não existir)
             function adicionarConcorrente(valor) {
                 if (!valor || typeof valor !== 'string') return;
                 valor = valor.trim();
                 if (valor === '' || concorrentesSet.has(valor)) return;
-                // usa o próprio valor como chave (escape para evitar caracteres inválidos)
                 const safeKey = valor.replace(/[.#$\[\]]/g, '_');
                 concorrentesRef.child(safeKey).set(true);
             }
 
-            // ---------- gerar HTML das tabelas ----------
+            // Geração da Tabela no HTML
             const container = document.getElementById('produtos-container');
             function renderizarTabelas() {
                 let html = '';
                 categorias.forEach(cat => {
-                    html += `<div id="${cat.id}" class="bg-white rounded-xl border border-gray-200 overflow-hidden">`;
-                    html += `<div class="bg-panasonic px-4 py-2 text-white font-bold text-lg">${cat.nome}</div>`;
-                    html += `<div class="table-scroll"><table class="min-w-full divide-y divide-gray-200 product-table">`;
-                    // cabeçalho
-                    html += `<thead class="bg-gray-100"><tr>`;
-                    html += `<th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">PANASONIC</th>`;
-                    html += `<th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">PREÇO (R$)</th>`;
-                    html += `<th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">CD</th>`;
-                    html += `<th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">CONCORRENTE (produto)</th>`;
-                    html += `<th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">PREÇO CONCORRENTE (R$)</th>`;
-                    html += `</tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+                    html += `<div id="${cat.id}" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6 scroll-mt-6">`;
+                    html += `<div class="bg-panasonic px-5 py-3 text-white font-bold tracking-wide">${cat.nome}</div>`;
+                    html += `<div class="table-scroll"><table class="min-w-full divide-y divide-gray-200">`;
                     
-                    cat.modelos.forEach(modelo => {
-                        html += `<tr class="hover:bg-gray-50">`;
-                        html += `<td class="px-3 py-2 whitespace-nowrap font-mono text-sm">${modelo}</td>`;
-                        html += `<td class="px-3 py-2"><input type="text" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="preco" placeholder="0,00" class="w-24 border border-gray-300 rounded px-2 py-1 text-sm"></td>`;
-                        html += `<td class="px-3 py-2"><input type="text" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="cd" placeholder="CD" class="w-16 border border-gray-300 rounded px-2 py-1 text-sm"></td>`;
-                        html += `<td class="px-3 py-2"><input type="text" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="concorrente" list="listaConcorrentes" placeholder="Marca/modelo" class="w-40 border border-gray-300 rounded px-2 py-1 text-sm concorrente-input"></td>`;
-                        html += `<td class="px-3 py-2"><input type="text" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="precoConcorrente" placeholder="0,00" class="w-24 border border-gray-300 rounded px-2 py-1 text-sm"></td>`;
+                    html += `<thead class="bg-gray-50"><tr>`;
+                    html += `<th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">MODELO PANASONIC</th>`;
+                    html += `<th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">PREÇO (R$)</th>`;
+                    html += `<th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">ESTOQUE CD</th>`;
+                    html += `<th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">CONCORRENTE DIRETO</th>`;
+                    html += `<th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">PREÇO CONC. (R$)</th>`;
+                    html += `</tr></thead><tbody class="bg-white divide-y divide-gray-100">`;
+                    
+                    cat.modelos.forEach((modelo, index) => {
+                        const bgClass = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+                        html += `<tr class="${bgClass} hover:bg-blue-50 transition-colors">`;
+                        html += `<td class="px-4 py-2 whitespace-nowrap font-mono font-medium text-sm text-gray-800">${modelo}</td>`;
+                        html += `<td class="px-4 py-2"><input type="text" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="preco" placeholder="Ex: 3499,00" class="w-28 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white"></td>`;
+                        html += `<td class="px-4 py-2"><input type="number" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="cd" placeholder="Qtd" class="w-20 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white"></td>`;
+                        html += `<td class="px-4 py-2"><input type="text" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="concorrente" list="listaConcorrentes" placeholder="Marca / Modelo" class="w-48 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white concorrente-input"></td>`;
+                        html += `<td class="px-4 py-2"><input type="text" data-categoria="${cat.id}" data-modelo="${modelo}" data-campo="precoConcorrente" placeholder="Ex: 3300,00" class="w-28 border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white"></td>`;
                         html += `</tr>`;
                     });
                     html += `</tbody></table></div></div>`;
                 });
                 container.innerHTML = html;
 
-                // anexar eventos de blur nos campos concorrente para salvar no Firebase
                 document.querySelectorAll('.concorrente-input').forEach(inp => {
                     inp.addEventListener('blur', (e) => {
                         const valor = e.target.value;
@@ -209,16 +206,11 @@
                 });
             }
 
-            // ---------- data atual automática ----------
             function preencherDataHoje() {
                 const hoje = new Date();
-                const ano = hoje.getFullYear();
-                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-                const dia = String(hoje.getDate()).padStart(2, '0');
-                document.getElementById('data').value = `${ano}-${mes}-${dia}`;
+                document.getElementById('data').value = hoje.toISOString().split('T')[0];
             }
 
-            // ---------- salvar rascunho no localStorage ----------
             function salvarRascunho() {
                 const rascunho = {
                     revenda: document.getElementById('revenda').value,
@@ -241,12 +233,12 @@
                     entry[campo] = valor;
                 });
                 localStorage.setItem('rascunhoEstoque', JSON.stringify(rascunho));
-                alert('✅ Rascunho salvo no navegador');
+                alert('✅ Rascunho salvo com sucesso!');
             }
 
             function carregarRascunho() {
                 const saved = localStorage.getItem('rascunhoEstoque');
-                if (!saved) { alert('Nenhum rascunho encontrado'); return; }
+                if (!saved) { alert('Nenhum rascunho salvo encontrado.'); return; }
                 try {
                     const rascunho = JSON.parse(saved);
                     document.getElementById('revenda').value = rascunho.revenda || '';
@@ -256,7 +248,6 @@
                     document.getElementById('obs').value = rascunho.obs || '';
                     
                     rascunho.produtos.forEach(p => {
-                        // preencher inputs correspondentes
                         const precoInp = document.querySelector(`input[data-categoria="${p.categoria}"][data-modelo="${p.modelo}"][data-campo="preco"]`);
                         if (precoInp) precoInp.value = p.preco || '';
                         const cdInp = document.querySelector(`input[data-categoria="${p.categoria}"][data-modelo="${p.modelo}"][data-campo="cd"]`);
@@ -266,154 +257,209 @@
                         const precoConcInp = document.querySelector(`input[data-categoria="${p.categoria}"][data-modelo="${p.modelo}"][data-campo="precoConcorrente"]`);
                         if (precoConcInp) precoConcInp.value = p.precoConcorrente || '';
                     });
-                    alert('✅ Rascunho carregado');
+                    alert('✅ Dados carregados com sucesso!');
                 } catch (e) {
-                    alert('Erro ao carregar rascunho');
+                    alert('Erro ao carregar o rascunho.');
                 }
             }
 
-            // ---------- gerar texto para WhatsApp ----------
+            // Geração de Texto Inteligente (Apenas Preenchidos)
             function gerarTextoCompleto() {
-                let texto = '*ESTOQUE DA REVENDA:*\n';
-                texto += '------------------------------------------------\n';
-                texto += `*REVENDA:* ${document.getElementById('revenda').value || '________________'}\n`;
-                texto += `*DATA:* ${document.getElementById('data').value || '____-__-__'}\n`;
-                texto += `*CONSULTOR:* ${document.getElementById('consultor').value || '________________'}\n`;
-                texto += `*COORDENADOR:* ${document.getElementById('coordenador').value || '________________'}\n`;
-                texto += '________________________________________________\n';
+                let texto = '*📊 RELATÓRIO DE ESTOQUE E CONCORRÊNCIA*\n\n';
+                
+                texto += `*🏢 Revenda:* ${document.getElementById('revenda').value || 'Não informada'}\n`;
+                const d = document.getElementById('data').value;
+                texto += `*📅 Data:* ${d ? d.split('-').reverse().join('/') : 'Não informada'}\n`;
+                texto += `*👤 Consultor:* ${document.getElementById('consultor').value || 'Não informado'}\n`;
+                texto += `*👥 Coordenador:* ${document.getElementById('coordenador').value || 'Não informado'}\n\n`;
+
+                let itensEncontrados = false;
 
                 categorias.forEach(cat => {
-                    texto += `\n*${cat.nome}:*\n`;
-                    texto += '------------------------------------------------\n';
-                    texto += '*PANASONIC:* | *PREÇO:* | *CD:* | *CONCORRENTE:* | *PREÇO CONCORRENTE:*\n';
+                    let catTexto = `🔹 *${cat.nome}*\n`;
+                    let temProdutoPreenchido = false;
+
                     cat.modelos.forEach(modelo => {
-                        const preco = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="preco"]`)?.value || '';
-                        const cd = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="cd"]`)?.value || '';
-                        const conc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="concorrente"]`)?.value || '';
-                        const precoConc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="precoConcorrente"]`)?.value || '';
-                        if (preco || cd || conc || precoConc) { // só mostra linhas preenchidas? mas pode mostrar tudo
-                            texto += `${modelo.padEnd(15)} R$${preco.padEnd(8)} ${cd.padEnd(6)} ${conc.padEnd(20)} R$${precoConc}\n`;
-                        } else {
-                            texto += `${modelo.padEnd(15)} R$          ${''.padEnd(6)} ${''.padEnd(20)} R$\n`;
+                        const preco = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="preco"]`)?.value.trim();
+                        const cd = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="cd"]`)?.value.trim();
+                        const conc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="concorrente"]`)?.value.trim();
+                        const precoConc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="precoConcorrente"]`)?.value.trim();
+                        
+                        // Verifica se algo foi digitado nesta linha
+                        if (preco || cd || conc || precoConc) {
+                            temProdutoPreenchido = true;
+                            itensEncontrados = true;
+                            
+                            catTexto += `▪️ *${modelo}*\n`;
+                            if(preco || cd) {
+                                catTexto += `  Pan: ${preco ? 'R$ '+preco : '-'} | CD: ${cd || '0'}\n`;
+                            }
+                            if(conc || precoConc) {
+                                catTexto += `  Conc: ${conc || '-'} | ${precoConc ? 'R$ '+precoConc : '-'}\n`;
+                            }
+                            catTexto += `\n`;
                         }
                     });
-                    texto += '________________________________________________\n';
+
+                    if (temProdutoPreenchido) {
+                        texto += catTexto + `\n`;
+                    }
                 });
-                texto += `\n*OBS:* ${document.getElementById('obs').value || ''}\n`;
+
+                if(!itensEncontrados) {
+                    texto += "Nenhum produto foi preenchido neste relatório.\n\n";
+                }
+
+                const obs = document.getElementById('obs').value.trim();
+                if (obs) {
+                    texto += `*📝 OBSERVAÇÕES:*\n${obs}\n`;
+                }
+
                 return texto;
             }
 
-            // ---------- gerar PDF (azul Panasonic) ----------
+            // Gerar PDF Profissional e Otimizado
             function gerarPDF() {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                // A4 formato Retrato fica mais profissional para relatórios
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 
-                // cabeçalho azul
-                doc.setFillColor(0, 76, 151); // #004c97
-                doc.rect(0, 0, doc.internal.pageSize.width, 20, 'F');
-                doc.setTextColor(255,255,255);
+                // Cabeçalho Corporativo
+                doc.setFillColor(0, 76, 151); // Azul Panasonic
+                doc.rect(0, 0, doc.internal.pageSize.width, 25, 'F');
+                doc.setTextColor(255, 255, 255);
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
-                doc.text('PANASONIC - ESTOQUE REVENDA', 10, 14);
+                doc.text('ESTOQUE E CONCORRÊNCIA - PANASONIC', 14, 16);
                 
-                // linha com dados
-                doc.setTextColor(0,0,0);
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                const rev = document.getElementById('revenda').value || '______________';
-                const dat = document.getElementById('data').value || '____-__-__';
-                const cons = document.getElementById('consultor').value || '______________';
-                const coord = document.getElementById('coordenador').value || '______________';
-                doc.text(`Revenda: ${rev}   Data: ${dat}   Consultor: ${cons}   Coord.: ${coord}`, 10, 28);
+                // Área de Dados do Cabeçalho
+                doc.setTextColor(60, 60, 60);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                
+                const revenda = document.getElementById('revenda').value || 'Não informada';
+                const dataRaw = document.getElementById('data').value;
+                const dataFormatada = dataRaw ? dataRaw.split('-').reverse().join('/') : 'Não informada';
+                const consultor = document.getElementById('consultor').value || 'Não informado';
+                const coordenador = document.getElementById('coordenador').value || 'Não informado';
 
-                let yPos = 35;
-                const pageHeight = doc.internal.pageSize.height;
+                doc.text(`Revenda:`, 14, 34); doc.setFont('helvetica', 'normal'); doc.text(revenda, 32, 34);
+                doc.setFont('helvetica', 'bold'); doc.text(`Data:`, 14, 40); doc.setFont('helvetica', 'normal'); doc.text(dataFormatada, 24, 40);
                 
-                categorias.forEach((cat, idx) => {
-                    // verificar espaço
-                    if (yPos > pageHeight - 40) {
-                        doc.addPage();
-                        yPos = 20;
-                    }
-                    // título da categoria
-                    doc.setFillColor(0, 76, 151);
-                    doc.setTextColor(255,255,255);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(11);
-                    doc.text(cat.nome, 10, yPos-2);
-                    doc.setTextColor(0,0,0);
+                doc.setFont('helvetica', 'bold'); doc.text(`Consultor:`, 110, 34); doc.setFont('helvetica', 'normal'); doc.text(consultor, 128, 34);
+                doc.setFont('helvetica', 'bold'); doc.text(`Coord.:`, 110, 40); doc.setFont('helvetica', 'normal'); doc.text(coordenador, 123, 40);
+
+                let finalY = 48;
+                let teveProduto = false;
+
+                categorias.forEach(cat => {
+                    const linhasTabela = [];
                     
-                    // montar dados da tabela
-                    const headers = [['PANASONIC', 'PREÇO (R$)', 'CD', 'CONCORRENTE', 'PREÇO CONCORRENTE (R$)']];
-                    const body = [];
+                    // Filtra apenas produtos preenchidos
                     cat.modelos.forEach(modelo => {
-                        const preco = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="preco"]`)?.value || '';
-                        const cd = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="cd"]`)?.value || '';
-                        const conc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="concorrente"]`)?.value || '';
-                        const precoConc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="precoConcorrente"]`)?.value || '';
-                        body.push([modelo, preco, cd, conc, precoConc]);
+                        const preco = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="preco"]`)?.value.trim();
+                        const cd = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="cd"]`)?.value.trim();
+                        const conc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="concorrente"]`)?.value.trim();
+                        const precoConc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="precoConcorrente"]`)?.value.trim();
+                        
+                        if (preco || cd || conc || precoConc) {
+                            linhasTabela.push([modelo, preco, cd, conc, precoConc]);
+                        }
                     });
 
-                    doc.autoTable({
-                        head: headers,
-                        body: body,
-                        startY: yPos,
-                        margin: { left: 10, right: 10 },
-                        theme: 'grid',
-                        headStyles: { fillColor: [0, 76, 151], textColor: 255, fontStyle: 'bold' },
-                        alternateRowStyles: { fillColor: [240, 244, 250] },
-                        columnStyles: {
-                            0: { cellWidth: 40 },
-                            1: { cellWidth: 20 },
-                            2: { cellWidth: 15 },
-                            3: { cellWidth: 45 },
-                            4: { cellWidth: 25 }
-                        },
-                        didDrawPage: (data) => { yPos = data.cursor.y + 5; }
-                    });
-                    yPos = doc.lastAutoTable.finalY + 8;
+                    // Só desenha a tabela se houver pelo menos 1 produto preenchido na categoria
+                    if (linhasTabela.length > 0) {
+                        teveProduto = true;
+                        
+                        doc.autoTable({
+                            startY: finalY,
+                            head: [[cat.nome, 'PREÇO (R$)', 'CD', 'CONCORRENTE', 'R$ CONC.']],
+                            body: linhasTabela,
+                            theme: 'grid',
+                            headStyles: { fillColor: [0, 76, 151], textColor: 255, fontStyle: 'bold' },
+                            alternateRowStyles: { fillColor: [245, 248, 252] },
+                            styles: { fontSize: 8, cellPadding: 3, textColor: [50, 50, 50] },
+                            columnStyles: {
+                                0: { fontStyle: 'bold', cellWidth: 45 },
+                                1: { halign: 'right', cellWidth: 25 },
+                                2: { halign: 'center', cellWidth: 20 },
+                                3: { cellWidth: 55 },
+                                4: { halign: 'right', cellWidth: 25 }
+                            },
+                            margin: { left: 14, right: 14 }
+                        });
+                        finalY = doc.lastAutoTable.finalY + 8; // Espaço para a próxima tabela
+                    }
                 });
 
-                // observações
-                const obs = document.getElementById('obs').value;
-                if (obs) {
+                if (!teveProduto) {
                     doc.setFontSize(10);
-                    doc.setTextColor(80,80,80);
-                    doc.text(`Obs: ${obs}`, 10, yPos);
+                    doc.setFont('helvetica', 'italic');
+                    doc.text("Nenhum produto preenchido neste relatório.", 14, finalY);
+                    finalY += 10;
                 }
-                doc.save('estoque_panasonic.pdf');
+
+                // Observações
+                const obs = document.getElementById('obs').value.trim();
+                if (obs) {
+                    if (finalY > doc.internal.pageSize.height - 30) {
+                        doc.addPage();
+                        finalY = 20;
+                    }
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Observações:', 14, finalY);
+                    
+                    doc.setFont('helvetica', 'normal');
+                    const splitObs = doc.splitTextToSize(obs, doc.internal.pageSize.width - 28);
+                    doc.text(splitObs, 14, finalY + 6);
+                }
+
+                // Rodapé com número de página
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(7);
+                    doc.setTextColor(150);
+                    doc.text(
+                        `Página ${i} de ${pageCount}  |  Gerado via Sistema Interno`, 
+                        doc.internal.pageSize.width / 2, 
+                        doc.internal.pageSize.height - 10, 
+                        { align: 'center' }
+                    );
+                }
+
+                // Download Automático
+                const nomeArquivo = revenda ? `Relatorio_${revenda.replace(/\s+/g, '_')}.pdf` : `Relatorio_Panasonic.pdf`;
+                doc.save(nomeArquivo);
             }
 
-            // ---------- copiar texto ----------
             function copiarTexto() {
                 const texto = gerarTextoCompleto();
                 navigator.clipboard.writeText(texto).then(() => {
-                    alert('✅ Texto copiado para a área de transferência');
+                    alert('✅ Relatório copiado com sucesso! Você já pode colar no WhatsApp ou E-mail.');
                 }).catch(() => {
-                    prompt('Copie manualmente:', texto);
+                    alert('Erro ao copiar. Tente usar o botão Enviar WhatsApp.');
                 });
             }
 
-            // ---------- abrir WhatsApp ----------
             function abrirWhatsApp() {
                 const texto = encodeURIComponent(gerarTextoCompleto());
                 window.open(`https://api.whatsapp.com/send?text=${texto}`, '_blank');
             }
 
-            // ---------- inicialização ----------
             window.addEventListener('DOMContentLoaded', () => {
                 renderizarTabelas();
                 preencherDataHoje();
-                carregarConcorrentes(); // ouvinte Firebase
+                carregarConcorrentes();
 
-                // botões
                 document.getElementById('salvarRascunho').addEventListener('click', salvarRascunho);
                 document.getElementById('carregarRascunho').addEventListener('click', carregarRascunho);
                 document.getElementById('gerarWhatsApp').addEventListener('click', abrirWhatsApp);
                 document.getElementById('copiarTexto').addEventListener('click', copiarTexto);
                 document.getElementById('gerarPDF').addEventListener('click', gerarPDF);
 
-                // suavizar links de categoria
+                // Scroll suave para as abas
                 document.querySelectorAll('.tab-link').forEach(link => {
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -425,11 +471,5 @@
 
         })();
     </script>
-
-    <!-- instruções rápidas -->
-    <div class="max-w-7xl mx-auto mt-4 text-xs text-gray-400 flex justify-between">
-        <span>✅ Preencha os preços e CD. Ao digitar concorrente, ele é salvo no Firebase e sugerido para todos.</span>
-        <span>🎨 Azul Panasonic | colaborativo em tempo real</span>
-    </div>
 </body>
 </html>
