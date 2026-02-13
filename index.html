@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --pana-blue: #004c97; }
         .bg-panasonic { background-color: var(--pana-blue); }
@@ -87,21 +88,24 @@
             </div>
 
             <div class="mt-8 flex flex-wrap gap-3 justify-center lg:justify-end border-t border-gray-200 pt-6">
-                <button id="salvarRascunho" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                <button id="salvarRascunho" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-sm px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
                     💾 Salvar Rascunho
                 </button>
-                <button id="carregarRascunho" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
-                    📂 Carregar Rascunho
+                <button id="carregarRascunho" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-sm px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                    📂 Carregar
                 </button>
-                <div class="w-full lg:w-px lg:bg-gray-300 lg:mx-2 hidden lg:block"></div>
-                <button id="copiarTexto" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
-                    📋 Copiar Relatório
+                <div class="w-full lg:w-px lg:bg-gray-300 lg:mx-1 hidden lg:block"></div>
+                <button id="copiarTexto" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                    📋 Copiar
                 </button>
-                <button id="gerarWhatsApp" class="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
-                    📲 Enviar WhatsApp
+                <button id="gerarWhatsApp" class="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition">
+                    📲 WhatsApp
                 </button>
-                <button id="gerarPDF" class="bg-panasonic hover:bg-blue-900 text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow-lg shadow-blue-900/20 flex items-center gap-2 transition transform hover:-translate-y-0.5">
-                    📄 Gerar PDF Profissional
+                <button id="gerarExcel" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition transform hover:-translate-y-0.5">
+                    📊 Gerar Excel
+                </button>
+                <button id="gerarPDF" class="bg-panasonic hover:bg-blue-900 text-white font-bold text-sm px-4 py-2.5 rounded-lg shadow-lg shadow-blue-900/20 flex items-center gap-2 transition transform hover:-translate-y-0.5">
+                    📄 Gerar PDF
                 </button>
             </div>
         </div>
@@ -285,7 +289,6 @@
                         const conc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="concorrente"]`)?.value.trim();
                         const precoConc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="precoConcorrente"]`)?.value.trim();
                         
-                        // Verifica se algo foi digitado nesta linha
                         if (preco || cd || conc || precoConc) {
                             temProdutoPreenchido = true;
                             itensEncontrados = true;
@@ -318,21 +321,93 @@
                 return texto;
             }
 
-            // Gerar PDF Profissional e Otimizado
+            // --- NOVA FUNÇÃO: GERAR EXCEL ---
+            function gerarExcel() {
+                const revenda = document.getElementById('revenda').value || 'Não informada';
+                const dataRaw = document.getElementById('data').value;
+                const dataFormatada = dataRaw ? dataRaw.split('-').reverse().join('/') : 'Não informada';
+                const consultor = document.getElementById('consultor').value || 'Não informado';
+                const coordenador = document.getElementById('coordenador').value || 'Não informado';
+                const obs = document.getElementById('obs').value.trim();
+
+                const excelData = [];
+                
+                // Estrutura de Cabeçalho do Arquivo Excel
+                excelData.push(["ESTOQUE E CONCORRÊNCIA - PANASONIC"]);
+                excelData.push(["Revenda:", revenda, "Data:", dataFormatada]);
+                excelData.push(["Consultor:", consultor, "Coordenador:", coordenador]);
+                excelData.push([]); // Linha em branco
+                
+                // Títulos das Colunas
+                excelData.push(["CATEGORIA", "MODELO PANASONIC", "PREÇO PANASONIC (R$)", "ESTOQUE CD", "CONCORRENTE DIRETO", "PREÇO CONCORRENTE (R$)"]);
+
+                let teveProduto = false;
+
+                categorias.forEach(cat => {
+                    cat.modelos.forEach(modelo => {
+                        const preco = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="preco"]`)?.value.trim();
+                        const cd = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="cd"]`)?.value.trim();
+                        const conc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="concorrente"]`)?.value.trim();
+                        const precoConc = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="precoConcorrente"]`)?.value.trim();
+                        
+                        // Adiciona na planilha apenas se a linha foi preenchida
+                        if (preco || cd || conc || precoConc) {
+                            teveProduto = true;
+                            excelData.push([
+                                cat.nome, 
+                                modelo, 
+                                preco ? `R$ ${preco}` : "-", 
+                                cd || "0", 
+                                conc || "-", 
+                                precoConc ? `R$ ${precoConc}` : "-"
+                            ]);
+                        }
+                    });
+                });
+
+                if (!teveProduto) {
+                    excelData.push(["Nenhum produto preenchido neste relatório."]);
+                }
+
+                if (obs) {
+                    excelData.push([]);
+                    excelData.push(["OBSERVAÇÕES:"]);
+                    excelData.push([obs]);
+                }
+
+                // Criar a planilha a partir do array
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+                // Ajustar a largura das colunas do Excel para ficar organizado
+                ws['!cols'] = [
+                    { wch: 22 }, // Categoria
+                    { wch: 20 }, // Modelo Pan
+                    { wch: 22 }, // Preco Pan
+                    { wch: 15 }, // Estoque CD
+                    { wch: 35 }, // Concorrente
+                    { wch: 25 }  // Preco Conc
+                ];
+
+                // Gerar e salvar o arquivo
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Relatorio");
+
+                const nomeArquivo = revenda !== 'Não informada' ? `Relatorio_${revenda.replace(/\s+/g, '_')}.xlsx` : `Relatorio_Panasonic.xlsx`;
+                XLSX.writeFile(wb, nomeArquivo);
+            }
+
+            // Gerar PDF
             function gerarPDF() {
                 const { jsPDF } = window.jspdf;
-                // A4 formato Retrato fica mais profissional para relatórios
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 
-                // Cabeçalho Corporativo
-                doc.setFillColor(0, 76, 151); // Azul Panasonic
+                doc.setFillColor(0, 76, 151);
                 doc.rect(0, 0, doc.internal.pageSize.width, 25, 'F');
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
                 doc.text('ESTOQUE E CONCORRÊNCIA - PANASONIC', 14, 16);
                 
-                // Área de Dados do Cabeçalho
                 doc.setTextColor(60, 60, 60);
                 doc.setFontSize(9);
                 doc.setFont('helvetica', 'bold');
@@ -355,7 +430,6 @@
                 categorias.forEach(cat => {
                     const linhasTabela = [];
                     
-                    // Filtra apenas produtos preenchidos
                     cat.modelos.forEach(modelo => {
                         const preco = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="preco"]`)?.value.trim();
                         const cd = document.querySelector(`input[data-categoria="${cat.id}"][data-modelo="${modelo}"][data-campo="cd"]`)?.value.trim();
@@ -367,7 +441,6 @@
                         }
                     });
 
-                    // Só desenha a tabela se houver pelo menos 1 produto preenchido na categoria
                     if (linhasTabela.length > 0) {
                         teveProduto = true;
                         
@@ -388,7 +461,7 @@
                             },
                             margin: { left: 14, right: 14 }
                         });
-                        finalY = doc.lastAutoTable.finalY + 8; // Espaço para a próxima tabela
+                        finalY = doc.lastAutoTable.finalY + 8;
                     }
                 });
 
@@ -399,7 +472,6 @@
                     finalY += 10;
                 }
 
-                // Observações
                 const obs = document.getElementById('obs').value.trim();
                 if (obs) {
                     if (finalY > doc.internal.pageSize.height - 30) {
@@ -415,7 +487,6 @@
                     doc.text(splitObs, 14, finalY + 6);
                 }
 
-                // Rodapé com número de página
                 const pageCount = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     doc.setPage(i);
@@ -429,7 +500,6 @@
                     );
                 }
 
-                // Download Automático
                 const nomeArquivo = revenda ? `Relatorio_${revenda.replace(/\s+/g, '_')}.pdf` : `Relatorio_Panasonic.pdf`;
                 doc.save(nomeArquivo);
             }
@@ -453,10 +523,12 @@
                 preencherDataHoje();
                 carregarConcorrentes();
 
+                // Listeners dos botões (agora com o Gerar Excel)
                 document.getElementById('salvarRascunho').addEventListener('click', salvarRascunho);
                 document.getElementById('carregarRascunho').addEventListener('click', carregarRascunho);
                 document.getElementById('gerarWhatsApp').addEventListener('click', abrirWhatsApp);
                 document.getElementById('copiarTexto').addEventListener('click', copiarTexto);
+                document.getElementById('gerarExcel').addEventListener('click', gerarExcel);
                 document.getElementById('gerarPDF').addEventListener('click', gerarPDF);
 
                 // Scroll suave para as abas
