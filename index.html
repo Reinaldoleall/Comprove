@@ -1,1930 +1,240 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <!-- Meta tag essencial para layout móvel responsivo sem zoom -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dominó Multiplayer Imersivo</title>
-    <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Sortable.js (para Drag-and-Drop) -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    
-    <style>
-        /* --- 1. Reset e Variáveis Globais --- */
-        :root {
-            --md-sys-color-primary: #6750A4;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-primary-container: #EADDFF;
-            --md-sys-color-on-primary-container: #21005D;
-            --md-sys-color-secondary: #625B71;
-            --md-sys-color-on-secondary: #FFFFFF;
-            --md-sys-color-secondary-container: #E8DEF8;
-            --md-sys-color-on-secondary-container: #1D192B;
-            --md-sys-color-surface: #FFFBFE;
-            --md-sys-color-on-surface: #1C1B1F;
-            --md-sys-color-surface-variant: #E7E0EC;
-            --md-sys-color-on-surface-variant: #49454F;
-            --md-sys-color-outline: #79747E;
-            --md-sys-color-error: #B3261E;
-            --md-sys-color-on-error: #FFFFFF;
-            --md-sys-color-error-container: #F9DEDC;
-            --md-sys-color-on-error-container: #410E0B;
-            --md-sys-color-success: #0D652D;
-            --md-sys-color-on-success: #FFFFFF;
-            --md-sys-color-success-container: #A5F3C1;
-            --md-sys-color-on-success-container: #00210B;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title></title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<script src="https://cdn.tailwindcss.com"></script>
 
-        /* O body é o fundo inicial */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #F3E5F5, #E3F2FD);
-            color: var(--md-sys-color-on-surface);
-            overflow: hidden; /* Impede o scroll do body */
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        /* --- 2. Classes de Peças de Dominó --- */
-        .domino {
-            width: 4rem;
-            height: 8rem;
-            border: 2px solid var(--md-sys-color-on-surface);
-            background-color: var(--md-sys-color-surface);
-            border-radius: 0.75rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            align-items: center;
-            font-size: 1.875rem;
-            font-weight: bold;
-            color: var(--md-sys-color-on-surface);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
+const firebaseConfig = {
+  apiKey: "AIzaSyAyfJtCTZdIt5IUG5BZNmDd9UiaKBIyKZY",
+  authDomain: "arenadeconhecimento.firebaseapp.com",
+  databaseURL: "https://arenadeconhecimento-default-rtdb.firebaseio.com",
+  projectId: "arenadeconhecimento",
+  storageBucket: "arenadeconhecimento.firebasestorage.app",
+  messagingSenderId: "889132093510",
+  appId: "1:889132093510:web:d9d7ddd92fec82d247ba47"
+};
 
-        .domino:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-        .domino-half {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            z-index: 1;
-            position: relative;
-        }
+/* ================= PRODUTOS COMPLETOS ================= */
 
-        .domino-divider {
-            height: 2px;
-            width: 90%;
-            background-color: var(--md-sys-color-outline);
-            opacity: 0.5;
-            z-index: 1;
-        }
-        
-        /* Peça na mão do jogador (MUITO Compacto) */
-        #player-hand .domino {
-            width: 2.5rem; /* MUDANÇA: Compacto */
-            height: 5rem; /* MUDANÇA: Compacto */
-            font-size: 1rem; /* MUDANÇA: Compacto */
-            border-radius: 0.25rem;
-        }
-        
-        /* Classe fantasma para Drag-and-Drop */
-        .domino-ghost {
-            opacity: 0.5;
-            background: var(--md-sys-color-primary-container);
-        }
+const categorias = {
 
-/* Peça no tabuleiro */
-.domino-board {
-    width: 4rem;      /* REDUZIDO: era 6rem */
-    height: 2rem;     /* REDUZIDO: era 3rem */
-    flex-direction: row;
-    margin: -1px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    border-radius: 0;
+"REFRIGERADOR":[
+"NR-BB71GVFB","NR-BB71GV7B","NR-BB71PVFX","NR-BB71PV7X","NR-BB71PV4B",
+"NR-BB64PV1X","NR-BB64PV1B","NR-BB64PV2B","NR-BB65GVFB","NR-BB65GV7B",
+"NR-BB41GV1B","NR-BB41GV2B","NR-BB41PV1T","NR-BB41PV2T","NR-BT56PD4W",
+"NR-BT56PD4X","NR-BT41PD1X","NR-BT41PD1W","NR-BT41PD2W","NR-BT44PV3X",
+"NR-BT44PV3B","NR-DB69","NR-DB99"
+],
+
+"LAVADORA":[
+"NA-F120B1W","NA-F120B1TA","NA-F120B5G","NA-F130B1W","NA-F130B1T",
+"NA-F140B1W","NA-F150B1T","NA-F150B1W","NA-F160B6W","NA-F170B7W",
+"NA-F180D1WA","NA-F180P7T","NA-F190G1BW","NA-F190G1B","NA-S26MK1LB"
+],
+
+"MICROONDAS":[
+"NN-ST25L","NN-ST27L","NN-ST55L","NN-ST65L","NN-GT68L","NN-CD89",
+"NN-ST67L","NN-ST61N","NN-ST66N"
+],
+
+"FORNO / COOKTOP / COZINHA":[
+"NN-GB68QBRUK","NN-GB68QSRUK","HL-CX668SRPK","HL-CX672BRPK",
+"NP-6M2FTKBRP","NP-6M1MBKBRP","KY-W648CLRPK","KY-T937XLRPK",
+"FV-6HSUB2","FV-9HSDB2"
+],
+
+"CUIDADOS PESSOAIS":[
+"ER-GK20","ER-GN30","ER-GN25","ER-GK80","ER-GB80",
+"ER-389X","EW-DJ10","ER389X"
+]
+
+};
+
+/* ================= RENDER TABELAS ================= */
+
+const container = document.getElementById("produtosContainer");
+
+Object.keys(categorias).forEach(cat=>{
+
+let bloco = document.createElement("div");
+bloco.className="mb-8";
+
+bloco.innerHTML = `
+<h2 class="text-xl font-bold text-blue-900 mb-3">${cat}</h2>
+<div class="overflow-auto">
+<table class="min-w-full text-sm border">
+<thead class="bg-blue-900 text-white">
+<tr>
+<th class="p-2 text-left">Produto</th>
+<th class="p-2">Preço</th>
+<th class="p-2">CD</th>
+<th class="p-2">Concorrente</th>
+<th class="p-2">Preço Conc.</th>
+</tr>
+</thead>
+<tbody id="tbody_${cat.replace(/\s/g,'')}"></tbody>
+</table>
+</div>
+`;
+
+container.appendChild(bloco);
+
+let tbody = bloco.querySelector("tbody");
+
+categorias[cat].forEach(prod=>{
+let tr=document.createElement("tr");
+tr.innerHTML=`
+<td class="border p-2 font-semibold">${prod}</td>
+<td class="border p-1"><input class="input preco w-full"></td>
+<td class="border p-1"><input class="input cd w-full"></td>
+<td class="border p-1">
+<input list="listaConc" class="input concorrente w-full">
+</td>
+<td class="border p-1"><input class="input precoConc w-full"></td>
+`;
+tbody.appendChild(tr);
+});
+
+});
+
+/* ================= AUTOCOMPLETE GLOBAL ================= */
+
+const dataList=document.createElement("datalist");
+dataList.id="listaConc";
+document.body.appendChild(dataList);
+
+onValue(ref(db,"concorrentes"),snapshot=>{
+dataList.innerHTML="";
+snapshot.forEach(child=>{
+let opt=document.createElement("option");
+opt.value=child.key;
+dataList.appendChild(opt);
+});
+});
+
+document.addEventListener("change",e=>{
+if(e.target.classList.contains("concorrente")){
+let nome=e.target.value.trim();
+if(nome!==""){
+set(ref(db,"concorrentes/"+nome),true);
 }
-
-/* Ajuste para o flex-wrap não quebrar a borda */
-.domino-board.double + .domino-board {
-     border-top-left-radius: 0.5rem;   /* REDUZIDO */
-     border-bottom-left-radius: 0.5rem; /* REDUZIDO */
 }
+});
 
-.domino-board .domino-half { 
-    height: 100%; 
-    font-size: 1rem; /* FONTE MENOR */
+/* ================= GERAR WHATSAPP ================= */
+
+window.gerarWhatsApp=()=>{
+
+let texto=`*ESTOQUE DA REVENDA*\n\n`;
+texto+=`Revenda: ${revenda.value}\n`;
+texto+=`Data: ${data.value}\n`;
+texto+=`Consultor: ${consultor.value}\n`;
+texto+=`Coordenador: ${coordenador.value}\n\n`;
+
+Object.keys(categorias).forEach(cat=>{
+texto+=`*${cat}*\n`;
+categorias[cat].forEach(prod=>{
+document.querySelectorAll("tr").forEach(tr=>{
+if(tr.children[0] && tr.children[0].innerText===prod){
+let inputs=tr.querySelectorAll("input");
+if(inputs[0].value){
+texto+=`${prod} - R$${inputs[0].value} | CD:${inputs[1].value} | ${inputs[2].value} R$${inputs[3].value}\n`;
 }
-
-.domino-board .domino-divider { 
-    width: 2px; 
-    height: 90%; 
 }
+});
+});
+texto+="\n";
+});
 
-/* Bucha no tabuleiro - MUITO MENOR */
-.domino-board.double {
-    width: 2rem;      /* REDUZIDO: era 4rem */
-    height: 4rem;     /* REDUZIDO: era 8rem */
-    flex-direction: column;
-    border-radius: 0.5rem; /* REDUZIDO */
+saida.value=texto;
+window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
+
+};
+
+/* ================= GERAR PDF ================= */
+
+window.gerarPDF=()=>{
+
+import("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js").then(jsPDF=>{
+const { jsPDF:PDF }=jsPDF;
+let doc=new PDF();
+
+doc.setFillColor(0,51,153);
+doc.rect(0,0,210,20,"F");
+doc.setTextColor(255,255,255);
+doc.text("ESTOQUE PANASONIC",10,12);
+
+doc.setTextColor(0,0,0);
+let y=30;
+
+Object.keys(categorias).forEach(cat=>{
+doc.setFontSize(12);
+doc.text(cat,10,y);
+y+=8;
+
+categorias[cat].forEach(prod=>{
+document.querySelectorAll("tr").forEach(tr=>{
+if(tr.children[0] && tr.children[0].innerText===prod){
+let inputs=tr.querySelectorAll("input");
+if(inputs[0].value){
+doc.setFontSize(9);
+doc.text(`${prod} - ${inputs[0].value} - CD ${inputs[1].value} - ${inputs[2].value}`,10,y);
+y+=6;
 }
-
-.domino-board.double .domino-divider { 
-    width: 90%; 
-    height: 2px; 
 }
+});
+});
+y+=5;
+});
 
-/* Oculta TUDO do game-info exceto durante o jogo ativo */
-#game-info .turn-status[style*="Aguardando"],
-#game-info .turn-status[style*="waiting"],
-#game-info .chips-container,
-#game-info .button {
-    display: none !important;
-}
+doc.save("Estoque_Panasonic.pdf");
 
-/* Remove completamente quando não é a vez do jogador */
-#game-info:has(.turn-status:not([style*="sua vez"]):not([style*="Vez de"])) .chips-container {
-    display: none !important;
-}
+};
 
-/* Esconde informações de lobby */
-#game-info .turn-status {
-    display: none !important;
-}
+</script>
 
-#game-info .turn-status[style*="sua vez"],
-#game-info .turn-status[style*="Vez de"] {
-    display: block !important;
-}
-
-/* Remove o chip de jogadores permanentemente */
-#game-info .chip {
-    display: none !important;
-}
-
-/* Oculta tudo na game-info EXCETO o botão Iniciar */
-#game-info > *:not(.button) {
-    display: none !important;
-}
-
-/* Garante que o botão Iniciar fique visível */
-#game-info .button {
-    display: flex !important;
-    margin-top: 0 !important;
-}
-
-/* Remove qualquer padding extra */
-#game-info {
-    padding: 0.25rem !important;
-    min-width: auto !important;
-    width: auto !important;
-}
-
-/* Ajusta o tamanho do botão */
-#game-info .button {
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.75rem !important;
-    white-space: nowrap !important;
-}
-
-/* Remove o texto "Aguarde (mín 2)" */
-#game-info p {
-    display: none !important;
-}
-
-        /* Peça na mão do oponente (MUITO Compacto) */
-        .domino-back {
-            width: 1.2rem; /* MUDANÇA: Compacto */
-            height: 2.4rem; /* MUDANÇA: Compacto */
-            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
-            border: 1px solid var(--md-sys-color-primary);
-            border-radius: 0.25rem;
-            margin: 0.1rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Remove o brilho para economizar performance */
-        .domino-back::after {
-            display: none;
-        }
-
-        /* --- 3. Componentes de UI (Botões, Cards, etc) --- */
-        .card {
-            background-color: var(--md-sys-color-surface);
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            padding: 1.5rem;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 1.25rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            letter-spacing: 0.025rem;
-            text-transform: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-        
-        .button-filled {
-            background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-        }
-        
-        .button-filled:hover {
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .button-outlined {
-            background-color: transparent;
-            color: var(--md-sys-color-primary);
-            border: 1px solid var(--md-sys-color-outline);
-        }
-        
-        .button-outlined:hover {
-            background-color: var(--md-sys-color-primary-container);
-        }
-        
-        .button-text {
-            background-color: transparent;
-            color: var(--md-sys-color-primary);
-        }
-        
-        .button-text:hover {
-            background-color: var(--md-sys-color-primary-container);
-        }
-        
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.5rem;
-            background-color: var(--md-sys-color-surface-variant);
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        /* --- 4. Classes de Utilitários (Hidden, etc) --- */
-        .hidden {
-            display: none !important;
-        }
-        
-        .opacity-50 {
-            opacity: 0.5;
-        }
-        
-        .cursor-not-allowed {
-            cursor: not-allowed;
-        }
-        
-        /* --- 5. Modal e Toast --- */
-        #modal-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.75);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-            padding: 1rem;
-            transition: opacity 0.2s ease-in-out;
-        }
-        
-        #modal-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-            display: flex;
-        }
-
-        #modal-content {
-            color: var(--md-sys-color-on-surface);
-            max-width: 500px;
-            width: 100%;
-        }
-
-        .loading-spinner-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .loading-spinner {
-            width: 4rem;
-            height: 4rem;
-            border: 4px solid var(--md-sys-color-primary);
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-        .loading-spinner-container p {
-            color: white;
-            font-size: 1.125rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #toast-container {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .toast {
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            background-color: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        
-        .toast.success { border-left: 4px solid var(--md-sys-color-success); }
-        .toast.error { border-left: 4px solid var(--md-sys-color-error); }
-        .toast.warning { border-left: 4px solid #F59E0B; }
-
-        /* --- 6. Layout Principal (Lobby) --- */
-        
-        #auth-screen {
-            max-width: 28rem;
-            width: 100%;
-            text-align: center;
-            margin: auto;
-            padding: 1.5rem;
-        }
-        
-        #auth-screen .icon-container { margin-bottom: 1.5rem; }
-        #auth-screen .icon-container .material-icons { font-size: 3rem; color: var(--md-sys-color-primary); }
-        #auth-screen h1 { font-size: 1.875rem; font-weight: bold; color: var(--md-sys-color-on-surface); margin-bottom: 0.5rem; }
-        #auth-screen .subtitle { color: var(--md-sys-color-on-surface-variant); }
-        
-        #user-id-container {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background-color: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            border-radius: 0.5rem;
-        }
-        #user-id-display { font-size: 0.875rem; font-weight: 500; word-break: break-all; }
-        
-        #firebase-auth-warning {
-            display: none;
-            background-color: var(--md-sys-color-error-container);
-            color: var(--md-sys-color-on-error-container);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid var(--md-sys-color-error);
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        #firebase-auth-warning h3 { font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
-        #firebase-auth-warning p { font-size: 0.9rem; margin-top: 0.5rem; }
-        
-        .form-group { margin-bottom: 1.5rem; text-align: left; }
-        .form-group label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; }
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--md-sys-color-outline);
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-            font-size: 1rem;
-            text-transform: uppercase;
-        }
-        .form-group input:focus { outline: none; border-color: var(--md-sys-color-primary); box-shadow: 0 0 0 2px var(--md-sys-color-primary-container); }
-        .form-group .form-hint { font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-top: 0.5rem; }
-        
-        .button-container { display: flex; flex-direction: column; gap: 0.75rem; }
-        .button-container .button { width: 100%; }
-        
-        .footer-note {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--md-sys-color-surface-variant);
-            font-size: 0.75rem;
-            color: var(--md-sys-color-on-surface-variant);
-        }
-
-        /* --- 7. Layout Principal (Jogo) --- */
-        
-        /* Custom Scrollbar (Oculto mas funcional) */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--md-sys-color-primary); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-        
-        .hidden-scrollbar { scrollbar-width: none; /* Firefox */ }
-        
-        #game-screen {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(135deg, #388E3C, #1B5E20); /* A TELA É A MESA */
-            width: 100vw;
-            height: 100vh;
-        }
-        
-        /* Barra Superior (Oponentes) */
-        #opponent-hands-container {
-            flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(5px);
-            padding: 0.25rem 0.5rem; /* Compacto */
-            width: 100%;
-            z-index: 10;
-        }
-        
-        #opponent-hands {
-            display: flex;
-            flex-wrap: nowrap; /* MUDANÇA: Não quebra a linha */
-            justify-content: flex-start; /* MUDANÇA: Começa da esquerda */
-            gap: 0.5rem;
-            min-height: 3rem; /* MUDANÇA: Compacto */
-            overflow-x: auto; /* MUDANÇA: Permite scroll horizontal */
-        }
-        .opponent-hand {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .opponent-hand .opponent-info {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            font-size: 0.75rem;
-        }
-        .opponent-hand .opponent-info span { font-weight: 500; }
-        .opponent-hand .domino-back-container {
-            display: flex;
-            flex-wrap: nowrap; /* MUDANÇA: Não quebra a linha */
-            justify-content: center;
-        }
-        
-        /* Área da Mesa (Centro) */
-        #board-area {
-            flex-grow: 1; /* Ocupa todo o espaço restante */
-            display: flex;
-            /* MUDANÇA: align-items e justify-content centralizam a *primeira* peça */
-            align-items: center; 
-            justify-content: center; 
-            /* MUDANÇA: overflow-y permite scroll vertical da MESA, overflow-x impede */
-            overflow-y: auto; 
-            overflow-x: hidden;
-            padding: 1rem;
-            position: relative;
-            min-height: 0; /* Correção de flexbox para encolhimento */
-        }
-        
-        #domino-chain {
-            display: flex;
-            /* MUDANÇA: flex-wrap: wrap faz o jogo "virar" */
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem; /* Espaço entre as linhas da "cobra" */
-            padding: 1rem 0; /* Espaço para as buchas crescerem */
-        }
-
-        .board-empty-message {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            color: rgba(255, 255, 255, 0.7);
-            text-align: center;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        }
-        .board-empty-message .material-icons { font-size: 3rem; margin-bottom: 0.5rem; }
-        
-        /* Barra Inferior (Jogador) */
-        #game-footer-bar {
-            flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.25rem 0.5rem; /* MUDANÇA: Compacto */
-            width: 100%;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem; /* Compacto */
-        }
-        
-        #game-info {
-            flex-shrink: 0;
-            color: white;
-            padding: 0.25rem 0.5rem; /* Compacto */
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 0.5rem;
-            width: 120px; /* Compacto */
-            text-align: center;
-        }
-        #game-info h2 { font-size: 0.9rem; font-weight: bold; word-break: break-all; }
-        #game-info .turn-status { font-size: 0.75rem; margin-top: 0.1rem; }
-        #game-info .chips-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.25rem;
-            margin-top: 0.25rem; /* Compacto */
-            justify-content: center;
-        }
-        
-        #player-hand-container {
-            flex-grow: 1; /* Ocupa o espaço entre a info e os botões */
-            overflow: hidden; /* Controla o overflow da mão */
-            min-width: 80px; /* Compacto */
-        }
-        
-        #player-hand {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            overflow-x: auto; /* Mão rola horizontalmente */
-            padding: 0.5rem 0.25rem; /* MUDANÇA: Espaço para a mão "respirar" */
-            min-height: 5.5rem; /* MUDANÇA: Altura da peça .domino + padding */
-            scrollbar-width: none; /* Firefox */
-        }
-        #player-hand::-webkit-scrollbar { display: none; }
-        
-        #game-controls {
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        #game-controls .button {
-            padding: 0.4rem 0.5rem; /* Botões menores */
-            font-size: 0.75rem; /* Botões menores */
-            gap: 0.25rem;
-        }
-        #game-controls .button .material-icons {
-            font-size: 1rem;
-        }
-        
-        /* Oculta o log */
-        #game-log-container { display: none; }
-        
-        /* --- NOVAS REGRAS RESPONSIVAS --- */
-        
-        /* Ajustes para telas muito pequenas */
-        @media (max-width: 360px) {
-            #player-hand .domino {
-                width: 2rem;
-                height: 4rem;
-                font-size: 0.8rem;
-            }
-            
-            #player-hand {
-                min-height: 4.5rem;
-            }
-            
-            .domino-back {
-                width: 1rem;
-                height: 2rem;
-            }
-            
-            #game-info {
-                width: 100px;
-            }
-            
-            #game-info h2 {
-                font-size: 0.8rem;
-            }
-            
-            #game-controls .button {
-                padding: 0.3rem 0.4rem;
-                font-size: 0.7rem;
-            }
-        }
-        
-        /* Ajustes para telas muito altas */
-        @media (min-height: 800px) {
-            #opponent-hands-container {
-                padding: 0.5rem;
-            }
-            
-            #game-footer-bar {
-                padding: 0.5rem;
-            }
-        }
-        
-        /* Ajustes para telas muito largas */
-        @media (min-width: 600px) and (max-height: 500px) {
-            #player-hand .domino {
-                width: 2rem;
-                height: 4rem;
-                font-size: 0.8rem;
-            }
-            
-            #player-hand {
-                min-height: 4.5rem;
-            }
-            
-            #game-info {
-                width: 100px;
-            }
-        }
-        
-        /* Garantir que tudo caiba na tela */
-        @media (max-height: 600px) {
-            #board-area {
-                padding: 0.5rem;
-            }
-            
-            #domino-chain {
-                gap: 0.25rem;
-                padding: 0.5rem 0;
-            }
-        }
-        
-        /* Ajuste para garantir que o tabuleiro não ultrapasse a tela */
-        #domino-chain {
-            max-width: 100%;
-            max-height: 100%;
-        }
-        
-    </style>
 </head>
-<body>
 
-    <!-- Tela de Modal (Loading, Vitória, Escolha) -->
-    <div id="modal-overlay" class="hidden" style="opacity: 0;">
-        <div id="modal-content">
-            <!-- Conteúdo do modal será injetado aqui -->
-            <div class="loading-spinner-container">
-                <div class="loading-spinner"></div>
-                <p>Carregando...</p>
-            </div>
-        </div>
-    </div>
+<body class="bg-blue-50 p-6">
 
-    <!-- Container de Toasts -->
-    <div id="toast-container">
-        <!-- Notificações Toast serão injetadas aqui -->
-    </div>
+<div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-xl">
 
-    <!-- Tela de Autenticação / Lobby -->
-    <div id="auth-screen" class="card">
-        <div class="icon-container">
-            <span class="material-icons">dashboard_customize</span>
-        </div>
-        <h1>Dominó Multiplayer</h1>
-        <p class="subtitle">Jogue dominó online com amigos em tempo real</p>
-        
-        <div id="user-id-container">
-            <p id="user-id-display">Carregando ID...</p>
-        </div>
+<h1 class="text-3xl font-bold text-blue-900 mb-6">
+Estoque Panasonic
+</h1>
 
-        <div id="firebase-auth-warning">
-            <h3>
-                <span class="material-icons">warning</span>
-                Ação Necessária (Firebase)
-            </h3>
-            <p>
-                Se a autenticação falhar com o erro <strong>(auth/admin-restricted-operation)</strong>,
-                você precisa <strong>ATIVAR</strong> o provedor "Anônimo" nas configurações
-                do seu projeto Firebase.
-            </p>
-            <p>
-                Firebase Console -> Authentication -> Sign-in method -> Ativar "Anônimo".
-            </p>
-        </div>
-        
-        <div class="form-group">
-            <label for="game-id-input">ID do Jogo</label>
-            <input type="text" id="game-id-input" placeholder="Ex: SALA123" 
-                   oninput="this.value = this.value.toUpperCase()" autocomplete="off">
-            <p class="form-hint">Use um ID único para criar ou entrar em um jogo</p>
-        </div>
-        
-        <div class="button-container">
-            <button id="create-game-btn" class="button button-filled">
-                <span class="material-icons">add</span>
-                Criar Novo Jogo
-            </button>
-            <button id="join-game-btn" class="button button-outlined">
-                <span class="material-icons">login</span>
-                Entrar em Jogo Existente
-            </button>
-        </div>
-        
-        <div class="footer-note">
-            <p>Jogue com 2 a 4 jogadores. Cada jogador recebe 7 peças.</p>
-        </div>
-    </div>
+<div class="grid md:grid-cols-4 gap-4 mb-6">
+<input id="revenda" placeholder="Revenda" class="border p-2 rounded">
+<input id="data" type="date" class="border p-2 rounded">
+<input id="consultor" placeholder="Consultor" class="border p-2 rounded">
+<input id="coordenador" placeholder="Coordenador" class="border p-2 rounded">
+</div>
 
-    <!-- Tela Principal do Jogo -->
-    <div id="game-screen" class="hidden">
-        
-        <!-- 1. Mãos dos Oponentes (Topo) -->
-        <div id="opponent-hands-container">
-            <div id="opponent-hands" class="hidden-scrollbar">
-                <!-- Mãos dos oponentes aqui -->
-            </div>
-        </div>
-        
-        <!-- 2. Mesa Principal (Centro) -->
-        <div id="board-area" class="hidden-scrollbar">
-            <div id="domino-chain">
-                <!-- Peças do tabuleiro aqui -->
-            </div>
-        </div>
-        
-        <!-- 3. Barra de Controle (Base) -->
-        <div id="game-footer-bar">
-            <!-- Info do Jogo -->
-            <div id="game-info">
-                <!-- Info do jogo será injetada aqui -->
-            </div>
-            
-            <!-- Mão do Jogador (Drag-and-Drop) -->
-            <div id="player-hand-container">
-                <div id="player-hand" class="hidden-scrollbar">
-                    <!-- Peças do jogador aqui -->
-                </div>
-            </div>
-            
-            <!-- Controles -->
-            <div id="game-controls" class="hidden">
-                <button id="boneyard" class="button button-filled">
-                    <span class="material-icons">style</span>
-                    Comprar
-                </button>
-                <button id="pass-turn-btn" class="button button-outlined">
-                    <span class="material-icons">skip_next</span>
-                    Passar
-                </button>
-            </div>
-        </div>
+<div id="produtosContainer"></div>
 
-        <!-- Oculto -->
-        <div id="game-log-container" class="hidden">
-            <div id="game-log"></div>
-        </div>
-        <div id="player-hand-container-old" class="hidden"></div>
-    </div>
+<div class="flex gap-4 mt-6">
+<button onclick="gerarWhatsApp()" class="bg-green-600 text-white px-4 py-2 rounded">
+Gerar WhatsApp
+</button>
+<button onclick="gerarPDF()" class="bg-blue-900 text-white px-4 py-2 rounded">
+Gerar PDF Azul Panasonic
+</button>
+</div>
 
-    <script type="module">
-        // Importações do Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            signInAnonymously, 
-            onAuthStateChanged,
-            signInWithCustomToken
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc, 
-            getDoc, 
-            updateDoc, 
-            onSnapshot,
-            setLogLevel
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+<textarea id="saida" class="w-full mt-4 h-40 border rounded p-2"></textarea>
 
-        // --- Configuração do Firebase ---------------------------------------------
-        
-        // Configuração do Firebase
-        const firebaseConfig = {
-          apiKey: "AIzaSyByyM8RvGNM5pyrQIQ7nCH6mmgYAIpq0bc",
-          authDomain: "rifas-c414b.firebaseapp.com",
-          databaseURL: "https://rifas-c414b-default-rtdb.firebaseio.com",
-          projectId: "rifas-c414b",
-          storageBucket: "rifas-c414b.firebasestorage.app",
-          messagingSenderId: "770195193538",
-          appId: "1:770195193538:web:48e585ac5661d27f3dc55b"
-        };
-        
-        // Variáveis do ambiente do Canvas
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'domino-default';
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let app, auth, db;
-        let currentUserId = null;
-        let currentGameId = null;
-        let localGameState = null;
-        let gameUnsubscribe = null;
-        let sortableInstance = null; // Instância do Sortable.js
+</div>
 
-        // Elementos da UI
-        let authScreen, gameScreen, modalOverlay, modalContent, gameIdInput, createGameBtn, joinGameBtn;
-        let gameInfo, opponentHands, boardArea, playerHand, gameControls, boneyard, passTurnBtn, gameLog;
-        let userIdDisplay;
-        let toastContainer;
-        let authWarningBox;
-        let dominoChain;
-
-        // --- Funções de UI (Modal, Toast) ---------------------------------------
-
-        function showSpinner(message = "Carregando...") {
-            modalOverlay.classList.remove('hidden');
-            modalOverlay.style.opacity = '1';
-            modalContent.innerHTML = `
-                <div class="loading-spinner-container">
-                    <div class="loading-spinner"></div>
-                    <p>${message}</p>
-                </div>
-            `;
-        }
-
-        function showModal(htmlContent) {
-            modalOverlay.classList.remove('hidden');
-            modalOverlay.style.opacity = '1';
-            modalContent.innerHTML = htmlContent;
-        }
-        
-        function hideModal() {
-            modalOverlay.style.opacity = '0';
-            setTimeout(() => {
-                modalOverlay.classList.add('hidden');
-                modalContent.innerHTML = '';
-            }, 200);
-        }
-        
-        // Função para mostrar notificações toast
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            
-            let icon = 'info';
-            if (type === 'success') icon = 'check_circle';
-            if (type === 'error') icon = 'error';
-            if (type === 'warning') icon = 'warning';
-            
-            toast.innerHTML = `
-                <span class="material-icons">${icon}</span>
-                <span>${message}</span>
-            `;
-            
-            toastContainer.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    if (toastContainer.contains(toast)) {
-                        toastContainer.removeChild(toast);
-                    }
-                }, 300);
-            }, duration);
-        }
-
-        // --- Funções Principais --------------------------------------------------
-
-        window.onload = () => {
-            // Inicializar Firebase
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug');
-                
-                // Obter referências da UI
-                authScreen = document.getElementById('auth-screen');
-                gameScreen = document.getElementById('game-screen');
-                modalOverlay = document.getElementById('modal-overlay');
-                modalContent = document.getElementById('modal-content');
-                gameIdInput = document.getElementById('game-id-input');
-                createGameBtn = document.getElementById('create-game-btn');
-                joinGameBtn = document.getElementById('join-game-btn');
-                gameInfo = document.getElementById('game-info');
-                opponentHands = document.getElementById('opponent-hands');
-                boardArea = document.getElementById('board-area');
-                dominoChain = document.getElementById('domino-chain'); 
-                playerHand = document.getElementById('player-hand');
-                gameControls = document.getElementById('game-controls');
-                boneyard = document.getElementById('boneyard');
-                passTurnBtn = document.getElementById('pass-turn-btn');
-                gameLog = document.getElementById('game-log');
-                userIdDisplay = document.getElementById('user-id-display');
-                toastContainer = document.getElementById('toast-container');
-                authWarningBox = document.getElementById('firebase-auth-warning');
-
-                // Mostrar spinner de conexão inicial
-                showSpinner('Conectando...');
-
-                // Iniciar autenticação
-                handleAuth();
-
-                // Listeners de botões
-                createGameBtn.onclick = createGame;
-                joinGameBtn.onclick = joinGame;
-                boneyard.onclick = drawFromBoneyard;
-                passTurnBtn.onclick = passTurn;
-                
-                // Inicializa o Sortable.js
-                initSortable();
-
-            } catch (e) {
-                console.error("Erro ao inicializar:", e);
-                showModal(`
-                    <div class="card" style="text-align: center; padding: 1.5rem;">
-                        <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
-                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro na Inicialização</h2>
-                        <p style="color: var(--md-sys-color-on-surface-variant);">Não foi possível carregar o jogo. Verifique o console.</p>
-                        <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">${e.message}</p>
-                    </div>
-                `);
-            }
-        };
-
-        // *** FLUXO DE AUTENTICAÇÃO ROBUSTO ***
-        async function handleAuth() {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    // Caso 1: Usuário está logado
-                    currentUserId = user.uid;
-                    console.log("Autenticado com UID:", currentUserId);
-                    userIdDisplay.textContent = `Seu ID: ${currentUserId}`;
-                    
-                    hideModal();
-                    authScreen.classList.remove('hidden');
-                    gameScreen.classList.add('hidden');
-                } else {
-                    // Caso 2: Usuário NÃO está logado
-                    console.log("Nenhum usuário logado. Tentando login...");
-                    try {
-                        if (authToken) {
-                            console.log("Tentando login com Custom Token...");
-                            await signInWithCustomToken(auth, authToken);
-                        } else {
-                            console.log("Tentando login anônimo...");
-                            await signInAnonymously(auth);
-                        }
-                    } catch (e) {
-                        // Caso 3: A tentativa de login FALHOU
-                        console.error("Erro na autenticação:", e);
-                        
-                        // Mostra o aviso fixo na tela de lobby
-                        if (authWarningBox) authWarningBox.style.display = 'block';
-
-                        // Mostra o modal de erro fatal
-                        showModal(`
-                            <div class="card" style="text-align: center; padding: 1.5rem;">
-                                <span class="material-icons" style="font-size: 3rem; color: var(--md-sys-color-error); margin-bottom: 1rem;">error</span>
-                                <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Erro de Autenticação</h2>
-                                <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 1rem;">
-                                    Não foi possível conectar. Verifique se o login <strong>"Anônimo"</strong>
-                                    está ativado no seu projeto Firebase.
-                                </p>
-                                <p style="font-size: 0.75rem; color: var(--md-sys-color-outline); margin-top: 1rem;">Firebase: ${e.message}</p>
-                                <button id="reload-btn" class="button button-filled" style="margin-top: 1.5rem;">Tentar Novamente</button>
-                            </div>
-                        `);
-                        document.getElementById('reload-btn').onclick = () => window.location.reload();
-                    }
-                }
-            });
-        }
-
-        function getGameRef(gameId) {
-            return doc(db, 'artifacts', appId, 'public', 'data', 'domino_games', gameId);
-        }
-
-        // --- Lógica de Lobby (Criar/Entrar) -------------------------------------
-
-        async function createGame() {
-            const gameId = gameIdInput.value.trim().toUpperCase();
-            if (!gameId) {
-                showToast("Digite um ID para o jogo", "warning");
-                gameIdInput.focus();
-                return;
-            }
-
-            if (gameId.length < 3) {
-                showToast("ID deve ter pelo menos 3 caracteres", "warning");
-                gameIdInput.focus();
-                return;
-            }
-
-            showSpinner('Criando jogo...');
-            const gameRef = getGameRef(gameId);
-
-            try {
-                const gameDoc = await getDoc(gameRef);
-                if (gameDoc.exists()) {
-                    showToast("Jogo já existe. Tente outro ID.", "error");
-                    hideModal();
-                    return;
-                }
-
-                const newGameState = {
-                    gameId: gameId,
-                    hostId: currentUserId,
-                    playerIds: [currentUserId],
-                    players: {},
-                    gameStatus: 'waiting',
-                    board: [],
-                    boneyard: [],
-                    openEnds: [null, null],
-                    currentPlayerId: null,
-                    passCount: 0,
-                    log: [`Jogo "${gameId}" criado por ${currentUserId.substring(0, 5)}...`],
-                    winner: null,
-                    createdAt: new Date().toISOString()
-                };
-
-                await setDoc(gameRef, newGameState);
-                console.log("Jogo criado:", gameId);
-                showToast(`Jogo "${gameId}" criado com sucesso!`, "success");
-                listenToGame(gameId);
-
-            } catch (e) {
-                console.error("Erro ao criar jogo:", e);
-                showToast("Erro ao criar jogo. Tente novamente.", "error");
-                hideModal();
-            }
-        }
-
-        async function joinGame() {
-            const gameId = gameIdInput.value.trim().toUpperCase();
-            if (!gameId) {
-                showToast("Digite um ID de jogo", "warning");
-                gameIdInput.focus();
-                return;
-            }
-
-            showSpinner('Entrando no jogo...');
-            const gameRef = getGameRef(gameId);
-
-            try {
-                const gameDoc = await getDoc(gameRef);
-                if (!gameDoc.exists()) {
-                    showToast("Jogo não encontrado", "error");
-                    hideModal();
-                    return;
-                }
-
-                const gameState = gameDoc.data();
-
-                if (gameState.gameStatus !== 'waiting' && gameState.gameStatus !== 'ended') {
-                    if(gameState.gameStatus === 'playing') {
-                        if (!gameState.playerIds.includes(currentUserId)) {
-                            showToast("Jogo já começou", "error");
-                            hideModal();
-                            return;
-                        }
-                    }
-                }
-
-                if (gameState.playerIds.includes(currentUserId)) {
-                    console.log("Reentrando no jogo...");
-                    showToast("Reentrando no jogo...", "info");
-                    listenToGame(gameId);
-                    return;
-                }
-
-                if (gameState.playerIds.length >= 4 && gameState.gameStatus === 'waiting') {
-                    showToast("Jogo cheio (máximo 4 jogadores)", "error");
-                    hideModal();
-                    return;
-                }
-
-                // Adiciona novo jogador (apenas se 'waiting')
-                if (gameState.gameStatus === 'waiting') {
-                    const newPlayerIds = [...gameState.playerIds, currentUserId];
-                    const newLog = [...gameState.log, `${currentUserId.substring(0, 5)}... entrou no jogo.`];
-                    
-                    await updateDoc(gameRef, {
-                        playerIds: newPlayerIds,
-                        log: newLog
-                    });
-                }
-
-                console.log("Entrou no jogo:", gameId);
-                showToast(`Entrou no jogo "${gameId}"!`, "success");
-                listenToGame(gameId);
-
-            } catch (e) {
-                console.error("Erro ao entrar no jogo:", e);
-                showToast("Erro ao entrar no jogo. Tente novamente.", "error");
-                hideModal();
-            }
-        }
-        
-        // --- Drag-and-Drop (Sortable.js) ---
-        
-        function initSortable() {
-            if (sortableInstance) {
-                sortableInstance.destroy();
-            }
-            if (!playerHand) return;
-            
-            sortableInstance = new Sortable(playerHand, {
-                animation: 150,
-                ghostClass: 'domino-ghost', // Classe CSS para o "fantasma"
-                delay: 100, // Atraso de 100ms para diferenciar clique de arrastar
-                onEnd: (evt) => {
-                    // Atualiza a ordem no ESTADO LOCAL
-                    if (localGameState && localGameState.players[currentUserId]) {
-                        const hand = localGameState.players[currentUserId].hand;
-                        const [movedItem] = hand.splice(evt.oldIndex, 1);
-                        hand.splice(evt.newIndex, 0, movedItem);
-                        
-                        // Re-renderiza a mão localmente para atualizar os eventos de clique
-                        renderPlayerHandUI(hand);
-                    }
-                }
-            });
-        }
-        
-        /**
-         * Compara duas mãos para ver se contêm as mesmas peças,
-         * independentemente da ordem.
-         */
-        function handsAreEquivalent(handA, handB) {
-            if (!handA || !handB || handA.length !== handB.length) {
-                return false;
-            }
-            
-            const pieceToString = (p) => `${Math.min(p.top, p.bottom)}-${Math.max(p.top, p.bottom)}`;
-            
-            const sortedA = handA.map(pieceToString).sort().join(',');
-            const sortedB = handB.map(pieceToString).sort().join(',');
-            
-            return sortedA === sortedB;
-        }
-
-        // --- Listener Principal do Jogo ---
-
-        function listenToGame(gameId) {
-            currentGameId = gameId;
-            hideModal();
-            authScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-
-            const gameRef = getGameRef(gameId);
-
-            if (gameUnsubscribe) {
-                gameUnsubscribe();
-            }
-
-            gameUnsubscribe = onSnapshot(gameRef, (doc) => {
-                if (doc.exists()) {
-                    console.log("Dados do jogo recebidos:", doc.data());
-                    
-                    const serverState = doc.data();
-                    
-                    // LÓGICA DE PRESERVAÇÃO DA ORDEM DA MÃO
-                    if (localGameState && 
-                        localGameState.players[currentUserId] && 
-                        serverState.players[currentUserId] &&
-                        handsAreEquivalent(localGameState.players[currentUserId].hand, serverState.players[currentUserId].hand)) 
-                    {
-                        // As mãos são as mesmas (só a ordem mudou localmente).
-                        // Mantemos a ordem local!
-                        serverState.players[currentUserId].hand = localGameState.players[currentUserId].hand;
-                    }
-                    
-                    localGameState = serverState;
-                    renderGame(localGameState);
-                    
-                } else {
-                    console.warn("O jogo foi deletado ou não existe.");
-                    showToast("O jogo foi encerrado", "error");
-                    leaveGame();
-                }
-            }, (error) => {
-                console.error("Erro no listener do jogo:", error);
-                showToast("Erro de conexão com o jogo", "error");
-                leaveGame();
-            });
-        }
-
-        function leaveGame() {
-            if (gameUnsubscribe) {
-                gameUnsubscribe();
-            }
-            gameUnsubscribe = null;
-            localGameState = null;
-            currentGameId = null;
-
-            gameScreen.classList.add('hidden');
-            authScreen.classList.remove('hidden');
-            hideModal();
-        }
-
-        // --- Renderização do Jogo -----------------------------------------------
-
-        function renderGame(state) {
-            if (!state) return;
-            
-            const isLoadingModal = !!modalContent.querySelector('.loading-spinner-container');
-            if (isLoadingModal && (state.gameStatus === 'playing' || state.gameStatus === 'ended')) {
-                hideModal();
-            }
-            
-            const isModalVisible = !modalOverlay.classList.contains('hidden');
-            const isModalHiding = modalOverlay.style.opacity === '0';
-            const isLoadingModalCheck = !!modalContent.querySelector('.loading-spinner-container');
-
-            if (isModalVisible && !isModalHiding && !isLoadingModalCheck && state.gameStatus !== 'ended') {
-                return;
-            }
-
-            // Limpa áreas
-            opponentHands.innerHTML = '';
-            // playerHand.innerHTML = ''; (Não limpa mais aqui, é controlado por renderPlayerHandUI)
-            dominoChain.innerHTML = ''; // Limpa a corrente
-            // gameLog.innerHTML = ''; (Oculto)
-
-            // 1. Informações do Jogo (na barra inferior)
-            let turnText = "Carregando...";
-            let statusColor = "white";
-            
-            if (state.gameStatus === 'waiting') {
-                turnText = `Aguardando... (${state.playerIds.length}/4)`;
-                statusColor = "var(--md-sys-color-primary-container)";
-            } else if (state.gameStatus === 'playing') {
-                if (state.currentPlayerId === currentUserId) {
-                    turnText = "É a sua vez!";
-                    statusColor = "var(--md-sys-color-success-container)";
-                } else {
-                    turnText = `Vez de: ${state.currentPlayerId.substring(0, 5)}...`;
-                    statusColor = "#E65100";
-                }
-            } else if (state.gameStatus === 'ended') {
-                turnText = `Fim de Jogo!`;
-                statusColor = "var(--md-sys-color-primary-container)";
-            }
-            
-            gameInfo.innerHTML = `
-                <h2>${state.gameId}</h2>
-                <p class="turn-status" style="color: ${statusColor}; font-weight: 500;">${turnText}</p>
-                <div class="chips-container">
-                    ${state.gameStatus === 'playing' ? `<span class="chip">Monte: ${state.boneyard.length}</span>` : `<span class="chip">Jogadores: ${state.playerIds.length}/4</span>`}
-                </div>
-            `;
-
-            // 2. Botão de Iniciar (apenas para o Host, dentro do gameInfo)
-            if (state.gameStatus === 'waiting' && state.hostId === currentUserId) {
-                if (state.playerIds.length >= 2) {
-                    const startGameBtn = document.createElement('button');
-                    startGameBtn.innerHTML = `<span class="material-icons" style="font-size: 1rem;">play_arrow</span> Iniciar (${state.playerIds.length})`;
-                    startGameBtn.className = "button button-filled";
-                    startGameBtn.style.marginTop = "0.5rem";
-                    startGameBtn.style.padding = "0.5rem 0.75rem";
-                    startGameBtn.style.fontSize = "0.75rem";
-                    startGameBtn.onclick = () => startGame(state);
-                    gameInfo.appendChild(startGameBtn);
-                } else {
-                    const waitingText = document.createElement('p');
-                    waitingText.style.fontSize = "0.75rem";
-                    waitingText.style.color = "var(--md-sys-color-on-surface-variant)";
-                    waitingText.style.marginTop = "0.5rem";
-                    waitingText.innerText = "Aguarde (mín 2)";
-                    gameInfo.appendChild(waitingText);
-                }
-            }
-
-            // Se o jogo não começou, não renderiza o resto
-            if (state.gameStatus !== 'playing' && state.gameStatus !== 'ended') {
-                gameControls.classList.add('hidden');
-                opponentHands.innerHTML = '';
-                
-                let emptyMessage = `
-                    <div class="board-empty-message">
-                        <span class="material-icons">groups</span>
-                        <p>Aguardando o host iniciar o jogo...</p>
-                    </div>`;
-                
-                if (state.hostId === currentUserId) {
-                    if (state.playerIds.length < 2) {
-                         emptyMessage = `
-                            <div class="board-empty-message">
-                                <span class="material-icons">person_add</span>
-                                <p>Aguardando pelo menos mais 1 jogador...</p>
-                            </div>`;
-                    } else {
-                         emptyMessage = `
-                            <div class="board-empty-message">
-                                <span class="material-icons">play_circle_outline</span>
-                                <p>Tudo pronto! Pressione "Iniciar" na barra inferior.</p>
-                            </div>`;
-                    }
-                }
-                dominoChain.innerHTML = emptyMessage;
-                
-                playerHand.innerHTML = '';
-                return;
-            }
-            
-            gameControls.classList.remove('hidden');
-
-            const isMyTurn = state.currentPlayerId === currentUserId && state.gameStatus === 'playing';
-
-            // 3. Mãos dos Oponentes (no topo)
-            state.playerIds.forEach(pid => {
-                if (pid === currentUserId) return;
-                const hand = state.players[pid] ? state.players[pid].hand : [];
-                
-                const opponentDiv = document.createElement('div');
-                opponentDiv.className = 'opponent-hand';
-                opponentDiv.innerHTML = `
-                    <div class="opponent-info">
-                        <span>${pid.substring(0, 5)}...</span>
-                        <span class="chip" style="background: rgba(255,255,255,0.7); color: black; padding: 0.1rem 0.4rem; font-size: 0.65rem;">${hand.length}p</span>
-                    </div>
-                    <div class="domino-back-container">
-                        ${[...Array(hand.length)].map(() => `<div class="domino-back"></div>`).join('')}
-                    </div>
-                `;
-                opponentHands.appendChild(opponentDiv);
-            });
-
-            // 4. Tabuleiro (Board)
-            if (state.board.length === 0) {
-                dominoChain.innerHTML = `
-                    <div class="board-empty-message">
-                        <span class="material-icons">dashboard_customize</span>
-                        <p>O jogo começará aqui</p>
-                    </div>
-                `;
-            } else {
-                state.board.forEach(piece => {
-                    dominoChain.appendChild(createDominoElement(piece, true));
-                });
-            }
-
-            // 5. Mão do Jogador (Renderização separada)
-            const myHand = state.players[currentUserId] ? state.players[currentUserId].hand : [];
-            renderPlayerHandUI(myHand); // Usa a função helper
-            
-            // 6. Controles (Monte, Passar)
-            boneyard.innerHTML = `<span class="material-icons">style</span> Monte (${state.boneyard.length})`;
-            
-            if (isMyTurn) {
-                boneyard.classList.remove('opacity-50', 'cursor-not-allowed');
-                passTurnBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                boneyard.disabled = state.boneyard.length === 0;
-                passTurnBtn.disabled = false;
-                
-                playerHand.style.border = "2px solid var(--md-sys-color-success)";
-                playerHand.style.borderRadius = "0.5rem";
-            } else {
-                boneyard.classList.add('opacity-50', 'cursor-not-allowed');
-                passTurnBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                boneyard.disabled = true;
-                passTurnBtn.disabled = true;
-                playerHand.style.border = "2px solid transparent";
-            }
-            
-            if(boneyard.disabled) boneyard.classList.add('opacity-50');
-
-            // 7. Log (Oculto)
-            
-            // 8. Tela de Vitória
-            if (state.gameStatus === 'ended') {
-                showWinScreen(state.winner, state.players);
-            }
-        }
-        
-        /**
-         * Renderiza APENAS a mão do jogador.
-         * Esta função é chamada por renderGame e pelo initSortable.
-         */
-        function renderPlayerHandUI(hand) {
-            if (!playerHand) return;
-            
-            const isMyTurn = localGameState.currentPlayerId === currentUserId && localGameState.gameStatus === 'playing';
-            
-            playerHand.innerHTML = ''; // Limpa a mão
-            
-            if (hand.length === 0 && localGameState.gameStatus === 'playing') {
-                playerHand.innerHTML = `
-                    <div style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem; margin: auto;">
-                        <span class="material-icons" style="font-size: 2rem; margin-bottom: 0.5rem;">inventory_2</span>
-                        <p>Você não tem peças</p>
-                    </div>
-                `;
-            } else {
-                hand.forEach((piece) => {
-                    const pieceEl = createDominoElement(piece, false);
-                    if (isMyTurn) {
-                        // Passa a PEÇA, não o índice, para o click
-                        pieceEl.onclick = () => onPieceClick(piece); 
-                    } else {
-                        pieceEl.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                    playerHand.appendChild(pieceEl);
-                });
-            }
-            // Re-inicializa o sortable na mão recém-renderizada
-            initSortable();
-        }
-        
-        function createDominoElement(piece, isBoardPiece) {
-            const el = document.createElement('div');
-            el.className = isBoardPiece ? 'domino domino-board' : 'domino';
-            
-            if (isBoardPiece && piece.top === piece.bottom) {
-                el.classList.add('double');
-            }
-            
-            el.innerHTML = `
-                <div class="domino-half">${piece.top}</div>
-                <div class="domino-divider"></div>
-                <div class="domino-half">${piece.bottom}</div>
-            `;
-            return el;
-        }
-
-        function showWinScreen(winnerId, players) {
-            let scoreText = "Fim de Jogo!<br><br>";
-            const isWinner = winnerId === currentUserId;
-            
-            const winnerColor = isWinner ? "var(--md-sys-color-success)" : "var(--md-sys-color-primary)";
-            
-            if (isWinner) {
-                scoreText += `<strong style="font-size: 1.5rem; color: ${winnerColor};">🎉 Parabéns, você venceu! 🎉</strong><br><br>`;
-            } else {
-                scoreText += `Vencedor: <strong style="font-size: 1.25rem;">${winnerId.substring(0, 8)}</strong><br><br>`;
-            }
-            
-            scoreText += `Pontuação final (menos é melhor):`;
-            
-            let scores = [];
-            for (const pid in players) {
-                if (players[pid] && players[pid].hand) {
-                    const hand = players[pid].hand;
-                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
-                    scores.push({ pid, score, isCurrentUser: pid === currentUserId });
-                }
-            }
-            
-            scores.sort((a, b) => a.score - b.score);
-            scores.forEach(s => {
-                const userIndicator = s.isCurrentUser ? " (Você)" : "";
-                scoreText += `<br>${s.pid.substring(0, 8)}${userIndicator}: ${s.score} pontos`;
-            });
-            
-            const modalHtml = `
-                <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
-                    <div style="margin-bottom: 1rem;">
-                        <span class="material-icons" style="font-size: 4rem; color: ${winnerColor};">emoji_events</span>
-                    </div>
-                    <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: ${winnerColor};">${isWinner ? 'Vitória!' : 'Fim de Jogo'}</h2>
-                    <div style="font-size: 1.125rem; margin-bottom: 1.5rem; line-height: 1.6;">${scoreText}</div>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem; justify-content: center;">
-                        <button id="new-game-btn" class="button button-filled" style="width: 100%;">
-                            <span class="material-icons">add</span>
-                            Novo Jogo
-                        </button>
-                        <button id="leave-game-btn" class="button button-outlined" style="width: 100%;">
-                            <span class="material-icons">logout</span>
-                            Voltar ao Lobby
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            showModal(modalHtml);
-            
-            document.getElementById('leave-game-btn').onclick = () => {
-                showSpinner('Saindo...');
-                leaveGame();
-            };
-            
-            document.getElementById('new-game-btn').onclick = () => {
-                showSpinner('Saindo...');
-                leaveGame();
-                setTimeout(() => {
-                    gameIdInput.focus();
-                }, 500);
-            };
-        }
-
-        // --- Lógica de Início de Jogo ------------------------------------------
-
-        async function startGame(currentState) {
-            console.log("Iniciando o jogo...");
-            showSpinner("Embaralhando e distribuindo...");
-            try {
-                const { playerIds } = currentState;
-                
-                const deck = createDeck();
-                const shuffledDeck = shuffle(deck);
-                
-                // Distribuir peças
-                const hands = {};
-                playerIds.forEach(pid => { hands[pid] = { hand: [] }; });
-                
-                let piecesPerPlayer = 7;
-                
-                for (let i = 0; i < piecesPerPlayer; i++) {
-                    for (const pid of playerIds) {
-                        if (shuffledDeck.length > 0) {
-                            hands[pid].hand.push(shuffledDeck.pop());
-                        }
-                    }
-                }
-                
-                const boneyard = shuffledDeck;
-                
-                // Encontrar jogador inicial (maior bucha)
-                let startingPlayerId = null;
-                let highestDouble = -1;
-                
-                playerIds.forEach(pid => {
-                    hands[pid].hand.forEach(piece => {
-                        if (piece.top === piece.bottom && piece.top > highestDouble) {
-                            highestDouble = piece.top;
-                            startingPlayerId = pid;
-                        }
-                    });
-                });
-                
-                // Se ninguém tiver bucha (raro), o host começa
-                if (!startingPlayerId) {
-                    startingPlayerId = currentState.hostId;
-                }
-                
-                const newLog = [...currentState.log, `Jogo iniciado! ${startingPlayerId.substring(0, 5)}... começa.`];
-                
-                // Atualiza o estado do jogo no Firebase
-                await updateDoc(getGameRef(currentState.gameId), {
-                    gameStatus: 'playing',
-                    players: hands,
-                    boneyard: boneyard,
-                    board: [],
-                    openEnds: [null, null],
-                    currentPlayerId: startingPlayerId,
-                    passCount: 0,
-                    log: newLog
-                });
-                
-                hideModal();
-
-            } catch (e) {
-                console.error("Erro ao iniciar jogo:", e);
-                showToast("Erro ao iniciar jogo", "error");
-                hideModal();
-            }
-        }
-
-        function createDeck() {
-            const deck = [];
-            for (let i = 0; i <= 6; i++) {
-                for (let j = i; j <= 6; j++) {
-                    deck.push({ top: i, bottom: j });
-                }
-            }
-            return deck;
-        }
-
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
-
-        // --- Lógica de Turno ----------------------------------------------------
-
-        // Modal para escolha de jogada
-        function askMoveChoice(piece, validMoves) {
-            return new Promise((resolve, reject) => {
-                const modalHtml = `
-                    <div class="card" style="text-align: center; max-width: 400px; width: 100%; margin: 0 auto;">
-                        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Escolha sua Jogada</h2>
-                        <p style="font-size: 1.125rem; margin-bottom: 1.5rem;">Onde você quer jogar a peça?</p>
-                        
-                        <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-                            ${createDominoElement(piece, false).outerHTML}
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            ${validMoves.includes('left') ? `
-                            <button id="modal-btn-left" class="button button-filled" style="width: 100%;">
-                                <span class="material-icons">arrow_back</span>
-                                Na Ponta Esquerda
-                            </button>` : ''}
-                            
-                            ${validMoves.includes('right') ? `
-                            <button id="modal-btn-right" class="button button-filled" style="width: 100%;">
-                                <span class="material-icons">arrow_forward</span>
-                                Na Ponta Direita
-                            </button>` : ''}
-                            
-                            <button id="modal-btn-cancel" class="button button-text" style="width: 100%;">
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                showModal(modalHtml);
-                
-                if (validMoves.includes('left')) {
-                    document.getElementById('modal-btn-left').onclick = () => {
-                        hideModal();
-                        resolve('left');
-                    };
-                }
-                if (validMoves.includes('right')) {
-                    document.getElementById('modal-btn-right').onclick = () => {
-                        hideModal();
-                        resolve('right');
-                    };
-                }
-                document.getElementById('modal-btn-cancel').onclick = () => {
-                    hideModal();
-                    reject(new Error("Jogada cancelada"));
-                };
-            });
-        }
-
-        /**
-         * Chamado quando uma peça na MÃO DO JOGADOR é clicada.
-         * 'piece' é o objeto da peça clicada.
-         */
-        async function onPieceClick(piece) {
-            console.log("Peça clicada:", piece);
-            const state = localGameState;
-            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') {
-                return;
-            }
-            
-            // Encontra o índice da peça no array de dados (ignora a ordem visual)
-            const pieceIndex = state.players[currentUserId].hand.findIndex(
-                p => p.top === piece.top && p.bottom === piece.bottom
-            );
-            
-            // Se não encontrar (o que não deve acontecer), sai
-            if (pieceIndex === -1) {
-                console.error("Peça clicada não encontrada na mão!", piece);
-                return;
-            }
-
-            const { board, openEnds } = state;
-            const [leftEnd, rightEnd] = openEnds;
-            
-            let playedPiece = { ...piece };
-
-            const validMoves = [];
-            if (board.length === 0) {
-                validMoves.push('first');
-            } else {
-                if (piece.top === leftEnd || piece.bottom === leftEnd) {
-                    validMoves.push('left');
-                }
-                if (piece.top === rightEnd || piece.bottom === rightEnd) {
-                    validMoves.push('right');
-                }
-            }
-
-            if (validMoves.length === 0) {
-                showToast("Movimento inválido. Esta peça não encaixa.", "warning");
-                return;
-            }
-
-            let move;
-            try {
-                if (validMoves.length > 1 && piece.top !== piece.bottom) {
-                    move = await askMoveChoice(piece, validMoves);
-                } else {
-                    move = validMoves[0];
-                }
-            } catch (e) {
-                console.log("Jogada cancelada pelo usuário.");
-                return;
-            }
-            
-            let newBoard = [...board];
-            let newOpenEnds = [...openEnds];
-            
-            if (move === 'first') {
-                newBoard.push(playedPiece);
-                newOpenEnds = [playedPiece.top, playedPiece.bottom];
-            } else if (move === 'left') {
-                if (piece.top === leftEnd) {
-                    playedPiece = { top: piece.bottom, bottom: piece.top };
-                }
-                newBoard.unshift(playedPiece);
-                newOpenEnds[0] = playedPiece.top;
-            } else if (move === 'right') {
-                if (piece.bottom === rightEnd) {
-                    playedPiece = { top: piece.bottom, bottom: piece.top };
-                }
-                newBoard.push(playedPiece);
-                newOpenEnds[1] = playedPiece.bottom;
-            }
-
-            const myHand = state.players[currentUserId].hand;
-            // Remove a peça correta usando o pieceIndex
-            const newHand = myHand.filter((_, i) => i !== pieceIndex);
-            
-            const newPlayers = {
-                ...state.players,
-                [currentUserId]: { hand: newHand }
-            };
-
-            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
-            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... jogou [${playedPiece.top}|${playedPiece.bottom}].`];
-
-            const updatePayload = {
-                board: newBoard,
-                openEnds: newOpenEnds,
-                players: newPlayers,
-                currentPlayerId: nextPlayerId,
-                passCount: 0,
-                log: newLog,
-                gameStatus: state.gameStatus,
-                winner: state.winner
-            };
-
-            if (newHand.length === 0) {
-                console.log("JOGADOR VENCEU!");
-                updatePayload.gameStatus = 'ended';
-                updatePayload.winner = currentUserId;
-                showToast("🎉 Parabéns! Você venceu o jogo! 🎉", "success", 5000);
-            }
-            
-            try {
-                await updateDoc(getGameRef(currentGameId), updatePayload);
-            } catch (e) {
-                console.error("Erro ao jogar peça:", e);
-                showToast("Erro ao jogar peça. Tente novamente.", "error");
-            }
-        }
-
-        async function drawFromBoneyard() {
-            const state = localGameState;
-            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
-            
-            if (state.boneyard.length === 0) {
-                showToast("Monte vazio. Não há peças para comprar.", "warning");
-                return;
-            }
-
-            const newBoneyard = [...state.boneyard];
-            const drawnPiece = newBoneyard.pop();
-
-            const myHand = state.players[currentUserId].hand;
-            const newHand = [...myHand, drawnPiece];
-            
-            const newPlayers = {
-                ...state.players,
-                [currentUserId]: { hand: newHand }
-            };
-
-            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... comprou do monte.`];
-
-            try {
-                await updateDoc(getGameRef(currentGameId), {
-                    boneyard: newBoneyard,
-                    players: newPlayers,
-                    log: newLog
-                });
-                showToast(`Você comprou a peça [${drawnPiece.top}|${drawnPiece.bottom}].`, "info");
-            } catch (e) {
-                console.error("Erro ao comprar do monte:", e);
-                showToast("Erro ao comprar do monte. Tente novamente.", "error");
-            }
-        }
-
-        async function passTurn() {
-            const state = localGameState;
-            if (!state || state.currentPlayerId !== currentUserId || state.gameStatus !== 'playing') return;
-            
-            const myHand = state.players[currentUserId].hand;
-            const [leftEnd, rightEnd] = state.openEnds;
-
-            let canPlay = false;
-            if (state.board.length === 0) {
-                canPlay = myHand.length > 0;
-            } else {
-                for (const piece of myHand) {
-                    if (piece.top === leftEnd || piece.bottom === leftEnd || piece.top === rightEnd || piece.bottom === rightEnd) {
-                        canPlay = true;
-                        break;
-                    }
-                }
-            }
-
-            if (canPlay) {
-                showToast("Você tem uma peça que pode ser jogada!", "warning");
-                return;
-            }
-            
-            if (state.boneyard.length > 0) {
-                showToast("Você deve comprar do monte antes de passar!", "warning");
-                return;
-            }
-
-            const nextPlayerId = getNextPlayerId(state.playerIds, currentUserId);
-            const newPassCount = (state.passCount || 0) + 1;
-            const newLog = [...state.log, `${currentUserId.substring(0, 5)}... passou o turno.`];
-            
-            const updatePayload = {
-                currentPlayerId: nextPlayerId,
-                passCount: newPassCount,
-                log: newLog,
-                gameStatus: state.gameStatus,
-                winner: state.winner
-            };
-
-            if (newPassCount >= state.playerIds.length) {
-                console.log("JOGO BLOQUEADO!");
-                updatePayload.gameStatus = 'ended';
-                
-                let minScore = Infinity;
-                let winnerId = null;
-                
-                state.playerIds.forEach(pid => {
-                    const hand = state.players[pid].hand;
-                    const score = hand.reduce((acc, p) => acc + p.top + p.bottom, 0);
-                    if (score < minScore) {
-                        minScore = score;
-                        winnerId = pid;
-                    } else if (score === minScore) {
-                        if (winnerId === null) winnerId = pid;
-                    }
-                });
-                
-                if (winnerId === null) winnerId = state.hostId;
-                
-                updatePayload.winner = winnerId;
-                updatePayload.log.push(`Jogo bloqueado! Vencedor: ${winnerId.substring(0, 5)}... com ${minScore} pontos.`);
-            }
-
-            try {
-                await updateDoc(getGameRef(currentGameId), updatePayload);
-                showToast("Você passou a vez.", "info");
-            } catch (e) {
-                console.error("Erro ao passar turno:", e);
-                showToast("Erro ao passar turno. Tente novamente.", "error");
-            }
-        }
-
-        function getNextPlayerId(playerIds, currentPlayerId) {
-            const currentIndex = playerIds.indexOf(currentPlayerId);
-            const nextIndex = (currentIndex + 1) % playerIds.length;
-            return playerIds[nextIndex];
-        }
-
-    </script>
 </body>
-    </html>
+</html>
